@@ -9,6 +9,9 @@ workspace "Saba"
 	}
 	
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
+IncludeDirs = {}
+IncludeDirs["spdlog"] = "Saba/vendor/spdlog/include"
 	
 project "Saba"
 	location "Saba"
@@ -33,7 +36,8 @@ project "Saba"
 	
 	includedirs
 	{
-		"%{prj.name}/src"
+		"%{prj.name}/src",
+		"%{IncludeDirs.spdlog}"
 	}
 	
 	filter "configurations:Debug"
@@ -70,7 +74,8 @@ project "Game"
 	
 	includedirs
 	{
-		"Saba/src"
+		"Saba/src",
+		"%{IncludeDirs.spdlog}"
 	}
 	
 	links
