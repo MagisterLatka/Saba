@@ -1,0 +1,9 @@
+.vs/
+bin-int/
+
+*.ilk
+*.pdb
+*.user
+*.vcxproj
+*.filters
+*.sln

@@ -1,0 +1,90 @@
+workspace "Saba"
+	startproject "Game"
+	architecture "x64"
+	
+	configurations
+	{
+		"Debug",
+		"Release"
+	}
+	
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	
+project "Saba"
+	location "Saba"
+	kind "StaticLib"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+	
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+	files
+	{
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.h"
+	}
+	
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
+	}
+	
+	includedirs
+	{
+		"%{prj.name}/src"
+	}
+	
+	filter "configurations:Debug"
+		defines "DEBUG"
+		symbols "on"
+		runtime "Debug"
+
+	filter "configurations:Release"
+		defines "RELEASE"
+		optimize "on"
+		runtime "Release"
+		inlining "auto"
+	
+project "Game"
+	location "Game"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+	
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+	files
+	{
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.h"
+	}
+	
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
+	}
+	
+	includedirs
+	{
+		"Saba/src"
+	}
+	
+	links
+	{
+		"Saba"
+	}
+	
+	filter "configurations:Debug"
+		defines "DEBUG"
+		symbols "on"
+		runtime "Debug"
+
+	filter "configurations:Release"
+		defines "RELEASE"
+		optimize "on"
+		runtime "Release"
+		inlining "auto"
