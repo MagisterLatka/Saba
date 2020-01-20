@@ -1,3 +1,4 @@
+#include "pch.h"
 #include <Saba.h>
 
 class Game : public Saba::Application
@@ -13,7 +14,6 @@ public:
 
 	}
 };
-
 Saba::Application* Saba::CreateApplication()
 {
 	return new Game();

@@ -1,5 +1,10 @@
+#include "pch.h"
 #include "Application.h"
 #include "Log.h"
+
+#include "Events\KeyEvent.h"
+#include "Events\MouseEvent.h"
+#include "Events\WindowEvent.h"
 
 namespace Saba {
 
