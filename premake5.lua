@@ -51,7 +51,8 @@ project "Saba"
 	
 	links
 	{
-		"GLFW"
+		"GLFW",
+		"opengl32.lib"
 	}
 	
 	filter "configurations:Debug"
