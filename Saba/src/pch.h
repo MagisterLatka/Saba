@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #define uint unsigned int
 

@@ -12,6 +12,11 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 IncludeDirs = {}
 IncludeDirs["spdlog"] = "Saba/vendor/spdlog/include"
+IncludeDirs["GLFW"] = "Saba/vendor/GLFW/include"
+
+group "Dep"
+	include "Saba/vendor/GLFW"
+group ""
 	
 project "Saba"
 	location "Saba"
@@ -40,7 +45,13 @@ project "Saba"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{IncludeDirs.spdlog}"
+		"%{IncludeDirs.spdlog}",
+		"%{IncludeDirs.GLFW}"
+	}
+	
+	links
+	{
+		"GLFW"
 	}
 	
 	filter "configurations:Debug"
@@ -78,7 +89,8 @@ project "Game"
 	includedirs
 	{
 		"Saba/src",
-		"%{IncludeDirs.spdlog}"
+		"%{IncludeDirs.spdlog}",
+		"%{IncludeDirs.GLFW}"
 	}
 	
 	links

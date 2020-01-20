@@ -15,6 +15,8 @@ namespace Saba {
 		SB_CORE_ASSERT(!s_Application, "Application already exist!");
 		s_Application = this;
 		SB_CORE_INFO("Created application!");
+
+		m_Window = std::make_unique<Window>("Game", 1280, 720);
 	}
 	Application::~Application()
 	{
@@ -23,9 +25,9 @@ namespace Saba {
 
 	void Application::Run()
 	{
-		while (true)
+		while (m_Running)
 		{
-
+			m_Window->OnUpdate();
 		}
 	}
 
