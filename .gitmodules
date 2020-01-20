@@ -1,6 +1,3 @@
 [submodule "Saba/vendor/spdlog"]
 	path = Saba/vendor/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "Saba\\vendor\\GLFW"]
-	path = Saba\\vendor\\GLFW
-	url = https://github.com/TheCherno/glfw
