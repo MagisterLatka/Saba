@@ -61,7 +61,7 @@ namespace Saba {
 		Event& m_Event;
 	};
 
-	inline std::ostream& operator<<(std::ostream& stream, Event& e)
+	inline std::ostream& operator<<(std::ostream& stream, const Event& e)
 	{
 		return stream << e.ToString();
 	}

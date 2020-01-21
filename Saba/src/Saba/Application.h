@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Window.h"
+#include "Events\WindowEvent.h"
 
 namespace Saba {
 
@@ -13,6 +14,9 @@ namespace Saba {
 		void Run();
 
 		static Application* Get() { return s_Application; }
+	private:
+		void OnEvent(Event& event);
+		bool OnClose(WindowCloseEvent& event);
 	private:
 		static Application* s_Application;
 
