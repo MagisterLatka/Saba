@@ -16,19 +16,9 @@ public:
 	}
 	virtual void OnEvent(Saba::Event& event) override
 	{
-		Saba::Dispatcher d(event);
-		d.Dispatch<Saba::KeyPressedEvent>(SB_BIND_EVENT_FUNC(ExampleLayer::OnKeyPressed));
 	}
 	virtual void OnUpdate() override
 	{
-	}
-
-	bool OnKeyPressed(Saba::KeyPressedEvent& e)
-	{
-		if (e.GetKeyCode() == GLFW_KEY_ENTER && e.GetRepeatedCount() == 0)
-			SB_TRACE("Pressed ENTER"); //Only Debug mode :D
-
-		return false;
 	}
 };
 
