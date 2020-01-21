@@ -4,6 +4,7 @@
 #include "Events\KeyEvent.h"
 #include "Events\MouseEvent.h"
 #include "Events\WindowEvent.h"
+#include "glad\glad.h"
 
 namespace Saba {
 
@@ -61,6 +62,8 @@ namespace Saba {
 
 		m_Window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
+		int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		SB_CORE_ASSERT(success, "Failed to initialize GLAD!");
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
@@ -143,6 +146,7 @@ namespace Saba {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			data.width = xsize;
 			data.height = ysize;
+			glViewport(0, 0, xsize, ysize);
 
 			WindowResizeEvent e(xsize, ysize);
 			data.eventCallback(e);

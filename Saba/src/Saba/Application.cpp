@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Application.h"
 #include "Log.h"
+#include "glad\glad.h"
 
 #include "Events\KeyEvent.h"
 #include "Events\MouseEvent.h"
@@ -29,12 +30,16 @@ namespace Saba {
 
 	void Application::Run()
 	{
+		glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
+
 		while (m_Running)
 		{
-			m_Window->OnUpdate();
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			for (auto layer : *m_LayerStack)
 				layer->OnUpdate();
+
+			m_Window->OnUpdate();
 		}
 	}
 	void Application::PushLayer(Layer* layer)

@@ -13,9 +13,11 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDirs = {}
 IncludeDirs["spdlog"] = "Saba/vendor/spdlog/include"
 IncludeDirs["GLFW"] = "Saba/vendor/GLFW/include"
+IncludeDirs["GLAD"] = "Saba/vendor/GLAD/include"
 
 group "Dep"
 	include "Saba/vendor/GLFW"
+	include "Saba/vendor/GLAD"
 group ""
 	
 project "Saba"
@@ -39,19 +41,22 @@ project "Saba"
 	
 	defines
 	{
-		"_CRT_SECURE_NO_WARNINGS"
+		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE"
 	}
 	
 	includedirs
 	{
 		"%{prj.name}/src",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.GLFW}"
+		"%{IncludeDirs.GLFW}",
+		"%{IncludeDirs.GLAD}"
 	}
 	
 	links
 	{
 		"GLFW",
+		"GLAD",
 		"opengl32.lib"
 	}
 	
@@ -91,7 +96,8 @@ project "Game"
 	{
 		"Saba/src",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.GLFW}"
+		"%{IncludeDirs.GLFW}",
+		"%{IncludeDirs.GLAD}"
 	}
 	
 	links
