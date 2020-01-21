@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "Events\WindowEvent.h"
+#include "Layers\LayerStack.h"
 
 namespace Saba {
 
@@ -12,6 +13,8 @@ namespace Saba {
 		virtual ~Application();
 
 		void Run();
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* overlay);
 
 		static Application* Get() { return s_Application; }
 	private:
@@ -22,6 +25,7 @@ namespace Saba {
 
 		bool m_Running = true;
 
+		std::unique_ptr<LayerStack> m_LayerStack;
 		std::unique_ptr<Window> m_Window;
 	};
 

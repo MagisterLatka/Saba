@@ -17,6 +17,8 @@ namespace Saba {
 		s_Application = this;
 		SB_CORE_INFO("Created application!");
 
+		m_LayerStack = std::make_unique<LayerStack>();
+
 		m_Window = std::make_unique<Window>("Game", 1280, 720);
 		m_Window->SetEventCallback(BIND_EVENT_FUNC(OnEvent));
 	}
@@ -30,7 +32,18 @@ namespace Saba {
 		while (m_Running)
 		{
 			m_Window->OnUpdate();
+
+			for (auto layer : *m_LayerStack)
+				layer->OnUpdate();
 		}
+	}
+	void Application::PushLayer(Layer* layer)
+	{
+		m_LayerStack->PushLayer(layer);
+	}
+	void Application::PushOverlay(Layer* overlay)
+	{
+		m_LayerStack->PushOverlay(overlay);
 	}
 
 	void Application::OnEvent(Event& event)
@@ -38,7 +51,12 @@ namespace Saba {
 		Dispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FUNC(OnClose));
 
-		SB_CORE_TRACE("{0}", event);
+		for (auto it = m_LayerStack->rbegin(); it != m_LayerStack->rend(); it++)
+		{
+			(*it)->OnEvent(event);
+			if (event.p_Handled)
+				break;
+		}
 	}
 	bool Application::OnClose(WindowCloseEvent& event)
 	{
