@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Events\WindowEvent.h"
 #include "Layers\LayerStack.h"
+#include "ImGui\ImGuiLayer.h"
 
 namespace Saba {
 
@@ -16,6 +17,8 @@ namespace Saba {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
+		inline std::shared_ptr<Window> GetWindow() const { return m_Window; }
+
 		static Application* Get() { return s_Application; }
 	private:
 		void OnEvent(Event& event);
@@ -24,9 +27,10 @@ namespace Saba {
 		static Application* s_Application;
 
 		bool m_Running = true;
+		ImGuiLayer* m_ImGuiLayer;
 
 		std::unique_ptr<LayerStack> m_LayerStack;
-		std::unique_ptr<Window> m_Window;
+		std::shared_ptr<Window> m_Window;
 	};
 
 	Application* CreateApplication();

@@ -14,6 +14,7 @@ namespace Saba {
 		virtual void OnDetach() {}
 		virtual void OnEvent(Event& event) {}
 		virtual void OnUpdate() {}
+		virtual void OnImGuiRender() {}
 	private:
 		const char* m_Name;
 	};

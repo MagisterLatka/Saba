@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <Saba.h>
+#include <imgui.h>
 
 class ExampleLayer : public Saba::Layer
 {
@@ -19,6 +20,13 @@ public:
 	}
 	virtual void OnUpdate() override
 	{
+	}
+	virtual void OnImGuiRender() override
+	{
+		ImGui::Text("Framerate: %.1f", ImGui::GetIO().Framerate);
+		bool vsync = Saba::Application::Get()->GetWindow()->IsVSync();
+		ImGui::Checkbox("Set VSync", &vsync);
+		Saba::Application::Get()->GetWindow()->SetVSync(vsync);
 	}
 };
 
