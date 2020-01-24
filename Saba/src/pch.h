@@ -8,6 +8,8 @@
 #include <memory>
 #include <functional>
 
+#include <glm\glm.hpp>
+
 #define uint unsigned int
 
 #define BIT(x) (1 << x)

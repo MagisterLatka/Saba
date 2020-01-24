@@ -15,6 +15,7 @@ IncludeDirs["spdlog"] = "Saba/vendor/spdlog/include"
 IncludeDirs["GLFW"] = "Saba/vendor/GLFW/include"
 IncludeDirs["GLAD"] = "Saba/vendor/GLAD/include"
 IncludeDirs["ImGui"] = "Saba/vendor/ImGui"
+IncludeDirs["GLM"] = "Saba/vendor/glm"
 
 group "Dep"
 	include "Saba/vendor/GLFW"
@@ -53,7 +54,8 @@ project "Saba"
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.GLAD}",
-		"%{IncludeDirs.ImGui}"
+		"%{IncludeDirs.ImGui}",
+		"%{IncludeDirs.GLM}"
 	}
 	
 	links
@@ -102,7 +104,8 @@ project "Game"
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.GLAD}",
-		"%{IncludeDirs.ImGui}"
+		"%{IncludeDirs.ImGui}",
+		"%{IncludeDirs.GLM}"
 	}
 	
 	links
