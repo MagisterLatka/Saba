@@ -45,7 +45,9 @@ project "Saba"
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"SB_USE_GLFW",
+		"SB_USE_OPENGL"
 	}
 	
 	includedirs
@@ -101,10 +103,8 @@ project "Game"
 	includedirs
 	{
 		"Saba/src",
+		"Saba/vendor",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.GLFW}",
-		"%{IncludeDirs.GLAD}",
-		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.GLM}"
 	}
 	

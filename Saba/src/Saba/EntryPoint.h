@@ -2,7 +2,7 @@
 
 extern Saba::Application* Saba::CreateApplication();
 
-int main()
+int main(int argc, char** argv)
 {
 	Saba::Log::Init();
 	SB_CORE_INFO("Initialized Log");

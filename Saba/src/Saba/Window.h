@@ -1,40 +1,37 @@
 #pragma once
 
-#include <GLFW\glfw3.h>
-
 #include "Events\Event.h"
 
 namespace Saba {
 
+	struct WindowProps
+	{
+		const char* Title;
+		uint Width, Height;
+
+		WindowProps(const char* title = "Saba", uint width = 1280, uint height = 720)
+			: Title(title), Width(width), Height(height) {}
+	};
+
 	class Window
 	{
 	public:
-		Window(const char* title, int width, int height);
-		~Window();
+		using EventCallbackFN = std::function<void(Event&)>;
 
-		void OnUpdate();
+		virtual ~Window() = default;
 
-		inline int GetWidth() const { return m_Data.width; }
-		inline int GetHeight() const { return m_Data.height; }
+		virtual void OnUpdate() = 0;
 
-		inline bool IsVSync() const { return m_Data.vSync; }
-		void SetVSync(bool isVSync);
+		virtual uint GetWidth() const = 0;
+		virtual uint GetHeight() const = 0;
 
-		void SetEventCallback(const std::function<void(Event&)>& func);
-	private:
-		void Init(const char* title, int width, int height);
-		void Shutdown();
-	private:
-		GLFWwindow* m_Window;
+		virtual void SetEventCallback(const EventCallbackFN& callback) = 0;
+		virtual void SetVSync(bool vsync) = 0;
+		virtual bool IsVSync() const = 0;
 
-		struct WindowData
-		{
-			int width, height;
-			bool vSync;
+		virtual void* GetNativeWindow() const = 0;
 
-			std::function<void(Event&)> eventCallback;
-		};
-		WindowData m_Data;
+		static Window* Create(const WindowProps& props = WindowProps());
 	};
 
 }

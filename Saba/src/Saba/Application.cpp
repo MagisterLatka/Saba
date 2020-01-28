@@ -20,7 +20,7 @@ namespace Saba {
 
 		m_LayerStack = std::make_unique<LayerStack>();
 
-		m_Window = std::make_unique<Window>("Game", 1280, 720);
+		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FUNC(OnEvent));
 
 		m_ImGuiLayer = new ImGuiLayer;

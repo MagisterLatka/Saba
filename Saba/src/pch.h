@@ -10,6 +10,8 @@
 
 #include <glm\glm.hpp>
 
+#include "Saba\Log.h"
+
 #define uint unsigned int
 
 #define BIT(x) (1 << x)

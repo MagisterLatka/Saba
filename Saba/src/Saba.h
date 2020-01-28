@@ -5,5 +5,3 @@
 #include "Saba\Events\KeyEvent.h"
 #include "Saba\Events\MouseEvent.h"
 #include "Saba\Events\WindowEvent.h"
-
-#include "Saba\EntryPoint.h"
