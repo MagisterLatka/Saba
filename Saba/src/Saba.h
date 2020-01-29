@@ -9,5 +9,5 @@
 
 #include "Saba\Input.h"
 
-#include "Saba\Renderer\Buffer.h"
 #include "Saba\Renderer\Shader.h"
+#include "Saba\Renderer\VertexArray.h"

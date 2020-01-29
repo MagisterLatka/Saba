@@ -4,27 +4,6 @@
 #include <GLAD\include\glad\glad.h>
 #include <imgui/imgui.h>
 
-static uint ShaderDataTypeToOpenGLBaseType(Saba::ShaderDataType type)
-{
-	switch (type)
-	{
-		case Saba::ShaderDataType::Float:    return GL_FLOAT;
-		case Saba::ShaderDataType::Float2:   return GL_FLOAT;
-		case Saba::ShaderDataType::Float3:   return GL_FLOAT;
-		case Saba::ShaderDataType::Float4:   return GL_FLOAT;
-		case Saba::ShaderDataType::Mat3:     return GL_FLOAT;
-		case Saba::ShaderDataType::Mat4:     return GL_FLOAT;
-		case Saba::ShaderDataType::Int:      return GL_INT;
-		case Saba::ShaderDataType::Int2:     return GL_INT;
-		case Saba::ShaderDataType::Int3:     return GL_INT;
-		case Saba::ShaderDataType::Int4:     return GL_INT;
-		case Saba::ShaderDataType::Bool:     return GL_BOOL;
-	}
-		
-	SB_CORE_ASSERT(false, "Unknown ShaderDataType");
-	return 0;
-} //Will be moved to OpenGLVertexArray
-
 ExampleLayer::ExampleLayer()
 	: Saba::Layer("ExampleLayer")
 {
@@ -35,33 +14,28 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	glCreateVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-	////////////////////////////////////////////////////////////////
+	m_VAO.reset(Saba::VertexArray::Create());
+
+
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,
 		 0.5f, -0.5f, 0.0f,
 		 0.0f,  0.5f, 0.0f
 	};
-
-	m_VBO.reset(Saba::VertexBuffer::Create(vertices, sizeof(vertices)));
-
-	m_VBO->SetLayout({
+	std::shared_ptr<Saba::VertexBuffer> vbo;
+	vbo.reset(Saba::VertexBuffer::Create(vertices, sizeof(vertices)));
+	vbo->SetLayout({
 		{"i_Pos", Saba::ShaderDataType::Float3}
 	});
+	m_VAO->AddVertexBuffer(vbo);
 
-	uint index = 0;
-	const auto& layout = m_VBO->GetLayout();
-	for (const auto& element : layout)
-	{
-		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized, layout.GetStride(), (const void*)element.Offset);
-		index++;
-	}
-	////////////////////////////////////////////////////////////////
+
 	uint indices[] = { 0, 1, 2 };
-	m_IBO.reset(Saba::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint)));
-	////////////////////////////////////////////////////////////////
+	std::shared_ptr<Saba::IndexBuffer> ibo;
+	ibo.reset(Saba::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint)));
+	m_VAO->SetVertexBuffer(ibo);
+
+	
 	std::string vertexSrc = R"(
 		#version 330 core
 
@@ -88,7 +62,6 @@ void ExampleLayer::OnAttach()
 }
 void ExampleLayer::OnDetach()
 {
-	glDeleteVertexArrays(1, &m_VAO);
 }
 void ExampleLayer::OnEvent(Saba::Event& event)
 {
@@ -96,8 +69,8 @@ void ExampleLayer::OnEvent(Saba::Event& event)
 void ExampleLayer::OnUpdate()
 {
 	m_Shader->Bind();
-	glBindVertexArray(m_VAO);
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+	m_VAO->Bind();
+	glDrawElements(GL_TRIANGLES, m_VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 }
 void ExampleLayer::OnImGuiRender()
 {

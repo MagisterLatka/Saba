@@ -88,7 +88,7 @@ namespace Saba {
 			for (auto& element : m_Elements)
 			{
 				element.Offset = m_Stride;
-				m_Stride += element.Offset;
+				m_Stride += element.Size;
 			}
 		}
 	private:
