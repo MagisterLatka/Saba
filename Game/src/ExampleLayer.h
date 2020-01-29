@@ -12,6 +12,8 @@ public:
 	virtual void OnUpdate() override;
 	virtual void OnImGuiRender() override;
 private:
-	uint m_VAO, m_VBO, m_IBO;
+	std::shared_ptr<Saba::VertexBuffer> m_VBO;
+	std::shared_ptr<Saba::IndexBuffer> m_IBO;
+	uint m_VAO;
 	uint m_Shader;
 };
