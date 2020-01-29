@@ -4,6 +4,27 @@
 #include <GLAD\include\glad\glad.h>
 #include <imgui/imgui.h>
 
+static uint ShaderDataTypeToOpenGLBaseType(Saba::ShaderDataType type)
+{
+	switch (type)
+	{
+		case Saba::ShaderDataType::Float:    return GL_FLOAT;
+		case Saba::ShaderDataType::Float2:   return GL_FLOAT;
+		case Saba::ShaderDataType::Float3:   return GL_FLOAT;
+		case Saba::ShaderDataType::Float4:   return GL_FLOAT;
+		case Saba::ShaderDataType::Mat3:     return GL_FLOAT;
+		case Saba::ShaderDataType::Mat4:     return GL_FLOAT;
+		case Saba::ShaderDataType::Int:      return GL_INT;
+		case Saba::ShaderDataType::Int2:     return GL_INT;
+		case Saba::ShaderDataType::Int3:     return GL_INT;
+		case Saba::ShaderDataType::Int4:     return GL_INT;
+		case Saba::ShaderDataType::Bool:     return GL_BOOL;
+	}
+		
+	SB_CORE_ASSERT(false, "Unknown ShaderDataType");
+	return 0;
+} //Will be moved to OpenGLVertexArray
+
 ExampleLayer::ExampleLayer()
 	: Saba::Layer("ExampleLayer")
 {
@@ -25,8 +46,18 @@ void ExampleLayer::OnAttach()
 
 	m_VBO.reset(Saba::VertexBuffer::Create(vertices, sizeof(vertices)));
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+	m_VBO->SetLayout({
+		{"i_Pos", Saba::ShaderDataType::Float3}
+	});
+
+	uint index = 0;
+	const auto& layout = m_VBO->GetLayout();
+	for (const auto& element : layout)
+	{
+		glEnableVertexAttribArray(index);
+		glVertexAttribPointer(index, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized, layout.GetStride(), (const void*)element.Offset);
+		index++;
+	}
 	////////////////////////////////////////////////////////////////
 	uint indices[] = { 0, 1, 2 };
 	m_IBO.reset(Saba::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint)));

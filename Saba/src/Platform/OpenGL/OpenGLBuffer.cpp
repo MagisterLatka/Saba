@@ -25,6 +25,11 @@ namespace Saba {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
+	void OpenGLVertexBuffer::SetLayout(const BufferLayout& layout)
+	{
+		m_Layout = layout;
+	}
+
 
 
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint* data, uint count)
