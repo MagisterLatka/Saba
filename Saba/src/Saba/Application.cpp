@@ -33,7 +33,7 @@ namespace Saba {
 
 	void Application::Run()
 	{
-		glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 		while (m_Running)
 		{
