@@ -14,6 +14,6 @@ public:
 private:
 	std::shared_ptr<Saba::VertexBuffer> m_VBO;
 	std::shared_ptr<Saba::IndexBuffer> m_IBO;
+	std::shared_ptr<Saba::Shader> m_Shader;
 	uint m_VAO;
-	uint m_Shader;
 };

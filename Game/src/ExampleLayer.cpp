@@ -53,69 +53,10 @@ void ExampleLayer::OnAttach()
 		}
 	)";
 
-	uint vShader = glCreateShader(GL_VERTEX_SHADER);
-
-	const char* source = vertexSrc.c_str();
-	glShaderSource(vShader, 1, &source, nullptr);
-	glCompileShader(vShader);
-
-	int result;
-	glGetShaderiv(vShader, GL_COMPILE_STATUS, &result);
-	if (result == GL_FALSE)
-	{
-		int lenght;
-		glGetShaderiv(vShader, GL_INFO_LOG_LENGTH, &lenght);
-		char* message = (char*)alloca(lenght);
-		glGetShaderInfoLog(vShader, lenght, &lenght, message);
-		glDeleteShader(vShader);
-		SB_FATAL("Failed to compile vertex shader");
-		SB_ASSERT(false, "{0}", message);
-	}
-
-	uint fShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	source = fragmentSrc.c_str();
-	glShaderSource(fShader, 1, &source, nullptr);
-	glCompileShader(fShader);
-
-	glGetShaderiv(fShader, GL_COMPILE_STATUS, &result);
-	if (result == GL_FALSE)
-	{
-		int lenght;
-		glGetShaderiv(fShader, GL_INFO_LOG_LENGTH, &lenght);
-		char* message = (char*)alloca(lenght);
-		glGetShaderInfoLog(fShader, lenght, &lenght, message);
-		glDeleteShader(vShader);
-		glDeleteShader(fShader);
-		SB_FATAL("Failed to compile fragment shader");
-		SB_ASSERT(false, "{0}", message);
-	}
-
-	m_Shader = glCreateProgram();
-	glAttachShader(m_Shader, vShader);
-	glAttachShader(m_Shader, fShader);
-	glLinkProgram(m_Shader);
-
-	glDetachShader(m_Shader, vShader);
-	glDetachShader(m_Shader, fShader);
-	glDeleteShader(vShader);
-	glDeleteShader(fShader);
-
-	glGetProgramiv(m_Shader, GL_LINK_STATUS, &result);
-	if (result == GL_FALSE)
-	{
-		int lenght;
-		glGetProgramiv(m_Shader, GL_INFO_LOG_LENGTH, &lenght);
-		char* message = (char*)alloca(lenght);
-		glGetProgramInfoLog(m_Shader, lenght, &lenght, message);
-		glDeleteProgram(m_Shader);
-		SB_FATAL("Failed to link shader");
-		SB_ASSERT(false, "{0}", message);
-	}
+	m_Shader.reset(Saba::Shader::Create(vertexSrc.c_str(), fragmentSrc.c_str()));
 }
 void ExampleLayer::OnDetach()
 {
-	glDeleteProgram(m_Shader);
 	glDeleteVertexArrays(1, &m_VAO);
 }
 void ExampleLayer::OnEvent(Saba::Event& event)
@@ -123,7 +64,7 @@ void ExampleLayer::OnEvent(Saba::Event& event)
 }
 void ExampleLayer::OnUpdate()
 {
-	glUseProgram(m_Shader);
+	m_Shader->Bind();
 	glBindVertexArray(m_VAO);
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 }
