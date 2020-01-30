@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Application.h"
-#include "Log.h"
-#include "glad\glad.h"
+#include "Renderer\Renderer.h"
 
 #include "Events\KeyEvent.h"
 #include "Events\MouseEvent.h"
@@ -33,14 +32,18 @@ namespace Saba {
 
 	void Application::Run()
 	{
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 
 		while (m_Running)
 		{
-			glClear(GL_COLOR_BUFFER_BIT);
+			RenderCommand::Clear();
+
+			Saba::Renderer::BeginScene();
 
 			for (auto layer : *m_LayerStack)
 				layer->OnUpdate();
+
+			Saba::Renderer::EndScene();
 
 			m_ImGuiLayer->Begin();
 			for (auto layer : *m_LayerStack)

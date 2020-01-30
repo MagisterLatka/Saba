@@ -81,7 +81,7 @@ namespace Saba {
 				{
 					KeyPressedEvent e(key, 0);
 					data.eventCallback(e);
-					 break;
+					break;
 				}
 				case GLFW_RELEASE:
 				{
@@ -93,7 +93,7 @@ namespace Saba {
 				{
 					KeyPressedEvent e(key, 1);
 					data.eventCallback(e);
-					break;
+					break; 
 				}
 			}
 		});

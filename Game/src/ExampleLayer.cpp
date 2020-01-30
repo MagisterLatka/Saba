@@ -69,8 +69,7 @@ void ExampleLayer::OnEvent(Saba::Event& event)
 void ExampleLayer::OnUpdate()
 {
 	m_Shader->Bind();
-	m_VAO->Bind();
-	glDrawElements(GL_TRIANGLES, m_VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+	Saba::Renderer::Submit(m_VAO);
 }
 void ExampleLayer::OnImGuiRender()
 {

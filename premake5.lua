@@ -46,8 +46,7 @@ project "Saba"
 	{
 		"_CRT_SECURE_NO_WARNINGS",
 		"GLFW_INCLUDE_NONE",
-		"SB_USE_GLFW",
-		"SB_USE_OPENGL"
+		"SB_USE_GLFW"
 	}
 	
 	includedirs
