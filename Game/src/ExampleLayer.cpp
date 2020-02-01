@@ -4,8 +4,10 @@
 #include <GLAD\include\glad\glad.h>
 #include <imgui/imgui.h>
 
+#include <GLFW\include\GLFW\glfw3.h>
+
 ExampleLayer::ExampleLayer()
-	: Saba::Layer("ExampleLayer")
+	: Saba::Layer("ExampleLayer"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 {
 }
 ExampleLayer::~ExampleLayer()
@@ -41,9 +43,11 @@ void ExampleLayer::OnAttach()
 
 		layout(location = 0) in vec3 i_Pos;
 
+		uniform mat4 u_ViewProjMat;
+
 		void main()
 		{
-			gl_Position = vec4(i_Pos, 1.0f);
+			gl_Position = u_ViewProjMat * vec4(i_Pos, 1.0f);
 		}
 	)";
 
@@ -59,6 +63,9 @@ void ExampleLayer::OnAttach()
 	)";
 
 	m_Shader.reset(Saba::Shader::Create(vertexSrc.c_str(), fragmentSrc.c_str()));
+	
+	
+	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
 void ExampleLayer::OnDetach()
 {
@@ -68,8 +75,24 @@ void ExampleLayer::OnEvent(Saba::Event& event)
 }
 void ExampleLayer::OnUpdate()
 {
-	m_Shader->Bind();
-	Saba::Renderer::Submit(m_VAO);
+	if (Saba::Input::IsKeyPressed(GLFW_KEY_D))		m_CameraPos.x += 0.1f;
+	else if (Saba::Input::IsKeyPressed(GLFW_KEY_A)) m_CameraPos.x -= 0.1f;
+
+	if (Saba::Input::IsKeyPressed(GLFW_KEY_W))		m_CameraPos.y += 0.1f;
+	else if (Saba::Input::IsKeyPressed(GLFW_KEY_S)) m_CameraPos.y -= 0.1f;
+
+	if (Saba::Input::IsKeyPressed(GLFW_KEY_E))		m_CameraRotation += 1.0f;
+	else if (Saba::Input::IsKeyPressed(GLFW_KEY_Q)) m_CameraRotation -= 1.0f;
+
+	m_Camera.SetPosition(m_CameraPos);
+	m_Camera.SetRotation(m_CameraRotation);
+
+	Saba::RenderCommand::Clear();
+	Saba::Renderer::BeginScene(m_Camera);
+
+	Saba::Renderer::Submit(m_Shader, m_VAO);
+
+	Saba::Renderer::EndScene();
 }
 void ExampleLayer::OnImGuiRender()
 {

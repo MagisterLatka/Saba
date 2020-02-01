@@ -32,18 +32,10 @@ namespace Saba {
 
 	void Application::Run()
 	{
-		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-
 		while (m_Running)
 		{
-			RenderCommand::Clear();
-
-			Saba::Renderer::BeginScene();
-
 			for (auto layer : *m_LayerStack)
 				layer->OnUpdate();
-
-			Saba::Renderer::EndScene();
 
 			m_ImGuiLayer->Begin();
 			for (auto layer : *m_LayerStack)
