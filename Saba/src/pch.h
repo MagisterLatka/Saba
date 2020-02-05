@@ -7,6 +7,8 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <thread>
+#include <chrono>
 
 #include <glm\glm.hpp>
 

@@ -73,16 +73,16 @@ void ExampleLayer::OnDetach()
 void ExampleLayer::OnEvent(Saba::Event& event)
 {
 }
-void ExampleLayer::OnUpdate()
+void ExampleLayer::OnUpdate(Saba::Timestep ts)
 {
-	if (Saba::Input::IsKeyPressed(GLFW_KEY_D))		m_CameraPos.x += 0.1f;
-	else if (Saba::Input::IsKeyPressed(GLFW_KEY_A)) m_CameraPos.x -= 0.1f;
+	if (Saba::Input::IsKeyPressed(GLFW_KEY_D))		m_CameraPos.x += m_CameraVelocity * (float)ts;
+	else if (Saba::Input::IsKeyPressed(GLFW_KEY_A)) m_CameraPos.x -= m_CameraVelocity * (float)ts;
 
-	if (Saba::Input::IsKeyPressed(GLFW_KEY_W))		m_CameraPos.y += 0.1f;
-	else if (Saba::Input::IsKeyPressed(GLFW_KEY_S)) m_CameraPos.y -= 0.1f;
+	if (Saba::Input::IsKeyPressed(GLFW_KEY_W))		m_CameraPos.y += m_CameraVelocity * (float)ts;
+	else if (Saba::Input::IsKeyPressed(GLFW_KEY_S)) m_CameraPos.y -= m_CameraVelocity * (float)ts;
 
-	if (Saba::Input::IsKeyPressed(GLFW_KEY_E))		m_CameraRotation += 1.0f;
-	else if (Saba::Input::IsKeyPressed(GLFW_KEY_Q)) m_CameraRotation -= 1.0f;
+	if (Saba::Input::IsKeyPressed(GLFW_KEY_E))		m_CameraRotation += m_CameraRotationSpeed * (float)ts;
+	else if (Saba::Input::IsKeyPressed(GLFW_KEY_Q)) m_CameraRotation -= m_CameraRotationSpeed * (float)ts;
 
 	m_Camera.SetPosition(m_CameraPos);
 	m_Camera.SetRotation(m_CameraRotation);

@@ -31,6 +31,7 @@ namespace Saba {
 
 		std::unique_ptr<LayerStack> m_LayerStack;
 		std::unique_ptr<Window> m_Window;
+		long long m_LastFrameTime = 0;
 
 		static Application* s_Application;
 		friend int ::main(int argc, char** argv);
