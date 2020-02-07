@@ -107,7 +107,7 @@ namespace Saba {
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		static VertexBuffer* Create(float* data, uint size);
+		static Ref<VertexBuffer> Create(float* data, uint size);
 	};
 
 	class IndexBuffer
@@ -120,7 +120,7 @@ namespace Saba {
 
 		virtual uint GetCount() const = 0;
 
-		static IndexBuffer* Create(uint* data, uint count);
+		static Ref<IndexBuffer> Create(uint* data, uint count);
 	};
 
 }

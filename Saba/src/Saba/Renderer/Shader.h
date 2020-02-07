@@ -27,7 +27,7 @@ namespace Saba {
 		virtual void SetUniformMat3(const char* name, const glm::mat3& value) = 0;
 		virtual void SetUniformMat4(const char* name, const glm::mat4& value) = 0;
 
-		static Shader* Create(const char* vertexSrc, const char* fragmentSrc);
+		static Ref<Shader> Create(const char* vertexSrc, const char* fragmentSrc);
 	};
 
 }

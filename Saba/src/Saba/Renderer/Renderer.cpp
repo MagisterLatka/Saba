@@ -3,9 +3,9 @@
 
 namespace Saba {
 
-	Renderer::Scene* Renderer::s_Scene = new Renderer::Scene();
+	Scope<Renderer::Scene> Renderer::s_Scene = MakeScope<Renderer::Scene>();
 
-	void Renderer::BeginScene(OrthographicCamera& camera)
+	void Renderer::BeginScene(const OrthographicCamera& camera)
 	{
 		s_Scene->ViewProjMat = camera.GetViewProjectionMat();
 	}
@@ -14,7 +14,7 @@ namespace Saba {
 
 	}
 
-	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray)
+	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray)
 	{
 		shader->Bind();
 		shader->SetUniformMat4("u_ViewProjMat", s_Scene->ViewProjMat);

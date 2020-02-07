@@ -5,11 +5,12 @@
 
 namespace Saba {
 
-	Window* Window::Create(const WindowProps& props)
+	Ref<Window> Window::Create(const WindowProps& props)
 	{
 #if defined(SB_USE_GLFW)
-		return new WindowGLFW(props);
+		return MakeRef<WindowGLFW>(props);
 #endif
+		return nullptr;
 	}
 
 }

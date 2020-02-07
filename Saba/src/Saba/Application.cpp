@@ -17,9 +17,9 @@ namespace Saba {
 		s_Application = this;
 		SB_CORE_INFO("Created application!");
 
-		m_LayerStack = std::make_unique<LayerStack>();
+		m_LayerStack = MakeScope<LayerStack>();
 
-		m_Window = std::unique_ptr<Window>(Window::Create());
+		m_Window = Window::Create();
 		m_Window->SetEventCallback(BIND_EVENT_FUNC(OnEvent));
 
 		m_ImGuiLayer = new ImGuiLayer;

@@ -18,7 +18,7 @@ namespace Saba {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		inline Window& GetWindow() { return *m_Window; }
+		inline const Ref<Window>& GetWindow() const { return m_Window; }
 
 		static Application* Get() { return s_Application; }
 	private:
@@ -29,8 +29,8 @@ namespace Saba {
 		bool m_Running = true;
 		ImGuiLayer* m_ImGuiLayer;
 
-		std::unique_ptr<LayerStack> m_LayerStack;
-		std::unique_ptr<Window> m_Window;
+		Scope<LayerStack> m_LayerStack;
+		Ref<Window> m_Window;
 		long long m_LastFrameTime = 0;
 
 		static Application* s_Application;

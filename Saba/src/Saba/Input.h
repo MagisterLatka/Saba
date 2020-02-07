@@ -17,7 +17,7 @@ namespace Saba {
 		virtual float GetMouseXPosImpl() = 0;
 		virtual float GetMouseYPosImpl() = 0;
 	private:
-		static Input* s_Instance;
+		static Scope<Input> s_Instance;
 	};
 
 }

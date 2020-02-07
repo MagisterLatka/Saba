@@ -3,6 +3,6 @@
 
 namespace Saba {
 
-	RendererAPI* RenderCommand::s_API = RendererAPI::Create();
+	Scope<RendererAPI> RenderCommand::s_API = RendererAPI::Create();
 
 }

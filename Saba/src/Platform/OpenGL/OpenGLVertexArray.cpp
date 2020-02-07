@@ -44,7 +44,7 @@ namespace Saba {
 		glBindVertexArray(0);
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& buffer)
+	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& buffer)
 	{
 		glBindVertexArray(m_ID);
 		buffer->Bind();
@@ -58,7 +58,7 @@ namespace Saba {
 
 		m_VertexBuffers.push_back(buffer);
 	}
-	void OpenGLVertexArray::SetVertexBuffer(const std::shared_ptr<IndexBuffer>& buffer)
+	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& buffer)
 	{
 		glBindVertexArray(m_ID);
 		buffer->Bind();

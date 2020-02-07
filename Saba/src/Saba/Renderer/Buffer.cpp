@@ -6,24 +6,24 @@
 
 namespace Saba {
 
-	VertexBuffer* VertexBuffer::Create(float* data, uint size)
+	Ref<VertexBuffer> VertexBuffer::Create(float* data, uint size)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:	SB_CORE_ASSERT(false, "None API is not supported"); return nullptr;
-			case RendererAPI::API::OpenGL:	return new OpenGLVertexBuffer(data, size);
+			case RendererAPI::API::OpenGL:	return MakeRef<OpenGLVertexBuffer>(data, size);
 		}
 
 		SB_CORE_ASSERT(false, "Unknown API");
 		return nullptr;
 	}
 
-	IndexBuffer* IndexBuffer::Create(uint* data, uint count)
+	Ref<IndexBuffer> IndexBuffer::Create(uint* data, uint count)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:	SB_CORE_ASSERT(false, "None API is not supported"); return nullptr;
-			case RendererAPI::API::OpenGL:	return new OpenGLIndexBuffer(data, count);
+			case RendererAPI::API::OpenGL:	return MakeRef<OpenGLIndexBuffer>(data, count);
 		}
 
 		SB_CORE_ASSERT(false, "Unknown API");

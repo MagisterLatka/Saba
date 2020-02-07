@@ -16,12 +16,12 @@ namespace Saba {
 			s_API->Clear();
 		}
 		
-		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
 		{
 			s_API->DrawIndexed(vertexArray);
 		}
 	private:
-		static RendererAPI* s_API;
+		static Scope<RendererAPI> s_API;
 	};
 
 }
