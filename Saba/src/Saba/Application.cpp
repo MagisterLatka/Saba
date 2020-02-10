@@ -32,12 +32,12 @@ namespace Saba {
 
 	void Application::Run()
 	{
-		m_LastFrameTime = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()).time_since_epoch().count();
+		m_LastFrameTime = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()).time_since_epoch().count();
 		while (m_Running)
 		{
 			std::chrono::time_point<std::chrono::high_resolution_clock> timePointNow = std::chrono::high_resolution_clock::now();
-			long long now = std::chrono::time_point_cast<std::chrono::milliseconds>(timePointNow).time_since_epoch().count();
-			Timestep ts = (double)(now - m_LastFrameTime) / 1000.0;
+			long long now = std::chrono::time_point_cast<std::chrono::microseconds>(timePointNow).time_since_epoch().count();
+			Timestep ts = (double)(now - m_LastFrameTime) / 1000000.0;
 			m_LastFrameTime = now;
 
 			for (auto layer : *m_LayerStack)
