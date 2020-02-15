@@ -107,5 +107,5 @@ void ExampleLayer::OnImGuiRender()
 
 	ImGui::ColorEdit4("ColorBegin", &m_Particle.ColorBegin[0]);
 	ImGui::ColorEdit4("ColorEnd", &m_Particle.ColorEnd[0]);
-	ImGui::DragFloat("LifeTime", &m_Particle.LifeTime, 0.1f, 0.1f, 10.0f);
+	ImGui::SliderFloat("LifeTime", &m_Particle.LifeTime, 0.1f, 10.0f);
 }
