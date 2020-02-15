@@ -27,40 +27,16 @@ void ExampleLayer::OnAttach()
 	Saba::Ref<Saba::VertexBuffer> vbo = Saba::VertexBuffer::Create(vertices, sizeof(vertices));
 	vbo->SetLayout({
 		{"i_Pos", Saba::ShaderDataType::Float3}
-				   });
+	});
 	m_VAO->AddVertexBuffer(vbo);
 
 
-	uint indices[] = { 0, 1, 2 };
-	Saba::Ref<Saba::IndexBuffer> ibo = Saba::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint));
+	uint32_t indices[] = { 0, 1, 2 };
+	Saba::Ref<Saba::IndexBuffer> ibo = Saba::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 	m_VAO->SetIndexBuffer(ibo);
 
 
-	std::string vertexSrc = R"(
-		#version 330 core
-
-		layout(location = 0) in vec3 i_Pos;
-
-		uniform mat4 u_ViewProjMat;
-
-		void main()
-		{
-			gl_Position = u_ViewProjMat * vec4(i_Pos, 1.0f);
-		}
-	)";
-
-	std::string fragmentSrc = R"(
-		#version 330 core
-
-		out vec4 o_Color;
-
-		void main()
-		{
-			o_Color = vec4(0.2f, 0.3f, 0.8f, 1.0f);
-		}
-	)";
-
-	m_Shader = Saba::Shader::Create(vertexSrc.c_str(), fragmentSrc.c_str());
+	m_Shader = Saba::Shader::Create("assets/shaders/basic.glsl");
 
 
 	m_Particle.ColorBegin = glm::vec4(0.8f, 0.3f, 0.3f, 1.0f);

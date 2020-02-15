@@ -6,7 +6,7 @@
 
 namespace Saba {
 
-	Ref<VertexBuffer> VertexBuffer::Create(float* data, uint size)
+	Ref<VertexBuffer> VertexBuffer::Create(float* data, uint32_t size)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -18,7 +18,7 @@ namespace Saba {
 		return nullptr;
 	}
 
-	Ref<IndexBuffer> IndexBuffer::Create(uint* data, uint count)
+	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* data, uint32_t count)
 	{
 		switch (RendererAPI::GetAPI())
 		{

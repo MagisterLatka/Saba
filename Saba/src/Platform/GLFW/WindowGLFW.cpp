@@ -62,7 +62,7 @@ namespace Saba {
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 
-		m_Window = glfwCreateWindow(m_Data.width, m_Data.height, m_Data.title, nullptr, nullptr);
+		m_Window = glfwCreateWindow(m_Data.width, m_Data.height, m_Data.title.c_str(), nullptr, nullptr);
 		s_Windows++;
 
 		m_Context = GraphicsContext::Create(m_Window);

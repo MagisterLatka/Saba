@@ -67,6 +67,12 @@ project "Saba"
 		"opengl32.lib"
 	}
 	
+	postbuildcommands
+	{
+		"{COPY} \"assets\" \"../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Game/assets\"",
+		"{COPY} \"assets\" \"../Game/assets\""
+	}
+	
 	filter "configurations:Debug"
 		defines "DEBUG"
 		symbols "on"
@@ -110,6 +116,11 @@ project "Game"
 	links
 	{
 		"Saba"
+	}
+	
+	postbuildcommands
+	{
+		"{COPY} \"assets\" \"../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Game/assets\""
 	}
 	
 	filter "configurations:Debug"

@@ -30,19 +30,19 @@ namespace Saba {
 
 	struct BufferElement
 	{
-		const char* Name;
+		std::string Name;
 		ShaderDataType Type;
-		uint Size;
-		uint Offset;
+		uint32_t Size;
+		uint32_t Offset;
 		bool Normalized;
 
 		BufferElement() {}
-		BufferElement(const char* name, ShaderDataType type, bool normalized = false)
+		BufferElement(const std::string& name, ShaderDataType type, bool normalized = false)
 			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
 		{
 		}
 
-		uint GetComponentCount() const
+		uint32_t GetComponentCount() const
 		{
 			switch (Type)
 			{
@@ -77,10 +77,10 @@ namespace Saba {
 		inline uint GetStride() const { return m_Stride; }
 		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
-		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
-		std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
-		std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
+		std::vector<BufferElement>::iterator begin()				{ return m_Elements.begin(); }
+		std::vector<BufferElement>::iterator end()					{ return m_Elements.end(); }
+		std::vector<BufferElement>::const_iterator begin() const	{ return m_Elements.begin(); }
+		std::vector<BufferElement>::const_iterator end() const		{ return m_Elements.end(); }
 	private:
 		void Calculate()
 		{
@@ -93,7 +93,7 @@ namespace Saba {
 		}
 	private:
 		std::vector<BufferElement> m_Elements;
-		uint m_Stride = 0;
+		uint32_t m_Stride = 0;
 	};
 
 	class VertexBuffer
@@ -107,7 +107,7 @@ namespace Saba {
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		static Ref<VertexBuffer> Create(float* data, uint size);
+		static Ref<VertexBuffer> Create(float* data, uint32_t size);
 	};
 
 	class IndexBuffer
@@ -118,9 +118,9 @@ namespace Saba {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual uint GetCount() const = 0;
+		virtual uint32_t GetCount() const = 0;
 
-		static Ref<IndexBuffer> Create(uint* data, uint count);
+		static Ref<IndexBuffer> Create(uint32_t* data, uint32_t count);
 	};
 
 }

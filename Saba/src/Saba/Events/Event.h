@@ -22,7 +22,7 @@ namespace Saba {
 
 #define EVENT_TYPE(x) static EventType GetStaticType() { return EventType::x; }\
 						virtual EventType GetEventType() const override { return GetStaticType(); }\
-						virtual const char* GetName() const override { return #x; }
+						virtual std::string GetName() const override { return #x; }
 #define EVENT_CATEGORY(x) virtual int GetCategoryFlags() const override { return x; }
 
 	class Event
@@ -31,7 +31,7 @@ namespace Saba {
 		bool p_Handled = false;
 
 		virtual EventType GetEventType() const = 0;
-		virtual const char* GetName() const = 0;
+		virtual std::string GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
