@@ -95,7 +95,7 @@ namespace Saba {
 	std::string OpenGLShader::Read(const std::string& filepath)
 	{
 		std::string result;
-		std::ifstream stream(filepath, std::ios::in, std::ios::binary);
+		std::ifstream stream(filepath, std::ios::in | std::ios::binary);
 		if (stream)
 		{
 			stream.seekg(0, std::ios::end);
@@ -146,6 +146,8 @@ namespace Saba {
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& sources)
 	{
 		m_ID = glCreateProgram();
+		GLenum* shaders = (GLenum*)alloca(sources.size() * sizeof(GLenum));
+		int index = 0;
 
 		for (auto [type, source] : sources)
 		{
@@ -161,17 +163,22 @@ namespace Saba {
 			{
 				int lenght;
 				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &lenght);
-				char* message = (char*)alloca(lenght);
+				char* message = (char*)malloc(lenght);
 				glGetShaderInfoLog(shader, lenght, &lenght, message);
 				glDeleteShader(shader);
 				SB_CORE_FATAL("Failed to compile shader");
 				SB_CORE_ASSERT(false, "{0}", message);
+				free(message);
 			}
 
 			glAttachShader(m_ID, shader);
+			glDeleteShader(shader); //Only marked as TO_DELETE, will be destroyed when detached
+			shaders[index++] = shader;
 		}
 
 		glLinkProgram(m_ID);
+		for (int i = 0; i < index; i++)
+			glDetachShader(m_ID, shaders[i]);
 
 		int result;
 		glGetProgramiv(m_ID, GL_LINK_STATUS, &result);
@@ -179,11 +186,12 @@ namespace Saba {
 		{
 			int lenght;
 			glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &lenght);
-			char* message = (char*)alloca(lenght);
+			char* message = (char*)malloc(lenght);
 			glGetProgramInfoLog(m_ID, lenght, &lenght, message);
 			glDeleteProgram(m_ID);
 			SB_CORE_FATAL("Failed to link shader");
 			SB_CORE_ASSERT(false, "{0}", message);
+			free(message);
 		}
 	}
 
