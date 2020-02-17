@@ -11,6 +11,6 @@
 
 #include "Saba\Renderer\Shader.h"
 #include "Saba\Renderer\Renderer.h"
-#include "Saba\Renderer\OrthographicCamera.h"
+#include "Saba\Renderer\OrthographicCameraControler.h"
 
 #include "Saba\Renderer\ParticleSystem.h"

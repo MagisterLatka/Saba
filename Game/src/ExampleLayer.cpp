@@ -7,7 +7,7 @@
 #include <GLFW\include\GLFW\glfw3.h>
 
 ExampleLayer::ExampleLayer()
-	: Saba::Layer("ExampleLayer"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
+	: Saba::Layer("ExampleLayer"), m_CameraControler(16.0f / 9.0f)
 {
 }
 ExampleLayer::~ExampleLayer()
@@ -58,23 +58,14 @@ void ExampleLayer::OnDetach()
 }
 void ExampleLayer::OnEvent(Saba::Event& event)
 {
+	m_CameraControler.OnEvent(event);
 }
 void ExampleLayer::OnUpdate(Saba::Timestep ts)
 {
-	if (Saba::Input::IsKeyPressed(GLFW_KEY_D))		m_CameraPos.x += m_CameraVelocity * (float)ts;
-	else if (Saba::Input::IsKeyPressed(GLFW_KEY_A)) m_CameraPos.x -= m_CameraVelocity * (float)ts;
-
-	if (Saba::Input::IsKeyPressed(GLFW_KEY_W))		m_CameraPos.y += m_CameraVelocity * (float)ts;
-	else if (Saba::Input::IsKeyPressed(GLFW_KEY_S)) m_CameraPos.y -= m_CameraVelocity * (float)ts;
-
-	if (Saba::Input::IsKeyPressed(GLFW_KEY_E))		m_CameraRotation += m_CameraRotationSpeed * (float)ts;
-	else if (Saba::Input::IsKeyPressed(GLFW_KEY_Q)) m_CameraRotation -= m_CameraRotationSpeed * (float)ts;
-
-	m_Camera.SetPosition(m_CameraPos);
-	m_Camera.SetRotation(m_CameraRotation);
+	m_CameraControler.OnUpdate(ts);
 
 	Saba::RenderCommand::Clear();
-	Saba::Renderer::BeginScene(m_Camera);
+	Saba::Renderer::BeginScene(m_CameraControler.GetCamera());
 
 	Saba::Renderer::Submit(m_Shader, m_VAO);
 
@@ -86,7 +77,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 		x = x / width * 3.2f - 1.6f;
 		y = 0.9f - y / height * 1.8f;
 
-		m_Particle.Position = { x + m_CameraPos.x, y + m_CameraPos.y };
+		m_Particle.Position = { x + m_CameraControler.GetCamera().GetPosition().x, y + m_CameraControler.GetCamera().GetPosition().y };
 		for (int i = 0; i < 5; i++)
 			m_ParticleSystem.Emit(m_Particle);
 	}
