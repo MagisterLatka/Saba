@@ -77,7 +77,7 @@ namespace Saba {
 			}
 		}
 
-		m_VertexBuffers.push_back(buffer);
+		m_VertexBuffers.emplace_back(buffer);
 	}
 	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& buffer)
 	{

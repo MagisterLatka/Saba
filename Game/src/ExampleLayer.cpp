@@ -77,10 +77,13 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 		auto [x, y] = Saba::Input::GetMousePos();
 		auto width = Saba::Application::Get()->GetWindow()->GetWidth();
 		auto height = Saba::Application::Get()->GetWindow()->GetHeight();
-		x = x / width * 3.2f - 1.6f;
-		y = 0.9f - y / height * 1.8f;
 
-		m_Particle.Position = { x + m_CameraControler.GetCamera().GetPosition().x, y + m_CameraControler.GetCamera().GetPosition().y };
+		glm::vec2 bounds = { m_CameraControler.GetWidth(), m_CameraControler.GetHeight() };
+		glm::vec2 pos = m_CameraControler.GetCamera().GetPosition();
+		x = x / width * bounds.x - bounds.x * 0.5f;
+		y = bounds.y * 0.5f - y / height * bounds.y;
+
+		m_Particle.Position = { x + pos.x, y + pos.y };
 		for (int i = 0; i < 5; i++)
 			m_ParticleSystem.Emit(m_Particle);
 	}

@@ -16,6 +16,9 @@ namespace Saba {
 		OrthographicCamera& GetCamera() { return m_Camera; }
 		const OrthographicCamera& GetCamera() const { return m_Camera; }
 
+		inline float GetWidth() const { return m_AspectRatio * 2.0f * m_Zoom; }
+		inline float GetHeight() const { return 2.0f * m_Zoom; }
+
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 	private:

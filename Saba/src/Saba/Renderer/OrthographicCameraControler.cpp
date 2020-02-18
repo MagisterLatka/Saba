@@ -18,14 +18,26 @@ namespace Saba {
 	void OrthographicCameraControler::OnUpdate(Timestep ts)
 	{
 		if (Input::IsKeyPressed(GLFW_KEY_D))
-			m_CameraPosition.x += m_CameraMovementSpeed * (float)ts;
+		{
+			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+		}
 		else if (Input::IsKeyPressed(GLFW_KEY_A))
-			m_CameraPosition.x -= m_CameraMovementSpeed * (float)ts;
+		{
+			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+		}
 
 		if (Input::IsKeyPressed(GLFW_KEY_W))
-			m_CameraPosition.y += m_CameraMovementSpeed * (float)ts;
+		{
+			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+		}
 		else if (Input::IsKeyPressed(GLFW_KEY_S))
-			m_CameraPosition.y -= m_CameraMovementSpeed * (float)ts;
+		{
+			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
+		}
 
 		if (m_RotationEnabled)
 		{
