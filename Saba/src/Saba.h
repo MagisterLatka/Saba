@@ -9,6 +9,7 @@
 
 #include "Saba\Input.h"
 
+#include "Saba\Renderer\Texture.h"
 #include "Saba\Renderer\Shader.h"
 #include "Saba\Renderer\Renderer.h"
 #include "Saba\Renderer\OrthographicCameraControler.h"

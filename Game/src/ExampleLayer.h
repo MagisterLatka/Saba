@@ -14,6 +14,7 @@ public:
 private:
 	Saba::Ref<Saba::VertexArray> m_VAO;
 	Saba::Ref<Saba::Shader> m_Shader;
+	Saba::Ref<Saba::Texture2D> m_Texture;
 
 	Saba::OrthographicCameraControler m_CameraControler;
 

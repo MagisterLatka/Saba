@@ -5,6 +5,11 @@ namespace Saba {
 
 	Scope<Renderer::Scene> Renderer::s_Scene = MakeScope<Renderer::Scene>();
 
+	void Renderer::Init()
+	{
+		RenderCommand::Init();
+	}
+
 	void Renderer::BeginScene(const OrthographicCamera& camera)
 	{
 		s_Scene->ViewProjMat = camera.GetViewProjectionMat();

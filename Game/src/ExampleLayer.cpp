@@ -20,13 +20,14 @@ void ExampleLayer::OnAttach()
 
 
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
+		-0.5f, -0.5f, 0.0f,	0.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f,	1.0f, 0.0f,
+		 0.0f,  0.5f, 0.0f, 0.5f, 1.0f
 	};
 	Saba::Ref<Saba::VertexBuffer> vbo = Saba::VertexBuffer::Create(vertices, sizeof(vertices));
 	vbo->SetLayout({
-		{"i_Pos", Saba::ShaderDataType::Float3}
+		{"i_Pos", Saba::ShaderDataType::Float3},
+		{"i_UV", Saba::ShaderDataType::Float2}
 	});
 	m_VAO->AddVertexBuffer(vbo);
 
@@ -37,6 +38,9 @@ void ExampleLayer::OnAttach()
 
 
 	m_Shader = Saba::Shader::Create("assets/shaders/basic.glsl");
+	m_Shader->Bind();
+	m_Shader->SetUniformInt1("u_Tex", 0);
+	m_Texture = Saba::Texture2D::Create("assets/textures/checkerboard.png");
 
 
 	m_Particle.ColorBegin = glm::vec4(0.8f, 0.3f, 0.3f, 1.0f);
@@ -50,8 +54,6 @@ void ExampleLayer::OnAttach()
 
 
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 void ExampleLayer::OnDetach()
 {
@@ -67,6 +69,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::RenderCommand::Clear();
 	Saba::Renderer::BeginScene(m_CameraControler.GetCamera());
 
+	m_Texture->Bind();
 	Saba::Renderer::Submit(m_Shader, m_VAO);
 
 	if (Saba::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
