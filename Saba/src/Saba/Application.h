@@ -25,8 +25,10 @@ namespace Saba {
 		void Run();
 		void OnEvent(Event& event);
 		bool OnClose(WindowCloseEvent& event);
+		bool OnWindowResize(WindowResizeEvent& event);
 	private:
 		bool m_Running = true;
+		bool m_Minimized = false;
 		ImGuiLayer* m_ImGuiLayer;
 
 		Scope<LayerStack> m_LayerStack;

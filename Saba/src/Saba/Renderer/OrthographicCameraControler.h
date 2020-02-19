@@ -19,6 +19,9 @@ namespace Saba {
 		inline float GetWidth() const { return m_AspectRatio * 2.0f * m_Zoom; }
 		inline float GetHeight() const { return 2.0f * m_Zoom; }
 
+		void SetZoom(float zoom) { m_Zoom = zoom; }
+		inline float GetZoom() const { return m_Zoom; }
+
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 	private:
