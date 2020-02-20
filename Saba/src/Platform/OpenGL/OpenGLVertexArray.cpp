@@ -51,12 +51,33 @@ namespace Saba {
 
 		for (const auto& element : buffer->GetLayout())
 		{
-			glEnableVertexAttribArray(m_Index);
-			glVertexAttribPointer(m_Index, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized, buffer->GetLayout().GetStride(), (const void*)element.Offset);
-			m_Index++;
+			if (element.Type == ShaderDataType::Mat3)
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					glEnableVertexAttribArray(m_Index);
+					glVertexAttribPointer(m_Index, 3, GL_FLOAT, element.Normalized, buffer->GetLayout().GetStride(), (const void*)element.Offset);
+					m_Index++;
+				}
+			}
+			else if (element.Type == ShaderDataType::Mat4)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					glEnableVertexAttribArray(m_Index);
+					glVertexAttribPointer(m_Index, 4, GL_FLOAT, element.Normalized, buffer->GetLayout().GetStride(), (const void*)element.Offset);
+					m_Index++;
+				}
+			}
+			else
+			{
+				glEnableVertexAttribArray(m_Index);
+				glVertexAttribPointer(m_Index, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized, buffer->GetLayout().GetStride(), (const void*)element.Offset);
+				m_Index++;
+			}
 		}
 
-		m_VertexBuffers.push_back(buffer);
+		m_VertexBuffers.emplace_back(buffer);
 	}
 	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& buffer)
 	{

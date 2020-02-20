@@ -32,7 +32,7 @@ namespace Saba {
 
 		struct WindowData
 		{
-			const char* title;
+			std::string title;
 			uint width, height;
 			bool vSync;
 

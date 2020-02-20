@@ -14,12 +14,9 @@ public:
 private:
 	Saba::Ref<Saba::VertexArray> m_VAO;
 	Saba::Ref<Saba::Shader> m_Shader;
+	Saba::Ref<Saba::Texture2D> m_Texture;
 
-	Saba::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPos = { 0.0f, 0.0f, 0.0f };
-	float m_CameraRotation = 0.0f;
-	float m_CameraVelocity = 3.0f; //units per second
-	float m_CameraRotationSpeed = 50.0f; // degrees per second
+	Saba::OrthographicCameraControler m_CameraControler;
 
 	Saba::ParticleSystem m_ParticleSystem;
 	Saba::ParticleProps m_Particle;

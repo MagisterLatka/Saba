@@ -19,9 +19,9 @@ namespace Saba {
 		inline virtual const std::vector<Ref<VertexBuffer>> GetVertexBuffers() const override { return m_VertexBuffers; }
 		inline virtual const Ref<IndexBuffer> GetIndexBuffer() const override { return m_IndexBuffer; }
 	private:
-		uint m_ID;
+		uint32_t m_ID;
 		std::vector<Ref<VertexBuffer>> m_VertexBuffers;
-		uint m_Index = 0;
+		uint32_t m_Index = 0;
 		Ref<IndexBuffer> m_IndexBuffer;
 	};
 

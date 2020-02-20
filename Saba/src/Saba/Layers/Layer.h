@@ -8,8 +8,8 @@ namespace Saba {
 	class Layer
 	{
 	public:
-		Layer(const char* name);
-		~Layer();
+		Layer(const std::string& name);
+		~Layer() = default;
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
@@ -17,7 +17,7 @@ namespace Saba {
 		virtual void OnUpdate(Timestep ts) {}
 		virtual void OnImGuiRender() {}
 	private:
-		const char* m_Name;
+		std::string m_Name;
 	};
 
 }

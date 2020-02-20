@@ -6,10 +6,10 @@ namespace Saba {
 
 	struct WindowProps
 	{
-		const char* Title;
+		std::string Title;
 		uint Width, Height;
 
-		WindowProps(const char* title = "Saba", uint width = 1280, uint height = 720)
+		WindowProps(const std::string& title = "Saba", uint width = 1280, uint height = 720)
 			: Title(title), Width(width), Height(height) {}
 	};
 

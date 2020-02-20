@@ -24,6 +24,8 @@ namespace Saba {
 
 		m_ImGuiLayer = new ImGuiLayer;
 		PushOverlay(m_ImGuiLayer);
+
+		Renderer::Init();
 	}
 	Application::~Application()
 	{
@@ -40,8 +42,11 @@ namespace Saba {
 			Timestep ts = (double)(now - m_LastFrameTime) / 1000000.0;
 			m_LastFrameTime = now;
 
-			for (auto layer : *m_LayerStack)
-				layer->OnUpdate(ts);
+			if (!m_Minimized)
+			{
+				for (auto layer : *m_LayerStack)
+					layer->OnUpdate(ts);
+			}
 
 			m_ImGuiLayer->Begin();
 			for (auto layer : *m_LayerStack)
@@ -75,6 +80,19 @@ namespace Saba {
 	bool Application::OnClose(WindowCloseEvent& event)
 	{
 		m_Running = false;
+		return false;
+	}
+	bool Application::OnWindowResize(WindowResizeEvent& event)
+	{
+		if (event.GetXSize() == 0 || event.GetYSize() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+
+		Renderer::OnWindowResize(event.GetXSize(), event.GetYSize());
+		m_Minimized = false;
+
 		return false;
 	}
 

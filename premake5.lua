@@ -16,11 +16,13 @@ IncludeDirs["GLFW"] = "Saba/vendor/GLFW/include"
 IncludeDirs["GLAD"] = "Saba/vendor/GLAD/include"
 IncludeDirs["ImGui"] = "Saba/vendor/ImGui"
 IncludeDirs["GLM"] = "Saba/vendor/glm"
+IncludeDirs["stbi"] = "Saba/vendor/stb_image"
 
 group "Dep"
 	include "Saba/vendor/GLFW"
 	include "Saba/vendor/GLAD"
 	include "Saba/vendor/ImGui"
+	include "Saba/vendor/stb_image"
 group ""
 	
 project "Saba"
@@ -56,7 +58,8 @@ project "Saba"
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.GLAD}",
 		"%{IncludeDirs.ImGui}",
-		"%{IncludeDirs.GLM}"
+		"%{IncludeDirs.GLM}",
+		"%{IncludeDirs.stbi}"
 	}
 	
 	links
@@ -64,7 +67,14 @@ project "Saba"
 		"GLFW",
 		"GLAD",
 		"ImGui",
+		"stb_image",
 		"opengl32.lib"
+	}
+	
+	postbuildcommands
+	{
+		"{COPY} \"assets\" \"../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Game/assets\"",
+		"{COPY} \"assets\" \"../Game/assets\""
 	}
 	
 	filter "configurations:Debug"
@@ -110,6 +120,11 @@ project "Game"
 	links
 	{
 		"Saba"
+	}
+	
+	postbuildcommands
+	{
+		"{COPY} \"assets\" \"../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Game/assets\""
 	}
 	
 	filter "configurations:Debug"
