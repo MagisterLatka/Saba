@@ -51,7 +51,7 @@ namespace Saba {
 			});
 			m_VAO->AddVertexBuffer(vbo);
 
-			uint indices[] = {
+			uint32_t indices[] = {
 				0, 1, 2, 2, 3, 0
 			};
 			Ref<IndexBuffer> ibo = IndexBuffer::Create(indices, 6);

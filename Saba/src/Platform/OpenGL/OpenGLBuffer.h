@@ -7,11 +7,16 @@ namespace Saba {
 	class OpenGLVertexBuffer : public VertexBuffer
 	{
 	public:
-		OpenGLVertexBuffer(float* data, uint32_t size);
+		OpenGLVertexBuffer(float* data, uint32_t size, BufferUsage usage);
 		virtual ~OpenGLVertexBuffer();
 
 		void Bind() const override;
 		void Unbind() const override;
+
+		virtual void* Map() const override;
+		virtual void Unmap() const override;
+
+		virtual void SetSubdata(uint32_t offset, uint32_t size, void* data) override;
 
 		inline virtual const BufferLayout& GetLayout() const override { return m_Layout; }
 		virtual void SetLayout(const BufferLayout& layout) override;
@@ -23,11 +28,16 @@ namespace Saba {
 	class OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:
-		OpenGLIndexBuffer(uint32_t* data, uint32_t count);
+		OpenGLIndexBuffer(uint32_t* data, uint32_t count, BufferUsage usage);
 		virtual ~OpenGLIndexBuffer();
 
 		void Bind() const override;
 		void Unbind() const override;
+
+		virtual void* Map() const override;
+		virtual void Unmap() const override;
+
+		virtual void SetSubdata(uint32_t offset, uint32_t size, void* data) override;
 
 		inline uint32_t GetCount() const override { return m_Count; }
 	private:

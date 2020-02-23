@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Saba\Renderer\ParticleSystemBatched.h"
+
 class ExampleLayer : public Saba::Layer
 {
 public:
@@ -18,6 +20,6 @@ private:
 
 	Saba::OrthographicCameraControler m_CameraControler;
 
-	Saba::ParticleSystem m_ParticleSystem;
+	Saba::ParticleSystemBatched m_ParticleSystem;
 	Saba::ParticleProps m_Particle;
 };

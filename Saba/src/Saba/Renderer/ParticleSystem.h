@@ -21,10 +21,10 @@ namespace Saba {
 		ParticleSystem();
 
 		void OnUpdate(Timestep ts);
-		void OnRender();
+		virtual void OnRender();
 
 		void Emit(ParticleProps& props);
-	private:
+	protected:
 		struct Particle
 		{
 			glm::vec2 Position;
