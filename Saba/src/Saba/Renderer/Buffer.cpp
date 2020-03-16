@@ -6,12 +6,12 @@
 
 namespace Saba {
 
-	Ref<VertexBuffer> VertexBuffer::Create(float* data, uint32_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(float* data, uint32_t size, BufferUsage usage)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:	SB_CORE_ASSERT(false, "None API is not supported"); return nullptr;
-			case RendererAPI::API::OpenGL:	return MakeRef<OpenGLVertexBuffer>(data, size);
+			case RendererAPI::API::OpenGL:	return MakeRef<OpenGLVertexBuffer>(data, size, usage);
 		}
 
 		SB_CORE_ASSERT(false, "Unknown API");

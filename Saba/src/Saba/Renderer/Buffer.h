@@ -96,6 +96,11 @@ namespace Saba {
 		uint32_t m_Stride = 0;
 	};
 
+	enum BufferUsage
+	{
+		None = 0, Static, Dynamic, Stream
+	};
+
 	class VertexBuffer
 	{
 	public:
@@ -104,10 +109,12 @@ namespace Saba {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
+		virtual void SetData(void* data, uint32_t size, uint32_t offset) = 0;
+
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		static Ref<VertexBuffer> Create(float* data, uint32_t size);
+		static Ref<VertexBuffer> Create(float* data, uint32_t size, BufferUsage usage = BufferUsage::Static);
 	};
 
 	class IndexBuffer

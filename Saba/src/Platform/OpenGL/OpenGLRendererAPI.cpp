@@ -29,5 +29,9 @@ namespace Saba {
 	{
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
+	void OpenGLRendererAPI::DrawIndexed(uint32_t indicesCount)
+	{
+		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr);
+	}
 
 }

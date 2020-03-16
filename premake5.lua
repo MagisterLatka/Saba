@@ -73,7 +73,7 @@ project "Saba"
 	
 	postbuildcommands
 	{
-		"{COPY} \"assets\" \"../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Game/assets\"",
+		"{COPY} \"assets\" \"../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Game/assets\""
 		"{COPY} \"assets\" \"../Game/assets\""
 	}
 	

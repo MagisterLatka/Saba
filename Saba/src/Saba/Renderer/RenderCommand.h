@@ -29,6 +29,10 @@ namespace Saba {
 		{
 			s_API->DrawIndexed(vertexArray);
 		}
+		inline static void DrawIndexed(uint32_t indicesCount)
+		{
+			s_API->DrawIndexed(indicesCount);
+		}
 	private:
 		static Scope<RendererAPI> s_API;
 	};

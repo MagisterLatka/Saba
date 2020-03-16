@@ -16,41 +16,17 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	m_VAO = Saba::VertexArray::Create();
-
-
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,	0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f,	1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f, 0.5f, 1.0f
-	};
-	Saba::Ref<Saba::VertexBuffer> vbo = Saba::VertexBuffer::Create(vertices, sizeof(vertices));
-	vbo->SetLayout({
-		{"i_Pos", Saba::ShaderDataType::Float3},
-		{"i_UV", Saba::ShaderDataType::Float2}
-	});
-	m_VAO->AddVertexBuffer(vbo);
-
-
-	uint32_t indices[] = { 0, 1, 2 };
-	Saba::Ref<Saba::IndexBuffer> ibo = Saba::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-	m_VAO->SetIndexBuffer(ibo);
-
-
-	m_Shader = Saba::Shader::Create("assets/shaders/basic.glsl");
-	m_Shader->Bind();
-	m_Shader->SetUniformInt1("u_Tex", 0);
 	m_Texture = Saba::Texture2D::Create("assets/textures/checkerboard.png");
 
 
 	m_Particle.ColorBegin = glm::vec4(0.8f, 0.3f, 0.3f, 1.0f);
 	m_Particle.ColorEnd = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	m_Particle.Position = glm::vec2(0.0f, 0.0f);
-	m_Particle.SizeBegin = 0.1f;
-	m_Particle.SizeEnd = 0.01f;
+	m_Particle.SizeBegin = 0.5f;
+	m_Particle.SizeEnd = 0.1f;
 	m_Particle.SizeVariation = 0.05f;
 	m_Particle.Velocity = glm::vec2(0.0f, 0.0f);
-	m_Particle.VelocityVariation = glm::vec2(1.0f, 1.0f);
+	m_Particle.VelocityVariation = glm::vec2(3.0f, 3.0f);
 
 
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
@@ -67,29 +43,45 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	m_CameraControler.OnUpdate(ts);
 
 	Saba::RenderCommand::Clear();
-	Saba::Renderer::BeginScene(m_CameraControler.GetCamera());
 
-	m_Texture->Bind();
-	Saba::Renderer::Submit(m_Shader, m_VAO);
+	Saba::Renderer2D::BeginScene(m_CameraControler.GetCamera().GetViewProjectionMat());
 
-	if (Saba::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+	Saba::Renderer2D::DrawQuad({ -5.0f, -5.0f }, { 10.0f, 10.0f }, m_Texture);
+
+	for (float y = -4.975f; y < 5.0f; y += 0.1f)
 	{
-		auto [x, y] = Saba::Input::GetMousePos();
-		auto width = Saba::Application::Get()->GetWindow()->GetWidth();
-		auto height = Saba::Application::Get()->GetWindow()->GetHeight();
-
-		glm::vec2 bounds = { m_CameraControler.GetWidth(), m_CameraControler.GetHeight() };
-		glm::vec2 pos = m_CameraControler.GetCamera().GetPosition();
-		x = x / width * bounds.x - bounds.x * 0.5f;
-		y = bounds.y * 0.5f - y / height * bounds.y;
-
-		m_Particle.Position = { x + pos.x, y + pos.y };
-		for (int i = 0; i < 5; i++)
-			m_ParticleSystem.Emit(m_Particle);
+		for (float x = -4.975f; x < 5.0f; x += 0.1f)
+		{
+			Saba::Renderer2D::DrawQuad({ x, y }, { 0.05f, 0.05f }, {x / 10.0f + 0.5f, y / 10.0f + 0.5f, 0.0f, 1.0f});
+		}
 	}
 
-	m_ParticleSystem.OnUpdate(ts);
-	m_ParticleSystem.OnRender();
+	Saba::Renderer2D::EndScene();
+	Saba::Renderer2D::Flush();
+
+	Saba::Renderer::BeginScene(m_CameraControler.GetCamera());
+
+	if (m_EnableParticles)
+	{
+		if (Saba::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+		{
+			auto [x, y] = Saba::Input::GetMousePos();
+			auto width = Saba::Application::Get()->GetWindow()->GetWidth();
+			auto height = Saba::Application::Get()->GetWindow()->GetHeight();
+
+			glm::vec2 bounds = { m_CameraControler.GetWidth(), m_CameraControler.GetHeight() };
+			glm::vec2 pos = m_CameraControler.GetCamera().GetPosition();
+			x = x / width * bounds.x - bounds.x * 0.5f;
+			y = bounds.y * 0.5f - y / height * bounds.y;
+
+			m_Particle.Position = { x + pos.x, y + pos.y };
+			for (int i = 0; i < 5; i++)
+				m_ParticleSystem.Emit(m_Particle);
+		}
+
+		m_ParticleSystem.OnUpdate(ts);
+		m_ParticleSystem.OnRender();
+	}
 
 	Saba::Renderer::EndScene();
 }
@@ -102,6 +94,7 @@ void ExampleLayer::OnImGuiRender()
 
 	ImGui::Text("");
 
+	ImGui::Checkbox("Enable Particles", &m_EnableParticles);
 	ImGui::ColorEdit4("ColorBegin", &m_Particle.ColorBegin[0]);
 	ImGui::ColorEdit4("ColorEnd", &m_Particle.ColorEnd[0]);
 	ImGui::SliderFloat("LifeTime", &m_Particle.LifeTime, 0.1f, 10.0f);

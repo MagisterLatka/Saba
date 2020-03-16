@@ -12,12 +12,11 @@ public:
 	virtual void OnUpdate(Saba::Timestep ts) override;
 	virtual void OnImGuiRender() override;
 private:
-	Saba::Ref<Saba::VertexArray> m_VAO;
-	Saba::Ref<Saba::Shader> m_Shader;
 	Saba::Ref<Saba::Texture2D> m_Texture;
 
 	Saba::OrthographicCameraControler m_CameraControler;
 
 	Saba::ParticleSystem m_ParticleSystem;
 	Saba::ParticleProps m_Particle;
+	bool m_EnableParticles = false;
 };

@@ -7,11 +7,13 @@ namespace Saba {
 	class OpenGLVertexBuffer : public VertexBuffer
 	{
 	public:
-		OpenGLVertexBuffer(float* data, uint32_t size);
+		OpenGLVertexBuffer(float* data, uint32_t size, BufferUsage usage);
 		virtual ~OpenGLVertexBuffer();
 
 		void Bind() const override;
 		void Unbind() const override;
+
+		virtual void SetData(void* data, uint32_t size, uint32_t offset) override;
 
 		inline virtual const BufferLayout& GetLayout() const override { return m_Layout; }
 		virtual void SetLayout(const BufferLayout& layout) override;

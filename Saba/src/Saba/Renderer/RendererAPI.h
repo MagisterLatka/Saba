@@ -21,6 +21,7 @@ namespace Saba {
 		virtual void Clear() = 0;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) = 0;
+		virtual void DrawIndexed(uint32_t indicesCount) = 0;
 
 		inline static API GetAPI() { return s_API; }
 		static Scope<RendererAPI> Create();
