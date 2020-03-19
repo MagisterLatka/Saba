@@ -48,11 +48,11 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 
 	Saba::Renderer2D::DrawQuad({ -5.0f, -5.0f }, { 10.0f, 10.0f }, m_Texture);
 
-	for (float y = -4.975f; y < 5.0f; y += 0.1f)
+	for (float y = 0.0f; y < 10.0; y += 0.1f)
 	{
-		for (float x = -4.975f; x < 5.0f; x += 0.1f)
+		for (float x = 0.0f; x < 10.0f; x += 0.1f)
 		{
-			Saba::Renderer2D::DrawQuad({ x, y }, { 0.05f, 0.05f }, {x / 10.0f + 0.5f, y / 10.0f + 0.5f, 0.0f, 1.0f});
+			Saba::Renderer2D::DrawQuad({ x - 5.0f, y - 5.0f }, { 0.09f, 0.09f }, {x / 10.0f, y / 10.0f, 1.0f, 1.0f});
 		}
 	}
 

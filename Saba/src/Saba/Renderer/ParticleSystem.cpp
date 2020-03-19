@@ -9,13 +9,25 @@
 
 namespace Saba {
 
-	ParticleSystem::ParticleSystem()
+	struct VertexData
 	{
-		m_Particles.resize(10000);
+		glm::vec3 pos;
+		glm::vec4 color;
+	};
+
+	ParticleSystem::ParticleSystem(uint32_t maxParticles)
+	{
+		m_Particles.resize(maxParticles);
+		m_Buffer = (float*)malloc(m_Particles.size() * 4 * sizeof(VertexData));
+	}
+	ParticleSystem::~ParticleSystem()
+	{
+		free(m_Buffer);
 	}
 
 	void ParticleSystem::OnUpdate(Timestep ts)
 	{
+		m_ActiveParticleCount = 0;
 		for (Particle& particle : m_Particles)
 		{
 			if (!particle.Active)
@@ -27,6 +39,7 @@ namespace Saba {
 				continue;
 			}
 
+			m_ActiveParticleCount++;
 			particle.LifeCounter -= (float)ts;
 			particle.Position += particle.Velocity * (float)ts;
 			particle.Rotation += 0.01f * (float)ts;
@@ -39,43 +52,84 @@ namespace Saba {
 			m_VAO = VertexArray::Create();
 			m_VAO->Bind();
 
-			float vertices[] = {
-				-0.5f, -0.5f, 0.0f,
-				 0.5f, -0.5f, 0.0f,
-				 0.5f,  0.5f, 0.0f,
-				-0.5f,  0.5f, 0.0f
-			};
-			Ref<VertexBuffer> vbo = VertexBuffer::Create(vertices, sizeof(vertices));
+			Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, (uint32_t)m_Particles.size() * 4 * sizeof(VertexData), Stream);
 			vbo->SetLayout({
-				{"position", ShaderDataType::Float3}
+				{"position", ShaderDataType::Float3},
+				{"color", ShaderDataType::Float4}
 			});
 			m_VAO->AddVertexBuffer(vbo);
 
-			uint indices[] = {
-				0, 1, 2, 2, 3, 0
-			};
-			Ref<IndexBuffer> ibo = IndexBuffer::Create(indices, 6);
+			uint32_t* indices = new uint32_t[m_Particles.size() * 6];
+			uint32_t index = 0;
+			for (int i = 0; i < m_Particles.size() * 6; i += 6)
+			{
+				indices[i + 0] = index + 0;
+				indices[i + 1] = index + 1;
+				indices[i + 2] = index + 2;
+
+				indices[i + 3] = index + 2;
+				indices[i + 4] = index + 3;
+				indices[i + 5] = index + 0;
+
+				index += 4;
+			}
+			Ref<IndexBuffer> ibo = IndexBuffer::Create(indices, (uint32_t)m_Particles.size() * 6);
+			delete[] indices;
 			m_VAO->SetIndexBuffer(ibo);
 
 			m_Shader = Shader::Create("assets/shaders/particle.glsl");
 		}
 
-		for (auto& particle : m_Particles)
+		if (m_ActiveParticleCount)
 		{
-			if (!particle.Active)
-				continue;
+			VertexData* at = (VertexData*)m_Buffer;
+			for (auto& particle : m_Particles)
+			{
+				if (!particle.Active)
+				{
+					at->color.a;
+					at++;
+					at->color.a;
+					at++;
+					at->color.a;
+					at++;
+					at->color.a;
+					at++;
+					continue;
+				}
 
-			float life = particle.LifeCounter / particle.LifeTime;
-			glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
-			color.a *= life;
+				static glm::vec4 data[4] = {
+					{-0.5f, -0.5f, 0.0f, 1.0f},
+					{ 0.5f, -0.5f, 0.0f, 1.0f},
+					{ 0.5f,  0.5f, 0.0f, 1.0f},
+					{-0.5f,  0.5f, 0.0f, 1.0f}
+				};
 
-			float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
+				float life = particle.LifeCounter / particle.LifeTime;
+				glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
+				color.a *= life;
 
-			glm::mat4 transform = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), {particle.Position.x, particle.Position.y, 0.0f}),
-											 particle.Rotation, { 0.0f, 0.0f, 1.0f }), glm::vec3(size, size, 0.0f));
+				float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
 
-			m_Shader->SetUniformMat4("u_Transform", transform);
-			m_Shader->SetUniformFloat4("u_Color", color);
+				glm::mat4 transform = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), { particle.Position.x, particle.Position.y, 0.0f }),
+												 particle.Rotation, { 0.0f, 0.0f, 1.0f }), glm::vec3(size, size, 0.0f));
+
+				at->pos = glm::vec3(transform * data[0]);
+				at->color = color;
+				at++;
+				at->pos = glm::vec3(transform * data[1]);
+				at->color = color;
+				at++;
+				at->pos = glm::vec3(transform * data[2]);
+				at->color = color;
+				at++;
+				at->pos = glm::vec3(transform * data[3]);
+				at->color = color;
+				at++;
+			}
+			m_VAO->GetVertexBuffers()[0]->Bind();
+			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer, (uint32_t)m_Particles.size() * 4 * sizeof(VertexData), 0);
+
 			Renderer::Submit(m_Shader, m_VAO);
 		}
 	}

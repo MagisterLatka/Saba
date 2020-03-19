@@ -2,13 +2,16 @@
 #version 330 core
 
 layout(location = 0) in vec3 i_Pos;
+layout(location = 1) in vec4 i_Color;
 
 uniform mat4 u_ViewProjMat;
-uniform mat4 u_Transform;
+
+out vec4 l_Color;
 
 void main()
 {
-	gl_Position = u_ViewProjMat * u_Transform * vec4(i_Pos, 1.0f);
+	l_Color = i_Color;
+	gl_Position = u_ViewProjMat * vec4(i_Pos, 1.0f);
 }
 
 
@@ -17,9 +20,9 @@ void main()
 
 out vec4 o_Color;
 
-uniform vec4 u_Color;
+in vec4 l_Color;
 
 void main()
 {
-	o_Color = u_Color;
+	o_Color = l_Color;
 }

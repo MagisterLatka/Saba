@@ -18,7 +18,8 @@ namespace Saba {
 	class ParticleSystem
 	{
 	public:
-		ParticleSystem();
+		ParticleSystem(uint32_t maxParticles = 10000);
+		~ParticleSystem();
 
 		void OnUpdate(Timestep ts);
 		void OnRender();
@@ -39,9 +40,11 @@ namespace Saba {
 			bool Active = false;
 		};
 		std::vector<Particle> m_Particles;
-		uint m_Index = 9999;
+		uint32_t m_ActiveParticleCount = 0;
+		uint32_t m_Index = 9999;
 
 		Ref<VertexArray> m_VAO;
+		float* m_Buffer;
 		Ref<Shader> m_Shader;
 	};
 
