@@ -87,13 +87,13 @@ namespace Saba {
 			{
 				if (!particle.Active)
 				{
-					at->color.a;
+					at->color.a = 0.0f;
 					at++;
-					at->color.a;
+					at->color.a = 0.0f;
 					at++;
-					at->color.a;
+					at->color.a = 0.0f;
 					at++;
-					at->color.a;
+					at->color.a = 0.0f;
 					at++;
 					continue;
 				}

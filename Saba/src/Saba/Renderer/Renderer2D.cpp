@@ -38,6 +38,14 @@ namespace Saba {
 	{
 		s_RendererData = new Renderer2DData;
 
+		for (uint32_t i = 0; i < c_MaxQuadCount * 4; i += 4)
+		{
+			s_RendererData->buffer[i + 0].uv = { 0.0f, 0.0f };
+			s_RendererData->buffer[i + 1].uv = { 1.0f, 0.0f };
+			s_RendererData->buffer[i + 2].uv = { 1.0f, 1.0f };
+			s_RendererData->buffer[i + 3].uv = { 0.0f, 1.0f };
+		}
+
 		s_RendererData->vertexArray = VertexArray::Create();
 		Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), Stream);
 		vbo->SetLayout({
@@ -85,6 +93,7 @@ namespace Saba {
 
 	void Renderer2D::BeginScene(const glm::mat4& viewProjMat)
 	{
+		s_RendererData->at = s_RendererData->buffer;
 		s_RendererData->viewProjMat = viewProjMat;
 		s_RendererData->shader->Bind();
 		s_RendererData->shader->SetUniformMat4("u_ViewProjMat", viewProjMat);
@@ -92,7 +101,6 @@ namespace Saba {
 	void Renderer2D::EndScene()
 	{
 		s_RendererData->vertexArray->GetVertexBuffers()[0]->SetData(s_RendererData->buffer, s_RendererData->quadCount * 4 * sizeof(VertexData), 0);
-		s_RendererData->at = s_RendererData->buffer;
 		s_RendererData->texIndex = 1;
 	}
 	void Renderer2D::Flush()
@@ -130,25 +138,21 @@ namespace Saba {
 		}
 
 		s_RendererData->at->pos = pos;
-		s_RendererData->at->uv = { 0.0f, 0.0f };
 		s_RendererData->at->color = color;
 		s_RendererData->at->texID = 0.0f;
 		s_RendererData->at++;
 
 		s_RendererData->at->pos = pos + glm::vec3(size.x, 0.0f, 0.0f);
-		s_RendererData->at->uv = { 1.0f, 0.0f };
 		s_RendererData->at->color = color;
 		s_RendererData->at->texID = 0.0f;
 		s_RendererData->at++;
 
 		s_RendererData->at->pos = pos + glm::vec3(size.x, size.y, 0.0f);
-		s_RendererData->at->uv = { 1.0f, 1.0f };
 		s_RendererData->at->color = color;
 		s_RendererData->at->texID = 0.0f;
 		s_RendererData->at++;
 
 		s_RendererData->at->pos = pos + glm::vec3(0.0f, size.y, 0.0f);
-		s_RendererData->at->uv = { 0.0f, 1.0f };
 		s_RendererData->at->color = color;
 		s_RendererData->at->texID = 0.0f;
 		s_RendererData->at++;
@@ -161,7 +165,7 @@ namespace Saba {
 	}
 	void Renderer2D::DrawQuad(glm::vec3 pos, glm::vec2 size, Ref<Texture2D> texture)
 	{
-		if (s_RendererData->quadCount >= c_MaxQuadCount)
+		if (s_RendererData->quadCount >= c_MaxQuadCount || s_RendererData->texIndex > c_MaxTextures - 1)
 		{
 			EndScene();
 			Flush();
@@ -169,47 +173,37 @@ namespace Saba {
 		}
 
 		float tid = 0.0f;
-		if (std::find(s_RendererData->textures.begin() + 1, s_RendererData->textures.begin() + 1 + s_RendererData->texIndex, texture) != s_RendererData->textures.begin() + 1 + s_RendererData->texIndex)
+		for (uint8_t i = 1; i < s_RendererData->texIndex; i++)
 		{
-			for (uint8_t i = 1; i < s_RendererData->texIndex; i++)
+			if (s_RendererData->textures[i] == texture)
 			{
 				tid = (float)i;
 				break;
 			}
 		}
-		else
+		if (tid == 0.0f)
 		{
-			if (s_RendererData->texIndex >= c_MaxTextures - 1)
-			{
-				EndScene();
-				Flush();
-				BeginScene(s_RendererData->viewProjMat);
-			}
-			s_RendererData->textures[s_RendererData->texIndex] = texture;
 			tid = (float)s_RendererData->texIndex;
+			s_RendererData->textures[s_RendererData->texIndex] = texture;
 			s_RendererData->texIndex++;
 		}
 
 		s_RendererData->at->pos = pos;
-		s_RendererData->at->uv = { 0.0f, 0.0f };
 		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_RendererData->at->texID = tid;
 		s_RendererData->at++;
 
 		s_RendererData->at->pos = pos + glm::vec3(size.x, 0.0f, 0.0f);
-		s_RendererData->at->uv = { 1.0f, 0.0f };
 		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_RendererData->at->texID = tid;
 		s_RendererData->at++;
 
 		s_RendererData->at->pos = pos + glm::vec3(size.x, size.y, 0.0f);
-		s_RendererData->at->uv = { 1.0f, 1.0f };
 		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_RendererData->at->texID = tid;
 		s_RendererData->at++;
 
 		s_RendererData->at->pos = pos + glm::vec3(0.0f, size.y, 0.0f);
-		s_RendererData->at->uv = { 0.0f, 1.0f };
 		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_RendererData->at->texID = tid;
 		s_RendererData->at++;
