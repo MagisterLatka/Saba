@@ -40,8 +40,8 @@ namespace Saba {
 			bool Active = false;
 		};
 		std::vector<Particle> m_Particles;
-		uint32_t m_ActiveParticleCount = 0;
-		uint32_t m_Index = 9999;
+		uint32_t m_FirstActive = -1, m_LastActive = -1;
+		uint32_t m_Index;
 
 		Ref<VertexArray> m_VAO;
 		float* m_Buffer;

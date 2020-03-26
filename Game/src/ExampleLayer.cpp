@@ -7,7 +7,7 @@
 #include <GLFW\include\GLFW\glfw3.h>
 
 ExampleLayer::ExampleLayer()
-	: Saba::Layer("ExampleLayer"), m_CameraControler(16.0f / 9.0f)
+	: Saba::Layer("ExampleLayer"), m_CameraControler(16.0f / 9.0f), m_ParticleSystem(25000)
 {
 }
 ExampleLayer::~ExampleLayer()
@@ -43,24 +43,22 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	m_CameraControler.OnUpdate(ts);
 
 	Saba::RenderCommand::Clear();
+	Saba::Renderer2D::ResetStats();
 
 	Saba::Renderer2D::BeginScene(m_CameraControler.GetCamera().GetViewProjectionMat());
-
 	Saba::Renderer2D::DrawQuad({ -5.0f, -5.0f }, { 10.0f, 10.0f }, m_Texture);
 
 	for (float y = 0.0f; y < 10.0; y += 0.1f)
 	{
 		for (float x = 0.0f; x < 10.0f; x += 0.1f)
 		{
-			Saba::Renderer2D::DrawQuad({ x - 5.0f, y - 5.0f }, { 0.09f, 0.09f }, {x / 10.0f, y / 10.0f, 1.0f, 1.0f});
+			Saba::Renderer2D::DrawQuad({ x - 5.0f + 0.01f, y - 5.0f + 0.01f }, { 0.08f, 0.08f }, {x / 10.0f, y / 10.0f, 1.0f, 1.0f});
 		}
 	}
-
 	Saba::Renderer2D::EndScene();
 	Saba::Renderer2D::Flush();
 
 	Saba::Renderer::BeginScene(m_CameraControler.GetCamera());
-
 	if (m_EnableParticles)
 	{
 		if (Saba::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -82,7 +80,6 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 		m_ParticleSystem.OnUpdate(ts);
 		m_ParticleSystem.OnRender();
 	}
-
 	Saba::Renderer::EndScene();
 }
 void ExampleLayer::OnImGuiRender()
@@ -91,6 +88,12 @@ void ExampleLayer::OnImGuiRender()
 	bool vsync = Saba::Application::Get()->GetWindow()->IsVSync();
 	ImGui::Checkbox("Set VSync", &vsync);
 	Saba::Application::Get()->GetWindow()->SetVSync(vsync);
+
+	ImGui::Text("");
+
+	ImGui::Text("Renderer2D stats:");
+	ImGui::Text("\tQuads: %d", Saba::Renderer2D::GetStats().quadCount);
+	ImGui::Text("\tDraw calls: %d", Saba::Renderer2D::GetStats().drawCalls);
 
 	ImGui::Text("");
 

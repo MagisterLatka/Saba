@@ -16,6 +16,7 @@ namespace Saba {
 	};
 
 	ParticleSystem::ParticleSystem(uint32_t maxParticles)
+		: m_Index(maxParticles - 1)
 	{
 		m_Particles.resize(maxParticles);
 		m_Buffer = (float*)malloc(m_Particles.size() * 4 * sizeof(VertexData));
@@ -27,11 +28,21 @@ namespace Saba {
 
 	void ParticleSystem::OnUpdate(Timestep ts)
 	{
-		m_ActiveParticleCount = 0;
+		m_FirstActive = -1; m_LastActive = -1;
+		uint32_t current = 0;
 		for (Particle& particle : m_Particles)
 		{
 			if (!particle.Active)
+			{
+				current++;
 				continue;
+			}
+
+			if (m_FirstActive == -1)
+				m_FirstActive = current;
+			m_LastActive = current;
+
+			current++;
 
 			if (particle.LifeCounter <= 0.0f)
 			{
@@ -39,7 +50,6 @@ namespace Saba {
 				continue;
 			}
 
-			m_ActiveParticleCount++;
 			particle.LifeCounter -= (float)ts;
 			particle.Position += particle.Velocity * (float)ts;
 			particle.Rotation += 0.01f * (float)ts;
@@ -80,11 +90,13 @@ namespace Saba {
 			m_Shader = Shader::Create("assets/shaders/particle.glsl");
 		}
 
-		if (m_ActiveParticleCount)
+		if (m_FirstActive != -1)
 		{
 			VertexData* at = (VertexData*)m_Buffer;
-			for (auto& particle : m_Particles)
+			at += (long long)m_FirstActive * 4;
+			for (uint32_t i = m_FirstActive; i <= m_LastActive; i++)
 			{
+				auto& particle = m_Particles[i];
 				if (!particle.Active)
 				{
 					at->color.a = 0.0f;
@@ -98,7 +110,7 @@ namespace Saba {
 					continue;
 				}
 
-				static glm::vec4 data[4] = {
+				constexpr glm::vec4 data[4] = {
 					{-0.5f, -0.5f, 0.0f, 1.0f},
 					{ 0.5f, -0.5f, 0.0f, 1.0f},
 					{ 0.5f,  0.5f, 0.0f, 1.0f},
@@ -128,7 +140,7 @@ namespace Saba {
 				at++;
 			}
 			m_VAO->GetVertexBuffers()[0]->Bind();
-			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer, (uint32_t)m_Particles.size() * 4 * sizeof(VertexData), 0);
+			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 28LL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));
 
 			Renderer::Submit(m_Shader, m_VAO);
 		}

@@ -7,8 +7,8 @@
 
 namespace Saba {
 
-	const uint32_t c_MaxQuadCount = 32768;
-	const uint8_t c_MaxTextures = 32;
+	constexpr uint32_t c_MaxQuadCount = 10000;
+	constexpr uint8_t c_MaxTextures = 32;
 
 	struct VertexData
 	{
@@ -23,6 +23,7 @@ namespace Saba {
 		Ref<Shader> shader;
 		Ref<VertexArray> vertexArray;
 		uint32_t quadCount = 0;
+		glm::mat4 viewProjMat;
 
 		VertexData* buffer = new VertexData[c_MaxQuadCount * 4];
 		VertexData* at = buffer;
@@ -30,7 +31,7 @@ namespace Saba {
 		std::array<Ref<Texture2D>, c_MaxTextures> textures;
 		uint8_t texIndex = 1;
 
-		glm::mat4 viewProjMat;
+		Renderer2D::Stats stats;
 	};
 	static Renderer2DData* s_RendererData = nullptr;
 
@@ -55,7 +56,7 @@ namespace Saba {
 			{"i_TexID", ShaderDataType::Float}
 		});
 		s_RendererData->vertexArray->AddVertexBuffer(vbo);
-		
+
 		uint32_t* indices = (uint32_t*)malloc(c_MaxQuadCount * 6 * sizeof(uint32_t));
 		uint32_t offset = 0;
 		for (int i = 0; i < c_MaxQuadCount * 6; i += 6)
@@ -100,6 +101,7 @@ namespace Saba {
 	}
 	void Renderer2D::EndScene()
 	{
+		s_RendererData->vertexArray->GetVertexBuffers()[0]->Bind();
 		s_RendererData->vertexArray->GetVertexBuffers()[0]->SetData(s_RendererData->buffer, s_RendererData->quadCount * 4 * sizeof(VertexData), 0);
 		s_RendererData->texIndex = 1;
 	}
@@ -119,6 +121,7 @@ namespace Saba {
 		s_RendererData->vertexArray->Bind();
 		RenderCommand::DrawIndexed(s_RendererData->quadCount * 6);
 
+		s_RendererData->stats.drawCalls++;
 		s_RendererData->quadCount = 0;
 		for (int i = 1; i < c_MaxTextures; i++)
 			s_RendererData->textures[i].reset();
@@ -158,6 +161,7 @@ namespace Saba {
 		s_RendererData->at++;
 
 		s_RendererData->quadCount++;
+		s_RendererData->stats.quadCount++;
 	}
 	void Renderer2D::DrawQuad(glm::vec2 pos, glm::vec2 size, Ref<Texture2D> texture)
 	{
@@ -209,6 +213,17 @@ namespace Saba {
 		s_RendererData->at++;
 
 		s_RendererData->quadCount++;
+		s_RendererData->stats.quadCount++;
 	}
 
+	void Renderer2D::ResetStats()
+	{
+		s_RendererData->stats.drawCalls = 0;
+		s_RendererData->stats.quadCount = 0;
+	}
+
+	const Renderer2D::Stats& Renderer2D::GetStats()
+	{
+		return s_RendererData->stats;
+	}
 }
