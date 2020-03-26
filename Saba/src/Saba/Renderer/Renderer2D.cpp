@@ -47,7 +47,7 @@ namespace Saba {
 		}
 
 		s_RendererData->vertexArray = VertexArray::Create();
-		Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), Stream);
+		Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), Dynamic);
 		vbo->SetLayout({
 			{"i_Pos", ShaderDataType::Float3},
 			{"i_UV", ShaderDataType::Float2},
