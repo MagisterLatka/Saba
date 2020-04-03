@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Renderer2D.h"
 
-#include "Shader.h"
 #include "VertexArray.h"
 #include "Renderer.h"
 
@@ -20,10 +19,8 @@ namespace Saba {
 
 	struct Renderer2DData
 	{
-		Ref<Shader> shader;
 		Ref<VertexArray> vertexArray;
 		uint32_t quadCount = 0;
-		glm::mat4 viewProjMat;
 
 		VertexData* buffer = new VertexData[c_MaxQuadCount * 4];
 		VertexData* at = buffer;
@@ -78,13 +75,6 @@ namespace Saba {
 		s_RendererData->textures[0] = Texture2D::Create(1, 1);
 		uint32_t texData = 0xffffffff;
 		s_RendererData->textures[0]->SetData(&texData, sizeof(uint32_t));
-
-		s_RendererData->shader = Shader::Create("assets/shaders/2D.glsl");
-		s_RendererData->shader->Bind();
-		int texIDs[c_MaxTextures];
-		for (int i = 0; i < c_MaxTextures; i++)
-			texIDs[i] = i;
-		s_RendererData->shader->SetUniformInt1v("u_Textures", texIDs, c_MaxTextures);
 	}
 	void Renderer2D::Shutdown()
 	{
@@ -92,12 +82,9 @@ namespace Saba {
 		delete s_RendererData;
 	}
 
-	void Renderer2D::BeginScene(const glm::mat4& viewProjMat)
+	void Renderer2D::BeginScene()
 	{
 		s_RendererData->at = s_RendererData->buffer;
-		s_RendererData->viewProjMat = viewProjMat;
-		s_RendererData->shader->Bind();
-		s_RendererData->shader->SetUniformMat4("u_ViewProjMat", viewProjMat);
 	}
 	void Renderer2D::EndScene()
 	{
@@ -137,7 +124,7 @@ namespace Saba {
 		{
 			EndScene();
 			Flush();
-			BeginScene(s_RendererData->viewProjMat);
+			BeginScene();
 		}
 
 		s_RendererData->at->pos = pos;
@@ -173,7 +160,7 @@ namespace Saba {
 		{
 			EndScene();
 			Flush();
-			BeginScene(s_RendererData->viewProjMat);
+			BeginScene();
 		}
 
 		float tid = 0.0f;

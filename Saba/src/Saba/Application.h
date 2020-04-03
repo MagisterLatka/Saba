@@ -18,6 +18,8 @@ namespace Saba {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
+		void Close();
+
 		inline const Ref<Window>& GetWindow() const { return m_Window; }
 
 		static Application* Get() { return s_Application; }

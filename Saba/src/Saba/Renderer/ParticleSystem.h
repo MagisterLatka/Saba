@@ -2,7 +2,6 @@
 
 #include "Saba\Timestep.h"
 #include "VertexArray.h"
-#include "Shader.h"
 
 namespace Saba {
 
@@ -45,7 +44,6 @@ namespace Saba {
 
 		Ref<VertexArray> m_VAO;
 		float* m_Buffer;
-		Ref<Shader> m_Shader;
 	};
 
 }

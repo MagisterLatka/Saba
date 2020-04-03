@@ -13,9 +13,11 @@ public:
 	virtual void OnImGuiRender() override;
 private:
 	Saba::Ref<Saba::Texture2D> m_Texture;
+	Saba::Ref<Saba::Shader> m_2DShader;
 
 	Saba::OrthographicCameraControler m_CameraControler;
 
+	Saba::Ref<Saba::Shader> m_ParticleShader;
 	Saba::ParticleSystem m_ParticleSystem;
 	Saba::ParticleProps m_Particle;
 	bool m_EnableParticles = false;

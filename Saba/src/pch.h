@@ -12,9 +12,7 @@
 
 #include <glm\glm.hpp>
 
-#include "Saba\Log.h"
-
-#define uint unsigned int
+#include <Saba\Log.h>
 
 #define BIT(x) (1 << x)
 #define SB_BIND_EVENT_FUNC(x) std::bind(&x, this, std::placeholders::_1)

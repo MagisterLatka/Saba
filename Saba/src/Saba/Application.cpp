@@ -65,6 +65,11 @@ namespace Saba {
 		m_LayerStack->PushOverlay(overlay);
 	}
 
+	void Application::Close()
+	{
+		m_Running = false;
+	}
+
 	void Application::OnEvent(Event& event)
 	{
 		Dispatcher dispatcher(event);

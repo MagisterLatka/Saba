@@ -14,7 +14,7 @@ namespace Saba {
 		
 		static float Float()
 		{
-			return (float)s_Distribution(s_RandomEngine) / (float)std::numeric_limits<uint>::max();
+			return (float)s_Distribution(s_RandomEngine) / (float)std::numeric_limits<unsigned int>::max();
 		}
 	private:
 		static std::mt19937 s_RandomEngine;

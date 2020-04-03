@@ -36,7 +36,7 @@ namespace Saba {
 
 		int GetUniformLocation(const std::string& name);
 	private:
-		uint m_ID;
+		unsigned int m_ID;
 		std::unordered_map<std::string, int> m_UniformLocations;
 	};
 

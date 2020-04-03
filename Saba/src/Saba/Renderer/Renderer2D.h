@@ -11,7 +11,7 @@ namespace Saba {
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const glm::mat4& camera);
+		static void BeginScene();
 		static void EndScene();
 		static void Flush();
 

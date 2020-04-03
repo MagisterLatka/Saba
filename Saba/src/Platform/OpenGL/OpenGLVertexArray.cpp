@@ -5,7 +5,7 @@
 
 namespace Saba {
 
-	static uint ShaderDataTypeToOpenGLBaseType(Saba::ShaderDataType type)
+	static unsigned int ShaderDataTypeToOpenGLBaseType(Saba::ShaderDataType type)
 	{
 		switch (type)
 		{

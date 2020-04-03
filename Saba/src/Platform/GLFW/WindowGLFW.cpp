@@ -97,7 +97,7 @@ namespace Saba {
 				}
 			}
 		});
-		glfwSetCharCallback(m_Window, [](GLFWwindow* window, uint key)
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int key)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 

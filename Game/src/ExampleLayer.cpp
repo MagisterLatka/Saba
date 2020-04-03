@@ -1,9 +1,8 @@
-#include "pch.h"
+#include <pch.h>
 #include <Saba.h>
 #include "ExampleLayer.h"
-#include <GLAD\include\glad\glad.h>
-#include <imgui/imgui.h>
 
+#include <imgui/imgui.h>
 #include <GLFW\include\GLFW\glfw3.h>
 
 ExampleLayer::ExampleLayer()
@@ -17,6 +16,17 @@ ExampleLayer::~ExampleLayer()
 void ExampleLayer::OnAttach()
 {
 	m_Texture = Saba::Texture2D::Create("assets/textures/checkerboard.png");
+
+
+	m_2DShader = Saba::Shader::Create("assets/shaders/2D.glsl");
+	m_2DShader->Bind();
+	int texIDs[] = {
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	};
+	m_2DShader->SetUniformInt1v("u_Textures", texIDs, 32);
+
+
+	m_ParticleShader = Saba::Shader::Create("assets/shaders/particle.glsl");
 
 
 	m_Particle.ColorBegin = glm::vec4(0.8f, 0.3f, 0.3f, 1.0f);
@@ -45,7 +55,9 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::RenderCommand::Clear();
 	Saba::Renderer2D::ResetStats();
 
-	Saba::Renderer2D::BeginScene(m_CameraControler.GetCamera().GetViewProjectionMat());
+	m_2DShader->Bind();
+	m_2DShader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
+	Saba::Renderer2D::BeginScene();
 	Saba::Renderer2D::DrawQuad({ -5.0f, -5.0f }, { 10.0f, 10.0f }, m_Texture);
 
 	for (float y = 0.0f; y < 10.0; y += 0.1f)
@@ -58,7 +70,6 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::Renderer2D::EndScene();
 	Saba::Renderer2D::Flush();
 
-	Saba::Renderer::BeginScene(m_CameraControler.GetCamera());
 	if (m_EnableParticles)
 	{
 		if (Saba::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -77,10 +88,11 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 				m_ParticleSystem.Emit(m_Particle);
 		}
 
+		m_ParticleShader->Bind();
+		m_ParticleShader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
 		m_ParticleSystem.OnUpdate(ts);
 		m_ParticleSystem.OnRender();
 	}
-	Saba::Renderer::EndScene();
 }
 void ExampleLayer::OnImGuiRender()
 {
