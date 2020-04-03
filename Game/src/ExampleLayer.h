@@ -12,11 +12,10 @@ public:
 	virtual void OnUpdate(Saba::Timestep ts) override;
 	virtual void OnImGuiRender() override;
 private:
+	bool OnKeyPress(Saba::KeyPressedEvent& e);
+private:
 	Saba::Ref<Saba::Texture2D> m_Texture;
+	Saba::Ref<Saba::Shader> m_Shader;
 
-	Saba::OrthographicCameraControler m_CameraControler;
-
-	Saba::ParticleSystem m_ParticleSystem;
-	Saba::ParticleProps m_Particle;
-	bool m_EnableParticles = false;
+	Saba::PerspectiveCameraControler m_CameraControler;
 };

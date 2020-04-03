@@ -1,10 +1,11 @@
 #pragma once
 
 #include "RenderCommand.h"
-#include "OrthographicCamera.h"
+#include "Cameras\OrthographicCamera.h"
 #include "Shader.h"
 
 #include "Renderer2D.h"
+#include "Renderer3D.h"
 
 namespace Saba {
 

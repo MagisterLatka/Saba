@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Texture.h"
-#include "OrthographicCamera.h"
 
 namespace Saba {
 

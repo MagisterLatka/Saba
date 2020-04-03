@@ -22,6 +22,9 @@ namespace Saba {
 		void SetVSync(bool isVSync) override;
 		bool IsVSync() const override;
 
+		virtual void SetCursor(bool enabled) override;
+		inline virtual bool IsCursorEnabled() const override { return m_IsCursorEnabled; }
+
 		inline virtual void* GetNativeWindow() const { return m_Window; }
 	private:
 		void Init(const WindowProps& props);
@@ -29,6 +32,7 @@ namespace Saba {
 	private:
 		GLFWwindow* m_Window;
 		Scope<GraphicsContext> m_Context;
+		bool m_IsCursorEnabled = false;
 
 		struct WindowData
 		{

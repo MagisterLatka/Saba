@@ -29,6 +29,9 @@ namespace Saba {
 		virtual void SetVSync(bool vsync) = 0;
 		virtual bool IsVSync() const = 0;
 
+		virtual void SetCursor(bool enabled) = 0;
+		virtual bool IsCursorEnabled() const = 0;
+
 		virtual void* GetNativeWindow() const = 0;
 
 		static Ref<Window> Create(const WindowProps& props = WindowProps());

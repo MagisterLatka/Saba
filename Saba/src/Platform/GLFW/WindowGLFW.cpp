@@ -44,6 +44,12 @@ namespace Saba {
 	{
 		return m_Data.vSync;
 	}
+	void WindowGLFW::SetCursor(bool enabled)
+	{
+		m_IsCursorEnabled = enabled;
+		if (enabled) glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		else glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
 	void WindowGLFW::SetEventCallback(const EventCallbackFN& func)
 	{
 		m_Data.eventCallback = func;
@@ -70,6 +76,9 @@ namespace Saba {
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
+		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		if (glfwRawMouseMotionSupported())
+			glfwSetInputMode(m_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
