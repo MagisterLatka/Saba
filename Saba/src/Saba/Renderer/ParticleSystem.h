@@ -18,6 +18,8 @@ namespace Saba {
 	{
 	public:
 		ParticleSystem(uint32_t maxParticles = 10000);
+		ParticleSystem(const ParticleSystem&) = delete;
+		ParticleSystem& operator=(const ParticleSystem&) = delete;
 		~ParticleSystem();
 
 		void OnUpdate(Timestep ts);

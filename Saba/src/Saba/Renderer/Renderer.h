@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RenderCommand.h"
-#include "OrthographicCamera.h"
+#include "Camera\OrthographicCamera.h"
 #include "Shader.h"
 
 #include "Renderer2D.h"
