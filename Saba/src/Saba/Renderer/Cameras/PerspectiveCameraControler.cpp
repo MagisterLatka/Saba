@@ -29,6 +29,11 @@ namespace Saba {
 		m_Pitch = pitch;
 	}
 
+	void PerspectiveCameraControler::SetMovementSpeed(float speed)
+	{
+		m_CameraMovementSpeed = speed;
+	}
+
 	void PerspectiveCameraControler::OnUpdate(Timestep ts)
 	{
 		if (Input::IsKeyPressed(GLFW_KEY_W))

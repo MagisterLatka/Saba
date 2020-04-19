@@ -20,8 +20,11 @@
 #include <Saba\Renderer\AssetsManager.h>
 #include <Saba\Renderer\Renderer.h>
 #include <Saba\Renderer\RenderCommand.h>
-#include <Saba\Renderer\Renderer2D.h>
-#include <Saba\Renderer\Renderer3D.h>
+#include <Saba\Renderer\2D\Renderer2D.h>
+#include <Saba\Renderer\3D\Renderer3D.h>
 #include <Saba\Renderer\Cameras\OrthographicCameraControler.h>
 #include <Saba\Renderer\Cameras\PerspectiveCameraControler.h>
 #include <Saba\Renderer\ParticleSystem.h>
+
+#include <Saba\Renderer\3D\Scene3D.h>
+#include <Saba\Renderer\3D\Cube.h>

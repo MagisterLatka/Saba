@@ -4,8 +4,8 @@
 #include "Cameras\OrthographicCamera.h"
 #include "Shader.h"
 
-#include "Renderer2D.h"
-#include "Renderer3D.h"
+#include "2D\Renderer2D.h"
+#include "3D\Renderer3D.h"
 
 namespace Saba {
 

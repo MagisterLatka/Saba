@@ -27,6 +27,9 @@ namespace Saba {
 		void EnableRotation(bool enable) { m_EnableRotation = enable; }
 		inline bool IsRotationEnabled() const { return m_EnableRotation; }
 
+		void SetMovementSpeed(float speed);
+		inline float GetMovementSpeed() const { return m_CameraMovementSpeed; }
+
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 	private:

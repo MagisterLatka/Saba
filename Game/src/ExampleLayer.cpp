@@ -25,6 +25,8 @@ void ExampleLayer::OnAttach()
 
 	Saba::TextureManager::Add2D("brick", "assets/textures/brick.jpg");
 
+	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, {1.0f, 0.0f, 0.0f}, Saba::TextureManager::Get2D("brick")));
+
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
 void ExampleLayer::OnDetach()
@@ -39,6 +41,12 @@ void ExampleLayer::OnEvent(Saba::Event& event)
 void ExampleLayer::OnUpdate(Saba::Timestep ts)
 {
 	m_CameraControler.OnUpdate(ts);
+	if (Saba::Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
+		m_CameraControler.SetMovementSpeed(1.0f);
+	else if (Saba::Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
+		m_CameraControler.SetMovementSpeed(10.0f);
+	else
+		m_CameraControler.SetMovementSpeed(5.0f);
 
 	Saba::RenderCommand::Clear();
 	Saba::Renderer3D::ResetStats();
@@ -47,12 +55,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::ShaderManager::Get("3d")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetProjectionViewMatrix());
 
 	Saba::Renderer3D::BeginScene();
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 2.0f }, { 0.0f, 1.0f, 2.0f }}, Saba::TextureManager::Get2D("brick"));
-	Saba::Renderer3D::DrawQuad({ glm::vec3(1.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 3.0f }, { 1.0f, 1.0f, 3.0f }, { 1.0f, 1.0f, 2.0f }}, Saba::TextureManager::Get2D("brick"));
-	Saba::Renderer3D::DrawQuad({ glm::vec3(1.0f, 0.0f, 3.0f), { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 3.0f }, { 1.0f, 1.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 3.0f), { 0.0f, 0.0f, 2.0f }, { 0.0f, 1.0f, 2.0f }, { 0.0f, 1.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 2.0f }, { 1.0f, 0.0f, 3.0f }, { 0.0f, 0.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 1.0f, 2.0f), { 1.0f, 1.0f, 2.0f }, { 1.0f, 1.0f, 3.0f }, { 0.0f, 1.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
+	m_Scene.DrawAll();
 	Saba::Renderer3D::EndScene();
 	Saba::Renderer3D::Flush();
 }

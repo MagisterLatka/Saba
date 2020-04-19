@@ -15,4 +15,5 @@ private:
 	bool OnKeyPress(Saba::KeyPressedEvent& e);
 private:
 	Saba::PerspectiveCameraControler m_CameraControler;
+	Saba::Scene3D m_Scene;
 };

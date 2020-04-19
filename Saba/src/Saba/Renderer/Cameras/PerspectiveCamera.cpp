@@ -43,8 +43,8 @@ namespace Saba {
 	void PerspectiveCamera::SetRotation(glm::vec3 dir)
 	{
 		m_Direction = glm::normalize(dir);
-		m_Pitch = glm::degrees(glm::cosh(dir.y));
-		m_Yaw = glm::degrees(glm::cosh(m_Direction.z / glm::cos(glm::radians(m_Pitch))));
+		m_Pitch = glm::degrees(glm::acos(dir.y));
+		m_Yaw = glm::degrees(glm::acos(m_Direction.z / glm::cos(glm::radians(m_Pitch))));
 		CalculateVectors();
 		Recaulculate();
 	}
