@@ -33,9 +33,9 @@ namespace Saba {
 		if (m_Pitch < -89.9f) m_Pitch = -89.9f;
 		if (m_Pitch >  89.9f) m_Pitch =  89.9f;
 
-		m_Direction.x = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+		m_Direction.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
 		m_Direction.y = glm::sin(glm::radians(pitch));
-		m_Direction.z = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+		m_Direction.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
 		CalculateVectors();
 		Recaulculate();
 	}

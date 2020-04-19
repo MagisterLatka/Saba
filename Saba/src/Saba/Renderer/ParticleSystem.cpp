@@ -86,8 +86,6 @@ namespace Saba {
 			Ref<IndexBuffer> ibo = IndexBuffer::Create(indices, (uint32_t)m_Particles.size() * 6);
 			delete[] indices;
 			m_VAO->SetIndexBuffer(ibo);
-
-			m_Shader = Shader::Create("assets/shaders/particle.glsl");
 		}
 
 		if (m_FirstActive != -1)
@@ -142,7 +140,8 @@ namespace Saba {
 			m_VAO->GetVertexBuffers()[0]->Bind();
 			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 28LL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));
 
-			Renderer::Submit(m_Shader, m_VAO);
+			m_VAO->Bind();
+			RenderCommand::DrawIndexed(m_VAO);
 		}
 	}
 

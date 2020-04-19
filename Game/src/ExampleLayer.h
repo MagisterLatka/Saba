@@ -14,8 +14,5 @@ public:
 private:
 	bool OnKeyPress(Saba::KeyPressedEvent& e);
 private:
-	Saba::Ref<Saba::Texture2D> m_Texture;
-	Saba::Ref<Saba::Shader> m_Shader;
-
 	Saba::PerspectiveCameraControler m_CameraControler;
 };

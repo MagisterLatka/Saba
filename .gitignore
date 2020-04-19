@@ -1,6 +1,8 @@
 .vs/
 bin-int/
 
+*.ini
+*.lib
 *.ilk
 *.pdb
 *.user

@@ -74,7 +74,8 @@ namespace Saba {
 	{
 		if (m_EnableRotation)
 		{
-			float xoffset = m_LastMouseX - e.GetXPos();
+			//float xoffset = m_LastMouseX - e.GetXPos();
+			float xoffset = e.GetXPos() - m_LastMouseX;
 			float yoffset = m_LastMouseY - e.GetYPos();
 
 			m_Yaw += xoffset * m_MouseSensivity;

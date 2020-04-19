@@ -15,14 +15,15 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	m_Shader = Saba::Shader::Create("assets/shaders/3d.glsl");
-	m_Shader->Bind();
+	Saba::Ref<Saba::Shader> shader = Saba::Shader::Create("assets/shaders/3d.glsl");
+	Saba::ShaderManager::Add("3d", shader);
+	shader->Bind();
 	int texIDs[] = {
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 	};
-	m_Shader->SetUniformInt1v("u_Tex", texIDs, 32);
+	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
-	m_Texture = Saba::Texture2D::Create("assets/textures/brick.jpg");
+	Saba::TextureManager::Add2D("brick", "assets/textures/brick.jpg");
 
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
@@ -42,16 +43,16 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::RenderCommand::Clear();
 	Saba::Renderer3D::ResetStats();
 
-	m_Shader->Bind();
-	m_Shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetProjectionViewMatrix());
+	Saba::ShaderManager::Get("3d")->Bind();
+	Saba::ShaderManager::Get("3d")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetProjectionViewMatrix());
 
 	Saba::Renderer3D::BeginScene();
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 2.0f }, { 0.0f, 1.0f, 2.0f }}, m_Texture);
-	Saba::Renderer3D::DrawQuad({ glm::vec3(1.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 3.0f }, { 1.0f, 1.0f, 3.0f }, { 1.0f, 1.0f, 2.0f }}, m_Texture);
-	Saba::Renderer3D::DrawQuad({ glm::vec3(1.0f, 0.0f, 3.0f), { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 3.0f }, { 1.0f, 1.0f, 3.0f }}, m_Texture);
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 3.0f), { 0.0f, 0.0f, 2.0f }, { 0.0f, 1.0f, 2.0f }, { 0.0f, 1.0f, 3.0f }}, m_Texture);
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 2.0f }, { 1.0f, 0.0f, 3.0f }, { 0.0f, 0.0f, 3.0f }}, m_Texture);
-	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 1.0f, 2.0f), { 1.0f, 1.0f, 2.0f }, { 1.0f, 1.0f, 3.0f }, { 0.0f, 1.0f, 3.0f }}, m_Texture);
+	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 2.0f }, { 0.0f, 1.0f, 2.0f }}, Saba::TextureManager::Get2D("brick"));
+	Saba::Renderer3D::DrawQuad({ glm::vec3(1.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 3.0f }, { 1.0f, 1.0f, 3.0f }, { 1.0f, 1.0f, 2.0f }}, Saba::TextureManager::Get2D("brick"));
+	Saba::Renderer3D::DrawQuad({ glm::vec3(1.0f, 0.0f, 3.0f), { 0.0f, 0.0f, 3.0f }, { 0.0f, 1.0f, 3.0f }, { 1.0f, 1.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
+	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 3.0f), { 0.0f, 0.0f, 2.0f }, { 0.0f, 1.0f, 2.0f }, { 0.0f, 1.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
+	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 0.0f, 2.0f), { 1.0f, 0.0f, 2.0f }, { 1.0f, 0.0f, 3.0f }, { 0.0f, 0.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
+	Saba::Renderer3D::DrawQuad({ glm::vec3(0.0f, 1.0f, 2.0f), { 1.0f, 1.0f, 2.0f }, { 1.0f, 1.0f, 3.0f }, { 0.0f, 1.0f, 3.0f }}, Saba::TextureManager::Get2D("brick"));
 	Saba::Renderer3D::EndScene();
 	Saba::Renderer3D::Flush();
 }
@@ -64,7 +65,7 @@ void ExampleLayer::OnImGuiRender()
 
 	ImGui::Text("");
 
-	ImGui::Text("Renderer2D stats:");
+	ImGui::Text("Renderer3D stats:");
 	ImGui::Text("\tQuads: %d", Saba::Renderer3D::GetStats().quadCount);
 	ImGui::Text("\tDraw calls: %d", Saba::Renderer3D::GetStats().drawCallsOnQuads);
 

@@ -15,8 +15,8 @@ namespace Saba {
 
 		void OnUpdate() override;
 
-		inline uint GetWidth() const override { return m_Data.width; }
-		inline uint GetHeight() const override { return m_Data.height; }
+		inline unsigned int GetWidth() const override { return m_Data.width; }
+		inline unsigned int GetHeight() const override { return m_Data.height; }
 
 		inline void SetEventCallback(const EventCallbackFN& func) override;
 		void SetVSync(bool isVSync) override;
@@ -37,7 +37,7 @@ namespace Saba {
 		struct WindowData
 		{
 			std::string title;
-			uint width, height;
+			unsigned int width, height;
 			bool vSync;
 
 			EventCallbackFN eventCallback;
