@@ -14,6 +14,7 @@ namespace Saba {
 		Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture);
 		//pos of the cube, size of the cube, dir of X+ side and textures (0 for X+, 1 for X-, 2 for Y+, 3 for Y-, 4 for Z+, 5 for Z-)
 		Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, const std::array<Ref<Texture2D>, 6>& textures);
+		~Cube() = default;
 
 		virtual void Draw() override;
 		virtual void SetPos(glm::vec3 pos) override;

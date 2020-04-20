@@ -37,12 +37,12 @@ namespace Saba {
 
 
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, uint32_t count)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, uint32_t count, BufferUsage usage)
 		: m_Count(count)
 	{
 		glCreateBuffers(1, &m_ID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), data, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), data, usage == Static ? GL_STATIC_DRAW : usage == Dynamic ? GL_DYNAMIC_DRAW : usage == Stream ? GL_STREAM_DRAW : 0);
 	}
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
@@ -56,6 +56,11 @@ namespace Saba {
 	void OpenGLIndexBuffer::Unbind() const
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
+	void OpenGLIndexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
+	{
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 	}
 
 }

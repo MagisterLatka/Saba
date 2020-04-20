@@ -13,6 +13,10 @@ namespace Saba {
 		{
 			None = 0, OpenGL
 		};
+		enum RenderTopology
+		{
+			None = 0, Triangles, TriangleStrip
+		};
 	public:
 		virtual void Init() = 0;
 		virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
@@ -20,8 +24,8 @@ namespace Saba {
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 		virtual void Clear() = 0;
 
-		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) = 0;
-		virtual void DrawIndexed(uint32_t indicesCount) = 0;
+		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, RenderTopology topology) = 0;
+		virtual void DrawIndexed(uint32_t indicesCount, RenderTopology topology) = 0;
 
 		inline static API GetAPI() { return s_API; }
 		static Scope<RendererAPI> Create();

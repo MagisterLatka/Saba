@@ -27,13 +27,15 @@ namespace Saba {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
+	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, RendererAPI::RenderTopology topology)
 	{
-		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		unsigned int t = topology == Triangles ? GL_TRIANGLES : topology == TriangleStrip ? GL_TRIANGLE_STRIP : 0;
+		glDrawElements(t, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
-	void OpenGLRendererAPI::DrawIndexed(uint32_t indicesCount)
+	void OpenGLRendererAPI::DrawIndexed(uint32_t indicesCount, RendererAPI::RenderTopology topology)
 	{
-		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr);
+		unsigned int t = topology == Triangles ? GL_TRIANGLES : topology == TriangleStrip ? GL_TRIANGLE_STRIP : 0;
+		glDrawElements(t, indicesCount, GL_UNSIGNED_INT, nullptr);
 	}
 
 }

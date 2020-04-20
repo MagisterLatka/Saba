@@ -22,17 +22,29 @@ namespace Saba {
 		static void EndSceneQuad();
 		static void FlushTriangle();
 
+		static void BeginSceneTriangleStrip();
+		static void EndSceneTriangleStrip();
+		static void FlushTriangleStrip();
+
 		static void DrawTriangle(const std::array<std::pair<glm::vec3, glm::vec2>, 3> & posUV, glm::vec4 color);
 		static void DrawTriangle(const std::array<std::pair<glm::vec3, glm::vec2>, 3> & posUV, Ref<Texture2D> texture);
 		static void DrawQuad(const std::array<glm::vec3, 4> & pos, glm::vec4 color);
 		static void DrawQuad(const std::array<glm::vec3, 4> & pos, Ref<Texture2D> texture);
+		static void DrawTriangleStrip(const std::vector<std::pair<glm::vec3, glm::vec2>>& posUV, const std::vector<uint32_t>& indices, glm::vec4 color);
+		static void DrawTriangleStrip(const std::vector<std::pair<glm::vec3, glm::vec2>>& posUV, const std::vector<uint32_t>& indices, Ref<Texture2D> texture);
 
 		struct Stats
 		{
 			uint32_t triangleCount = 0;
-			uint32_t quadCount = 0;
 			uint32_t drawCallsOnTriangles = 0;
+
+			uint32_t quadCount = 0;
 			uint32_t drawCallsOnQuads = 0;
+
+			uint32_t tsCount = 0;
+			uint32_t tsIndicesCount = 0;
+			uint32_t tsVerticesCount = 0;
+			uint32_t drawCallsOnTS = 0;
 		};
 
 		static void ResetStats();

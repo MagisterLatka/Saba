@@ -25,13 +25,13 @@ namespace Saba {
 			s_API->Clear();
 		}
 		
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, RendererAPI::RenderTopology topology = RendererAPI::Triangles)
 		{
-			s_API->DrawIndexed(vertexArray);
+			s_API->DrawIndexed(vertexArray, topology);
 		}
-		inline static void DrawIndexed(uint32_t indicesCount)
+		inline static void DrawIndexed(uint32_t indicesCount, RendererAPI::RenderTopology topology = RendererAPI::Triangles)
 		{
-			s_API->DrawIndexed(indicesCount);
+			s_API->DrawIndexed(indicesCount, topology);
 		}
 	private:
 		static Scope<RendererAPI> s_API;

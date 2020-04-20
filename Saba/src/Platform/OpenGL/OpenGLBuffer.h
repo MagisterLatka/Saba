@@ -25,11 +25,13 @@ namespace Saba {
 	class OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:
-		OpenGLIndexBuffer(uint32_t* data, uint32_t count);
+		OpenGLIndexBuffer(uint32_t* data, uint32_t count, BufferUsage usage);
 		virtual ~OpenGLIndexBuffer();
 
 		void Bind() const override;
 		void Unbind() const override;
+
+		virtual void SetData(void* data, uint32_t size, uint32_t offset) override;
 
 		inline uint32_t GetCount() const override { return m_Count; }
 	private:
