@@ -33,6 +33,15 @@ namespace Saba {
 		{
 			s_API->DrawIndexed(indicesCount, topology);
 		}
+
+		inline static void DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t instancesCount, RendererAPI::RenderTopology topology = RendererAPI::Triangles)
+		{
+			s_API->DrawIndexedInstanced(vertexArray, instancesCount, topology);
+		}
+		inline static void DrawIndexedInstanced(uint32_t indicesCount, uint32_t instancesCount, RendererAPI::RenderTopology topology = RendererAPI::Triangles)
+		{
+			s_API->DrawIndexedInstanced(indicesCount, instancesCount, topology);
+		}
 	private:
 		static Scope<RendererAPI> s_API;
 	};

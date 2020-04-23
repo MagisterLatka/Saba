@@ -38,11 +38,11 @@ namespace Saba {
 	{
 		if (Input::IsKeyPressed(GLFW_KEY_W))
 		{
-			m_CameraPosition += glm::vec3(m_Camera.GetDirection().x, 0.0f, m_Camera.GetDirection().z) * m_CameraMovementSpeed * (float)ts;
+			m_CameraPosition += glm::normalize(glm::vec3(m_Camera.GetDirection().x, 0.0f, m_Camera.GetDirection().z)) * m_CameraMovementSpeed * (float)ts;
 		}
 		if (Input::IsKeyPressed(GLFW_KEY_S))
 		{
-			m_CameraPosition -= glm::vec3(m_Camera.GetDirection().x, 0.0f, m_Camera.GetDirection().z) * m_CameraMovementSpeed * (float)ts;
+			m_CameraPosition -= glm::normalize(glm::vec3(m_Camera.GetDirection().x, 0.0f, m_Camera.GetDirection().z)) * m_CameraMovementSpeed * (float)ts;
 		}
 		if (Input::IsKeyPressed(GLFW_KEY_D))
 		{

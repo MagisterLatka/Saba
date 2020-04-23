@@ -27,6 +27,9 @@ namespace Saba {
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, RenderTopology topology) = 0;
 		virtual void DrawIndexed(uint32_t indicesCount, RenderTopology topology) = 0;
 
+		virtual void DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t instancesCount, RenderTopology topology) = 0;
+		virtual void DrawIndexedInstanced(uint32_t indicesCount, uint32_t instancesCount, RenderTopology topology) = 0;
+
 		inline static API GetAPI() { return s_API; }
 		static Scope<RendererAPI> Create();
 	private:

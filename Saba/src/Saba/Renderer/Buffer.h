@@ -35,10 +35,11 @@ namespace Saba {
 		uint32_t Size;
 		size_t Offset;
 		bool Normalized;
+		int AttribDivisor;
 
 		BufferElement() = default;
-		BufferElement(const std::string& name, ShaderDataType type, bool normalized = false)
-			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
+		BufferElement(const std::string& name, ShaderDataType type, int attribDivisor = 0, bool normalized = false)
+			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), AttribDivisor(attribDivisor), Normalized(normalized)
 		{
 		}
 

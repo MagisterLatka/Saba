@@ -15,6 +15,9 @@ namespace Saba {
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, RendererAPI::RenderTopology topology) override;
 		virtual void DrawIndexed(uint32_t indicesCount, RendererAPI::RenderTopology topology) override;
+
+		virtual void DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t instancesCount, RenderTopology topology) override;
+		virtual void DrawIndexedInstanced(uint32_t indicesCount, uint32_t instancesCount, RenderTopology topology) override;
 	};
 
 }

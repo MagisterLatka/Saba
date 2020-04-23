@@ -25,8 +25,11 @@ void ExampleLayer::OnAttach()
 
 	Saba::TextureManager::Add2D("brick", "assets/textures/brick.jpg");
 
-	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, {1.0f, 0.0f, 0.0f}, Saba::TextureManager::Get2D("brick")));
-	m_Scene.Add(new Saba::Sphere(32, { 0.0f, 3.0f, 2.0f }, { 1.5f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
+	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
+	m_Scene.Add(new Saba::Sphere({ 0.0f,  3.0f, 2.0f }, { 1.5f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
+	m_Scene.Add(new Saba::Sphere({ 0.0f, -1.0f, 0.0f }, { 1.0f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }));
+	m_Scene.Add(new Saba::Sphere({ 1.5f,  0.0f, 2.0f }, { 1.0f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
+	m_Scene.Add(new Saba::Sphere({ 0.0f, 1.0f, 2.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
@@ -48,8 +51,6 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 		m_CameraControler.SetMovementSpeed(10.0f);
 	else
 		m_CameraControler.SetMovementSpeed(5.0f);
-
-	m_Scene.Get(1)->Rotate((float)ts, { 0.0f, 1.0f, 0.0f });
 
 	Saba::RenderCommand::Clear();
 	Saba::Renderer3D::ResetStats();
@@ -81,11 +82,13 @@ void ExampleLayer::OnImGuiRender()
 	ImGui::Text("\t\tCount: %d", Saba::Renderer3D::GetStats().quadCount);
 	ImGui::Text("\t\tDraw calls: %d", Saba::Renderer3D::GetStats().drawCallsOnQuads);
 
-	ImGui::Text("\tTriangle Strips:");
-	ImGui::Text("\t\tStrips count: %d", Saba::Renderer3D::GetStats().tsCount);
-	ImGui::Text("\t\tVertices count: %d", Saba::Renderer3D::GetStats().tsVerticesCount);
-	ImGui::Text("\t\tIndices count: %d", Saba::Renderer3D::GetStats().tsIndicesCount);
-	ImGui::Text("\t\tDraw calls: %d", Saba::Renderer3D::GetStats().drawCallsOnQuads);
+	for (int i = 0; i < Saba::Renderer3D::GetStats().modelStats.size(); i++)
+	{
+		ImGui::Text("\tModel (id: %d):", i);
+		ImGui::Text("\t\tVertices count: %d", Saba::Renderer3D::GetStats().modelStats[i].verticesCount);
+		ImGui::Text("\t\tIndices count: %d", Saba::Renderer3D::GetStats().modelStats[i].indicesCount);
+		ImGui::Text("\t\tTimes drawed: %d", Saba::Renderer3D::GetStats().modelStats[i].timesDrawed);
+	}
 
 	ImGui::Text("");
 

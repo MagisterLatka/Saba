@@ -14,6 +14,7 @@ namespace Saba {
 
 		void Add(Scene3DObject* object);
 		inline Scene3DObject* Get(uint32_t id) const { return m_Objects[id]; }
+		inline Scene3DObject* operator[](uint32_t id) const { return m_Objects[id]; }
 
 		void Draw(uint32_t id);
 		void DrawAll();

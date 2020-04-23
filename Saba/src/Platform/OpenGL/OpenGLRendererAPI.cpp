@@ -38,4 +38,16 @@ namespace Saba {
 		glDrawElements(t, indicesCount, GL_UNSIGNED_INT, nullptr);
 	}
 
+	void OpenGLRendererAPI::DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t instancesCount, RenderTopology topology)
+	{
+		unsigned int t = topology == Triangles ? GL_TRIANGLES : topology == TriangleStrip ? GL_TRIANGLE_STRIP : 0;
+		glDrawElementsInstanced(t, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr, instancesCount);
+	}
+
+	void OpenGLRendererAPI::DrawIndexedInstanced(uint32_t indicesCount, uint32_t instancesCount, RenderTopology topology)
+	{
+		unsigned int t = topology == Triangles ? GL_TRIANGLES : topology == TriangleStrip ? GL_TRIANGLE_STRIP : 0;
+		glDrawElementsInstanced(t, indicesCount, GL_UNSIGNED_INT, nullptr, instancesCount);
+	}
+
 }
