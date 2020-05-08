@@ -6,7 +6,7 @@
 
 namespace Saba {
 
-	std::vector<std::tuple<glm::vec3, glm::vec2, glm::vec4, float>> Sphere::s_PosUVColorTID;
+	std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float>> Sphere::s_PosNormalUVColorTID;
 	std::vector<uint32_t> Sphere::s_Indices;
 	uint8_t Sphere::s_ModelID = 255;
 
@@ -18,7 +18,7 @@ namespace Saba {
 		if (s_ModelID == 255)
 		{
 			CreateSphereMesh();
-			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosUVColorTID, s_Indices, {});
+			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices, {});
 		}
 		SetDirection(dir);
 	}
@@ -28,7 +28,7 @@ namespace Saba {
 		if (s_ModelID == 255)
 		{
 			CreateSphereMesh();
-			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosUVColorTID, s_Indices, {});
+			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices, {});
 		}
 		SetDirection(dir);
 	}
@@ -104,7 +104,8 @@ namespace Saba {
 				const float yPos = glm::cos(ySegment * glm::pi<float>());
 				const float zPos = glm::sin(xSegment * 2.0f * glm::pi<float>()) * glm::sin(ySegment * glm::pi<float>());
 
-				s_PosUVColorTID.push_back({
+				s_PosNormalUVColorTID.push_back({
+					{xPos, yPos, zPos},
 					{xPos, yPos, zPos},
 					{xSegment, ySegment},
 					{1.0f, 1.0f, 1.0f, 1.0f},

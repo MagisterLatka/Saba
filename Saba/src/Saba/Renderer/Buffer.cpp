@@ -30,4 +30,15 @@ namespace Saba {
 		return nullptr;
 	}
 
+	Ref<UniformBuffer> UniformBuffer::Create(void* data, uint32_t size, BufferUsage usage)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+			case RendererAPI::API::None:	SB_CORE_ASSERT(false, "None API is not supported"); return nullptr;
+			case RendererAPI::API::OpenGL:	return MakeRef<OpenGLUniformBuffer>(data, size, usage);
+		}
+
+		SB_CORE_ASSERT(false, "Unknown API");
+		return nullptr;
+	}
 }

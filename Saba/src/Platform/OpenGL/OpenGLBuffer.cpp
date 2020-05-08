@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "OpenGLBuffer.h"
 
-#include <glad\glad.h>
-
 namespace Saba {
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(float* data, uint32_t size, BufferUsage usage)
@@ -63,4 +61,35 @@ namespace Saba {
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 	}
 
+
+
+	OpenGLUniformBuffer::OpenGLUniformBuffer(void* data, uint32_t size, BufferUsage usage)
+	{
+		glCreateBuffers(1, &m_ID);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_ID);
+		glBufferData(GL_UNIFORM_BUFFER, size, data, usage == Static ? GL_STATIC_DRAW : usage == Dynamic ? GL_DYNAMIC_DRAW : usage == Stream ? GL_STREAM_DRAW : 0);
+	}
+	OpenGLUniformBuffer::~OpenGLUniformBuffer()
+	{
+		glDeleteBuffers(1, &m_ID);
+	}
+
+	void OpenGLUniformBuffer::Bind() const
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, m_ID);
+	}
+	void OpenGLUniformBuffer::Unbind() const
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	void OpenGLUniformBuffer::SetBinding(uint8_t binding)
+	{
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding, m_ID);
+	}
+
+	void OpenGLUniformBuffer::SetData(void* data, uint32_t size, uint32_t offset)
+	{
+		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+	}
 }

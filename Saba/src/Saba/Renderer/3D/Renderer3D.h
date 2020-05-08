@@ -28,14 +28,14 @@ namespace Saba {
 		static void EndSceneModel(uint8_t modelID);
 		static void FlushModel(uint8_t modelID);
 
-		static void DrawTriangle(const std::array<std::pair<glm::vec3, glm::vec2>, 3> & posUV, glm::vec4 color);
-		static void DrawTriangle(const std::array<std::pair<glm::vec3, glm::vec2>, 3> & posUV, Ref<Texture2D> texture);
+		static void DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posUV, glm::vec4 color);
+		static void DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posUV, Ref<Texture2D> texture);
 
-		static void DrawQuad(const std::array<glm::vec3, 4> & pos, glm::vec4 color);
-		static void DrawQuad(const std::array<glm::vec3, 4> & pos, Ref<Texture2D> texture);
+		static void DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & pos, glm::vec4 color);
+		static void DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & pos, Ref<Texture2D> texture);
 
 		template<class T>
-		inline static void AddModel(RendererAPI::RenderTopology topology, const std::vector<std::tuple<glm::vec3, glm::vec2, glm::vec4, float>>& posUVColorTID, const std::vector<uint32_t>& indices, const std::vector<Ref<Texture2D>>& textures)
+		inline static void AddModel(RendererAPI::RenderTopology topology, const std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float>>& posNormalUVColorTID, const std::vector<uint32_t>& indices, const std::vector<Ref<Texture2D>>& textures)
 		{
 			SB_CORE_ASSERT((textures.size() < c_MaxTextures - 1), "Max textures limit extented");
 
@@ -48,20 +48,22 @@ namespace Saba {
 			s_Data.modelData[id].modelMatBuffer = new ModelVertexBuffer[c_MaxModelInstances];
 			s_Data.modelData[id].at = s_Data.modelData[id].modelMatBuffer;
 
-			VertexData* data = (VertexData*)malloc(posUVColorTID.size() * sizeof(VertexData));
+			VertexData* data = (VertexData*)malloc(posNormalUVColorTID.size() * sizeof(VertexData));
 			VertexData* at = data;
-			for (auto [pos, uv, color, tid] : posUVColorTID)
+			for (auto [pos, normal, uv, color, tid] : posNormalUVColorTID)
 			{
 				at->pos = pos;
+				at->normal = normal;
 				at->uv = uv;
 				at->color = color;
 				at->texID = tid;
 				at++;
 			}
-			Ref<VertexBuffer> vbo = VertexBuffer::Create((float*)data, (uint32_t)(posUVColorTID.size() * sizeof(VertexData)));
+			Ref<VertexBuffer> vbo = VertexBuffer::Create((float*)data, (uint32_t)(posNormalUVColorTID.size() * sizeof(VertexData)));
 			free(data);
 			vbo->SetLayout({
 				{ "i_Pos", ShaderDataType::Float3 },
+				{ "i_Normal", ShaderDataType::Float3 },
 				{ "i_UV", ShaderDataType::Float2 },
 				{ "i_Color", ShaderDataType::Float4 },
 				{ "i_TID", ShaderDataType::Float }
@@ -93,7 +95,7 @@ namespace Saba {
 			s_Data.modelData[id].texIndex = (uint8_t)(textures.size()) + 1;
 
 			s_Data.stats.modelStats.emplace_back();
-			s_Data.stats.modelStats[id].verticesCount = (uint32_t)posUVColorTID.size();
+			s_Data.stats.modelStats[id].verticesCount = (uint32_t)posNormalUVColorTID.size();
 			s_Data.stats.modelStats[id].indicesCount = (uint32_t)indices.size();
 		}
 		static void DrawModel(uint8_t modelID, glm::vec3 pos, glm::vec3 dir = { 1.0f, 0.0f, 0.0f }, glm::vec3 scale = { 1.0f, 1.0f, 1.0f }, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, const std::vector<Ref<Texture2D>>& textures = {});
@@ -126,6 +128,7 @@ namespace Saba {
 		struct VertexData
 		{
 			glm::vec3 pos;
+			glm::vec3 normal;
 			glm::vec2 uv;
 			glm::vec4 color;
 			float texID;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Scene3DObject.h"
+#include "Light.h"
+#include "Saba\Renderer\Buffer.h"
 
 namespace Saba {
 
@@ -18,7 +20,15 @@ namespace Saba {
 
 		void Draw(uint32_t id);
 		void DrawAll();
+
+		void AddLight(Light* light);
+		Light* DeleteLight(uint8_t id);
+		inline Light* GetLight(uint8_t id) const { if (id < c_MaxLights) return m_Lights[id]; return nullptr; }
+		Light::LightData* GetLightsData();
+		Light::LightData* GetLightsData(Light::LightData* bufferPtr);
 	private:
+		constexpr static uint8_t c_MaxLights = 10;
 		std::vector<Scene3DObject*> m_Objects;
+		std::array<Light*, c_MaxLights> m_Lights;
 	};
 }

@@ -5,6 +5,16 @@
 #include <imgui/imgui.h>
 #include <GLFW\include\GLFW\glfw3.h>
 
+struct ViewProjMatBufferData
+{
+	glm::mat4 viewProjMat;
+};
+struct SceneBufferData
+{
+	glm::vec3 viewPos;
+	Saba::Light::LightData lights[10];
+};
+
 ExampleLayer::ExampleLayer()
 	: Saba::Layer("ExampleLayer"), m_CameraControler(16.0f / 9.0f, glm::radians(90.0f), 0.01f, 10.0f)
 {
@@ -23,6 +33,12 @@ void ExampleLayer::OnAttach()
 	};
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
+	Saba::UniformBufferManager::Add("viewProjMat", nullptr, sizeof(ViewProjMatBufferData));
+	Saba::UniformBufferManager::Get("viewProjMat")->SetBinding(0);
+
+	Saba::UniformBufferManager::Add("scene", nullptr, sizeof(SceneBufferData));
+	Saba::UniformBufferManager::Get("scene")->SetBinding(1);
+
 	Saba::TextureManager::Add2D("brick", "assets/textures/brick.jpg");
 
 	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
@@ -30,6 +46,8 @@ void ExampleLayer::OnAttach()
 	m_Scene.Add(new Saba::Sphere({ 0.0f, -1.0f, 0.0f }, { 1.0f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }));
 	m_Scene.Add(new Saba::Sphere({ 1.5f,  0.0f, 2.0f }, { 1.0f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 	m_Scene.Add(new Saba::Sphere({ 0.0f, 1.0f, 2.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
+
+	m_Scene.AddLight(new Saba::DirectionalLight({ 0.0f, -1.0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
 
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
@@ -56,7 +74,16 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::Renderer3D::ResetStats();
 
 	Saba::ShaderManager::Get("3d")->Bind();
-	Saba::ShaderManager::Get("3d")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetProjectionViewMatrix());
+
+	Saba::UniformBufferManager::Get("viewProjMat")->Bind();
+	ViewProjMatBufferData data = { m_CameraControler.GetCamera().GetProjectionViewMatrix() };
+	Saba::UniformBufferManager::Get("viewProjMat")->SetData(&data, sizeof(ViewProjMatBufferData), 0);
+
+	Saba::UniformBufferManager::Get("scene")->Bind();
+	SceneBufferData dataScene = {};
+	dataScene.viewPos = m_CameraControler.GetPosition();
+	m_Scene.GetLightsData(dataScene.lights);
+	Saba::UniformBufferManager::Get("scene")->SetData(&dataScene, sizeof(SceneBufferData), 0);
 
 	Saba::Renderer3D::BeginScene();
 	m_Scene.DrawAll();

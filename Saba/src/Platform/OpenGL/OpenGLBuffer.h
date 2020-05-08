@@ -2,6 +2,8 @@
 
 #include "Saba\Renderer\Buffer.h"
 
+#include <glad\glad.h>
+
 namespace Saba {
 
 	class OpenGLVertexBuffer : public VertexBuffer
@@ -39,4 +41,19 @@ namespace Saba {
 		uint32_t m_Count;
 	};
 
+	class OpenGLUniformBuffer : public UniformBuffer
+	{
+	public:
+		OpenGLUniformBuffer(void* data, uint32_t size, BufferUsage usage);
+		virtual ~OpenGLUniformBuffer();
+
+		void Bind() const override;
+		void Unbind() const override;
+
+		virtual void SetBinding(uint8_t binding) override;
+
+		virtual void SetData(void* data, uint32_t size, uint32_t offset) override;
+	private:
+		uint32_t m_ID;
+	};
 }

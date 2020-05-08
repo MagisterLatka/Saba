@@ -30,6 +30,19 @@ namespace Saba {
 	}
 
 
+	std::unordered_map<std::string, Ref<UniformBuffer>> UniformBufferManager::s_Buffers;
+
+	void UniformBufferManager::Add(const std::string& name, Ref<UniformBuffer> buffer)
+	{
+		SB_CORE_ASSERT((s_Buffers.find(name) == s_Buffers.end()), "Uniform buffer \"{0}\" already exist", name.c_str());
+		s_Buffers[name] = buffer;
+	}
+	void UniformBufferManager::Add(const std::string& name, void* data, uint32_t size, BufferUsage usage)
+	{
+		SB_CORE_ASSERT((s_Buffers.find(name) == s_Buffers.end()), "Uniform buffer \"{0}\" already exist", name.c_str());
+		s_Buffers[name] = UniformBuffer::Create(data, size, usage);
+	}
+
 
 	std::unordered_map<std::string, Ref<Texture2D>> TextureManager::s_Textures2D;
 

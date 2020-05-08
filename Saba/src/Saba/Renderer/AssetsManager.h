@@ -2,6 +2,7 @@
 
 #include "Saba\Renderer\Shader.h"
 #include "Saba\Renderer\Texture.h"
+#include "Saba\Renderer\Buffer.h"
 
 namespace Saba {
 
@@ -17,6 +18,18 @@ namespace Saba {
 																	return s_Shaders[name]; }
 	private:
 		static std::unordered_map<std::string, Ref<Shader>> s_Shaders;
+	};
+
+	class UniformBufferManager
+	{
+	public:
+		static void Add(const std::string& name, Ref<UniformBuffer> buffer);
+		static void Add(const std::string& name, void* data, uint32_t size, BufferUsage usage = Static);
+
+		static inline Ref<UniformBuffer> Get(const std::string& name) { SB_CORE_ASSERT((s_Buffers.find(name) != s_Buffers.end()), "Uniform buffer \"{0}\" does not exist", name.c_str());
+																	return s_Buffers[name]; }
+	private:
+		static std::unordered_map<std::string, Ref<UniformBuffer>> s_Buffers;
 	};
 
 	class TextureManager

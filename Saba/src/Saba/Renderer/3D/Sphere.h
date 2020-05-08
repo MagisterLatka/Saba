@@ -28,7 +28,7 @@ namespace Saba {
 		static void CreateSphereMesh();
 	private:
 		static uint8_t s_ModelID;
-		static std::vector<std::tuple<glm::vec3, glm::vec2, glm::vec4, float>> s_PosUVColorTID;
+		static std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float>> s_PosNormalUVColorTID;
 		static std::vector<uint32_t> s_Indices;
 		glm::vec3 m_Pos;
 		glm::vec3 m_Size;

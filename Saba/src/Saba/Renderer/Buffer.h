@@ -133,4 +133,18 @@ namespace Saba {
 		static Ref<IndexBuffer> Create(uint32_t* data, uint32_t count, BufferUsage usage = BufferUsage::Static);
 	};
 
+	class UniformBuffer
+	{
+	public:
+		virtual ~UniformBuffer() = default;
+
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
+
+		virtual void SetBinding(uint8_t binding) = 0;
+
+		virtual void SetData(void* data, uint32_t size, uint32_t offset) = 0;
+
+		static Ref<UniformBuffer> Create(void* data, uint32_t size, BufferUsage usage = BufferUsage::Static);
+	};	
 }
