@@ -9,8 +9,8 @@ namespace Saba {
 	{
 		friend class Renderer3D;
 	public:
-		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color);
-		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture);
+		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted = true);
+		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted = true);
 		~Sphere() = default;
 
 		virtual void Draw() override;

@@ -8,24 +8,16 @@ namespace Saba {
 
 	uint8_t Cube::s_ModelID = 255;
 
-	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color)
-		: m_Pos(pos), m_Size(size), m_Color(color), m_Textured(false)
+	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(color), m_Textured(false)
 	{
 		if (s_ModelID == 255)
 			CreateModel();
 
 		SetDirection(dir);
 	}
-	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture)
-		: m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Textured(true), m_Textures({ texture, texture, texture, texture, texture, texture })
-	{
-		if (s_ModelID == 255)
-			CreateModel();
-
-		SetDirection(dir);
-	}
-	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, const std::array<Ref<Texture2D>, 6> & textures)
-		: m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Textured(true), m_Textures(textures)
+	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Textured(true), m_Texture(texture)
 	{
 		if (s_ModelID == 255)
 			CreateModel();
@@ -36,14 +28,10 @@ namespace Saba {
 	void Cube::Draw()
 	{
 		const glm::mat4 modelMat = glm::scale(glm::translate(m_RotateFromOrigin, m_Pos) * m_Rotate, m_Size);
-
-		std::vector<Ref<Texture2D>> textures(6);
 		if (m_Textured)
-		{
-			for (int i = 0; i < 6; i++)
-				textures[i] = m_Textures[i];
-		}
-		Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, textures);
+			Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, { m_Texture });
+		else
+			Renderer3D::DrawModel(s_ModelID, modelMat, m_Color);
 	}
 
 	void Cube::SetPos(glm::vec3 pos)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scene3DObject.h"
-#include "Light.h"
+#include "Lights\Light.h"
 #include "Saba\Renderer\Buffer.h"
 
 namespace Saba {
@@ -19,7 +19,8 @@ namespace Saba {
 		inline Scene3DObject* operator[](uint32_t id) const { return m_Objects[id]; }
 
 		void Draw(uint32_t id);
-		void DrawAll();
+		void DrawAllLighted();
+		void DrawAllNotLighted();
 
 		void AddLight(Light* light);
 		Light* DeleteLight(uint8_t id);

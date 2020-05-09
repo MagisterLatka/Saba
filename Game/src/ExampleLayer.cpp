@@ -25,12 +25,17 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	Saba::Ref<Saba::Shader> shader = Saba::Shader::Create("assets/shaders/3d.glsl");
+	Saba::Ref<Saba::Shader> shader = Saba::Shader::Create("assets/shaders/3D.glsl");
 	Saba::ShaderManager::Add("3d", shader);
 	shader->Bind();
 	int texIDs[] = {
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 	};
+	shader->SetUniformInt1v("u_Tex", texIDs, 32);
+
+	shader = Saba::Shader::Create("assets/shaders/3Dnolight.glsl");
+	Saba::ShaderManager::Add("3dnolight", shader);
+	shader->Bind();
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
 	Saba::UniformBufferManager::Add("viewProjMat", nullptr, sizeof(ViewProjMatBufferData));
@@ -47,7 +52,11 @@ void ExampleLayer::OnAttach()
 	m_Scene.Add(new Saba::Sphere({ 1.5f,  0.0f, 2.0f }, { 1.0f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 	m_Scene.Add(new Saba::Sphere({ 0.0f, 1.0f, 2.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 
-	m_Scene.AddLight(new Saba::DirectionalLight({ 0.0f, -1.0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
+	constexpr glm::vec3 lightPos = { 0.0f, 1.0f, 0.0f };
+	m_Scene.Add(new Saba::Sphere(lightPos, { 0.2f, 0.2f, 0.2f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, false));
+	m_Scene.AddLight(new Saba::PointLight(lightPos, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
+
+	m_Scene.AddLight(new Saba::DirectionalLight({ 0.0f, -1.0f, 0.0f }, { 0.8f, 0.8f, 0.8f }));
 
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
@@ -86,7 +95,13 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::UniformBufferManager::Get("scene")->SetData(&dataScene, sizeof(SceneBufferData), 0);
 
 	Saba::Renderer3D::BeginScene();
-	m_Scene.DrawAll();
+	m_Scene.DrawAllLighted();
+	Saba::Renderer3D::EndScene();
+	Saba::Renderer3D::Flush();
+
+	Saba::ShaderManager::Get("3dnolight")->Bind();
+	Saba::Renderer3D::BeginScene();
+	m_Scene.DrawAllNotLighted();
 	Saba::Renderer3D::EndScene();
 	Saba::Renderer3D::Flush();
 }

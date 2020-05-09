@@ -30,4 +30,5 @@
 #include <Saba\Renderer\3D\Cube.h>
 #include <Saba\Renderer\3D\Sphere.h>
 
-#include <Saba\Renderer\3D\DirectionalLight.h>
+#include <Saba\Renderer\3D\Lights\DirectionalLight.h>
+#include <Saba\Renderer\3D\Lights\PointLight.h>

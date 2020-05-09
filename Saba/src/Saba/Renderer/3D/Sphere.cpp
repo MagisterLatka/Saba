@@ -12,8 +12,8 @@ namespace Saba {
 
 	constexpr uint8_t c_Segments = 32;
 
-	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color)
-		: m_Pos(pos), m_Size(size), m_Color(color)
+	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(color)
 	{
 		if (s_ModelID == 255)
 		{
@@ -22,8 +22,8 @@ namespace Saba {
 		}
 		SetDirection(dir);
 	}
-	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture)
-		: m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Texture(texture)
+	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Texture(texture)
 	{
 		if (s_ModelID == 255)
 		{

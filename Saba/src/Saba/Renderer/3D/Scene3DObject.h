@@ -7,7 +7,9 @@ namespace Saba {
 		friend class Scene3D;
 		friend class Renderer3D;
 	public:
-		Scene3DObject() = default;
+		Scene3DObject(bool isLighted)
+			: m_IsLighted(isLighted)
+		{}
 		virtual ~Scene3DObject() = default;
 
 		inline uint32_t GetID() const { return m_ID; }
@@ -22,5 +24,6 @@ namespace Saba {
 		virtual void Scale(glm::vec3 scale) = 0;
 	private:
 		uint32_t m_ID = -1;
+		bool m_IsLighted;
 	};
 }

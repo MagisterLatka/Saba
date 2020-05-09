@@ -59,6 +59,8 @@ struct Light
 	vec3 diffuse;
 	vec3 specular;
 	vec2 cutOffs;
+
+	vec3 attenuation;
 };
 const int c_MaxLights = 10;
 layout(std140, binding = 1) uniform Scene {
@@ -66,7 +68,7 @@ layout(std140, binding = 1) uniform Scene {
 	Light u_Lights[c_MaxLights];
 };
 
-const float c_Ambient = 0.2f;
+const float c_Ambient = 0.1f;
 
 uniform sampler2D u_Tex[32];
 
@@ -96,6 +98,7 @@ vec3 CalcLight(Light light, vec3 pos, vec3 normal, vec3 color, vec3 viewPos)
 		vec3 halfwayDir = normalize(toLight + toView);
 		float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
 		vec3 specular = materialSpec * light.specular * spec;
+
 		return diffuse + specular;
 	}
 	//point light
@@ -109,6 +112,13 @@ vec3 CalcLight(Light light, vec3 pos, vec3 normal, vec3 color, vec3 viewPos)
 		vec3 halfwayDir = normalize(toLight + toView);
 		float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
 		vec3 specular = materialSpec * light.specular * spec;
+
+		float distance = length(toLight);
+		float attenuation = 1.0f / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * distance * distance);
+
+		diffuse *= attenuation;
+		specular *= attenuation;
+
 		return diffuse + specular;
 	}
 	//spot light
@@ -122,6 +132,12 @@ vec3 CalcLight(Light light, vec3 pos, vec3 normal, vec3 color, vec3 viewPos)
 		vec3 halfwayDir = normalize(toLight + toView);
 		float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
 		vec3 specular = materialSpec * light.specular * spec;
+
+		float distance = length(toLight);
+		float attenuation = 1.0f / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * distance * distance);
+
+		diffuse *= attenuation;
+		specular *= attenuation;
 
 		float theta = dot(toLight, normalize(-light.dir.xyz));
 		float epsilon = light.cutOffs.x - light.cutOffs.y;
