@@ -23,7 +23,7 @@ namespace Saba {
 			glm::vec4 pos;
 			glm::vec4 dir;
 			alignas(16) glm::vec3 diffuseColor;
-			alignas(16) glm::vec3 speculatColor;
+			alignas(16) glm::vec3 specularColor;
 			alignas(16) glm::vec2 cutsoff;
 			alignas(16) glm::vec3 attenuation;
 		};

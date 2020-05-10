@@ -139,21 +139,24 @@ namespace Saba {
 	}
 	void Renderer3D::FlushTriangle()
 	{
-		int index = 0;
-		for (Ref<Texture2D> texture : s_Data.texturesTriangle)
+		if (s_Data.triangleCount != 0)
 		{
-			if (texture)
+			int index = 0;
+			for (Ref<Texture2D> texture : s_Data.texturesTriangle)
 			{
-				texture->Bind(index);
-				index++;
+				if (texture)
+				{
+					texture->Bind(index);
+					index++;
+				}
+				else break;
 			}
-			else break;
-		}
 
-		s_Data.vertexArrayTriangle->Bind();
-		RenderCommand::DrawIndexedInstanced(s_Data.triangleCount * 6, 1);
-		s_Data.triangleCount = 0;
-		s_Data.stats.drawCallsOnTriangles++;
+			s_Data.vertexArrayTriangle->Bind();
+			RenderCommand::DrawIndexedInstanced(s_Data.triangleCount * 6, 1);
+			s_Data.triangleCount = 0;
+			s_Data.stats.drawCallsOnTriangles++;
+		}
 	}
 
 	void Renderer3D::BeginSceneModel(uint8_t modelID)
@@ -167,20 +170,23 @@ namespace Saba {
 	}
 	void Renderer3D::FlushModel(uint8_t modelID)
 	{
-		int index = 0;
-		for (auto& texture : s_Data.modelData[modelID].textures)
+		if (s_Data.modelData[modelID].instancesCount != 0)
 		{
-			if (texture)
+			int index = 0;
+			for (auto& texture : s_Data.modelData[modelID].textures)
 			{
-				texture->Bind(index);
-				index++;
+				if (texture)
+				{
+					texture->Bind(index);
+					index++;
+				}
+				else break;
 			}
-			else break;
-		}
 
-		s_Data.modelData[modelID].vertexArray->Bind();
-		RenderCommand::DrawIndexedInstanced(s_Data.modelData[modelID].vertexArray, s_Data.modelData[modelID].instancesCount, s_Data.modelData[modelID].topology);
-		s_Data.modelData[modelID].instancesCount = 0;
+			s_Data.modelData[modelID].vertexArray->Bind();
+			RenderCommand::DrawIndexedInstanced(s_Data.modelData[modelID].vertexArray, s_Data.modelData[modelID].instancesCount, s_Data.modelData[modelID].topology);
+			s_Data.modelData[modelID].instancesCount = 0;
+		}
 	}
 
 	void Renderer3D::BeginSceneQuad()
@@ -195,21 +201,24 @@ namespace Saba {
 	}
 	void Renderer3D::FlushQuad()
 	{
-		int index = 0;
-		for (Ref<Texture2D> texture : s_Data.texturesQuad)
+		if (s_Data.quadCount != 0)
 		{
-			if (texture)
+			int index = 0;
+			for (Ref<Texture2D> texture : s_Data.texturesQuad)
 			{
-				texture->Bind(index);
-				index++;
+				if (texture)
+				{
+					texture->Bind(index);
+					index++;
+				}
+				else break;
 			}
-			else break;
-		}
 
-		s_Data.vertexArrayQuad->Bind();
-		RenderCommand::DrawIndexedInstanced(s_Data.quadCount * 6, 1);
-		s_Data.quadCount = 0;
-		s_Data.stats.drawCallsOnQuads++;
+			s_Data.vertexArrayQuad->Bind();
+			RenderCommand::DrawIndexedInstanced(s_Data.quadCount * 6, 1);
+			s_Data.quadCount = 0;
+			s_Data.stats.drawCallsOnQuads++;
+		}
 	}
 	
 	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, glm::vec4 color)
@@ -437,7 +446,7 @@ namespace Saba {
 		}
 
 		float tid = 0.0f;
-		if (textures[0])
+		if (!textures.empty() && textures[0])
 		{
 			auto it = std::search(s_Data.modelData[modelID].textures.begin(), s_Data.modelData[modelID].textures.end(), textures.begin(), textures.end());
 			if (it != s_Data.modelData[modelID].textures.end())

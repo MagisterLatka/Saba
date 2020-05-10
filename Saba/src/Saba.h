@@ -32,3 +32,4 @@
 
 #include <Saba\Renderer\3D\Lights\DirectionalLight.h>
 #include <Saba\Renderer\3D\Lights\PointLight.h>
+#include <Saba\Renderer\3D\Lights\SpotLight.h>

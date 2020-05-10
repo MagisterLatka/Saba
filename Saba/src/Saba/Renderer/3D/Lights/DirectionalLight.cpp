@@ -32,7 +32,7 @@ namespace Saba {
 		data->pos.w = 0.0f;
 		data->dir = glm::vec4(m_Dir, 1.0f);
 		data->diffuseColor = m_DiffuseColor;
-		data->speculatColor = m_SpecularColor;
+		data->specularColor = m_SpecularColor;
 		data->cutsoff = glm::vec2(0.0f);
 		data->attenuation = glm::vec3(m_AttConstant, m_AttLinear, m_AttQuadratic);
 		return data;
@@ -42,7 +42,7 @@ namespace Saba {
 		bufferPtr->pos.w = 0.0f;
 		bufferPtr->dir = glm::vec4(m_Dir, 1.0f);
 		bufferPtr->diffuseColor = m_DiffuseColor;
-		bufferPtr->speculatColor = m_SpecularColor;
+		bufferPtr->specularColor = m_SpecularColor;
 		bufferPtr->cutsoff = glm::vec2(0.0f);
 		bufferPtr->attenuation = glm::vec3(m_AttConstant, m_AttLinear, m_AttQuadratic);
 		return bufferPtr;

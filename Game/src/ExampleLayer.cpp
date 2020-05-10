@@ -56,6 +56,11 @@ void ExampleLayer::OnAttach()
 	m_Scene.Add(new Saba::Sphere(lightPos, { 0.2f, 0.2f, 0.2f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, false));
 	m_Scene.AddLight(new Saba::PointLight(lightPos, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
 
+	constexpr glm::vec3 lampPos = { 0.0f, -2.0f, 2.0f };
+	constexpr glm::vec3 lampDir = { 0.0f, 1.0f, 0.0f };
+	m_Scene.Add(new Saba::Cube(lampPos, { 1.0f, 0.3f, 0.3f }, lampDir, { 1.0f, 1.0f, 1.0f, 1.0f }, false));
+	m_Scene.AddLight(new Saba::SpotLight(lampPos, lampDir, 7.5f, 15.0f, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
+
 	m_Scene.AddLight(new Saba::DirectionalLight({ 0.0f, -1.0f, 0.0f }, { 0.8f, 0.8f, 0.8f }));
 
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
