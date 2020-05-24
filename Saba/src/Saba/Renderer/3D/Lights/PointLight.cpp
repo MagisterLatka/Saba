@@ -30,7 +30,7 @@ namespace Saba {
 	{
 		LightData* data = new LightData;
 		data->pos = glm::vec4(m_Pos, 1.0f);
-		data->dir.w = 0.0f;
+		data->dir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f); //not vec4(0.0f, 0.0f, 0.0f, 0.0f) because of 0 / 0 when normalizing in shader
 		data->diffuseColor = m_DiffuseColor;
 		data->specularColor = m_SpecularColor;
 		data->cutsoff = glm::vec2(0.0f);
@@ -40,7 +40,7 @@ namespace Saba {
 	Light::LightData* PointLight::GetData(LightData* bufferPtr)
 	{
 		bufferPtr->pos = glm::vec4(m_Pos, 1.0f);
-		bufferPtr->dir.w = 0.0f;
+		bufferPtr->dir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);;
 		bufferPtr->diffuseColor = m_DiffuseColor;
 		bufferPtr->specularColor = m_SpecularColor;
 		bufferPtr->cutsoff = glm::vec2(0.0f);

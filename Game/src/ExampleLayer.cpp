@@ -25,16 +25,36 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	Saba::Ref<Saba::Shader> shader = Saba::Shader::Create("assets/shaders/3D.glsl");
-	Saba::ShaderManager::Add("3d", shader);
+	Saba::TextFile shaders("assets/shaders/shaders.txt", Saba::TextFile::Input | Saba::TextFile::Binary);
+	auto& line = Saba::TextFileReader::GetLine(shaders);
+	do
+	{
+		size_t a = line.first.find(',');
+		if (a == -1)
+		{
+			SB_ERROR("Shaders list syntax error");
+		}
+		std::string name(a, '\0');
+		memcpy(&name[0], line.first.data(), a);
+		size_t b = line.first.find_first_not_of(" \t", a + 1);
+		size_t c = line.first.find_first_of(" \t\0\r\n", b + 1);
+		if (c == -1) c = line.first.size() - 1;
+		std::string path(c - b + 15, '\0');
+		path[0] = 'a'; path[1] = 's'; path[2] = 's'; path[3] = 'e'; path[4] = 't'; path[5] = 's'; path[6] = '/';
+		path[7] = 's'; path[8] = 'h'; path[9] = 'a'; path[10] = 'd'; path[11] = 'e'; path[12] = 'r'; path[13] = 's'; path[14] = '/';
+		memcpy(&path[15], &line.first[b], c - b);
+		Saba::ShaderManager::Add(name, path);
+		line = Saba::TextFileReader::GetLine(shaders);
+	} while (!line.second);
+
+	Saba::Ref<Saba::Shader> shader = Saba::ShaderManager::Get("3d");
 	shader->Bind();
 	int texIDs[] = {
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 	};
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
-	shader = Saba::Shader::Create("assets/shaders/3Dnolight.glsl");
-	Saba::ShaderManager::Add("3dnolight", shader);
+	shader = Saba::ShaderManager::Get("3dnolight");
 	shader->Bind();
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
@@ -58,7 +78,7 @@ void ExampleLayer::OnAttach()
 
 	constexpr glm::vec3 lampPos = { 0.0f, -2.0f, 2.0f };
 	constexpr glm::vec3 lampDir = { 0.0f, 1.0f, 0.0f };
-	m_Scene.Add(new Saba::Cube(lampPos, { 1.0f, 0.3f, 0.3f }, lampDir, { 1.0f, 1.0f, 1.0f, 1.0f }, false));
+	m_Scene.Add(new Saba::Cube(lampPos, { 0.5f, 0.3f, 0.3f }, lampDir, { 1.0f, 1.0f, 1.0f, 1.0f }, false));
 	m_Scene.AddLight(new Saba::SpotLight(lampPos, lampDir, 7.5f, 15.0f, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
 
 	m_Scene.AddLight(new Saba::DirectionalLight({ 0.0f, -1.0f, 0.0f }, { 0.8f, 0.8f, 0.8f }));

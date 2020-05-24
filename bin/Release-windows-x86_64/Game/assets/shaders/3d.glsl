@@ -40,6 +40,15 @@ void main()
 #type fragment
 #version 420 core
 
+float equal(float x, float y); float not_equal(float x, float y); float greater(float x, float y); float less(float x, float y); float greater_equal(float x, float y); float less_equal(float x, float y);
+float and(float a, float b); float or(float a, float b); float not(float a, float b);
+vec2 equal(vec2 x, vec2 y); vec2 not_equal(vec2 x, vec2 y); vec2 greater(vec2 x, vec2 y); vec2 less(vec2 x, vec2 y); vec2 greater_equal(vec2 x, vec2 y); vec2 less_equal(vec2 x, vec2 y);
+vec2 and(vec2 a, vec2 b); vec2 or(vec2 a, vec2 b); vec2 not(vec2 a, vec2 b);
+vec3 equal(vec3 x, vec3 y); vec3 not_equal(vec3 x, vec3 y); vec3 greater(vec3 x, vec3 y); vec3 less(vec3 x, vec3 y); vec3 greater_equal(vec3 x, vec3 y); vec3 less_equal(vec3 x, vec3 y);
+vec3 and(vec3 a, vec3 b); vec3 or(vec3 a, vec3 b); vec3 not(vec3 a, vec3 b);
+vec4 equal(vec4 x, vec4 y); vec4 not_equal(vec4 x, vec4 y); vec4 greater(vec4 x, vec4 y); vec4 less(vec4 x, vec4 y); vec4 greater_equal(vec4 x, vec4 y); vec4 less_equal(vec4 x, vec4 y);
+vec4 and(vec4 a, vec4 b); vec4 or(vec4 a, vec4 b); vec4 not(vec4 a, vec4 b);
+
 out vec4 o_Color;
 
 in DATA {
@@ -68,84 +77,61 @@ layout(std140, binding = 1) uniform Scene {
 	Light u_Lights[c_MaxLights];
 };
 
-const float c_Ambient = 0.1f;
+const float c_Ambient = 0.15f;
 
 uniform sampler2D u_Tex[32];
 
-vec3 CalcLight(Light light, vec3 pos, vec3 normal, vec3 color, vec3 viewPos);
+vec3 CalcLight(const Light light, const vec3 pos, const vec3 normal, const vec3 color, const vec3 viewPos);
+
+
 
 void main()
 {
-	vec4 color = texture(u_Tex[int(fs_in.tid + fs_in.tidop + 0.1f)], fs_in.uv) * fs_in.color * fs_in.mulColor;
+	const vec4 color = texture(u_Tex[int(fs_in.tid + fs_in.tidop + 0.1f)], fs_in.uv) * fs_in.color * fs_in.mulColor;
 	vec3 outputColor = color.rgb * c_Ambient;
 	for (int i = 0; i < c_MaxLights; i++)
 		outputColor += CalcLight(u_Lights[i], fs_in.pos, fs_in.normal, color.rgb, u_ViewPos);
 	o_Color = vec4(outputColor, color.a);
 }
 
-vec3 CalcLight(Light light, vec3 pos, vec3 normal, vec3 color, vec3 viewPos)
+vec3 CalcLight(const Light light, const vec3 pos, const vec3 normal, const vec3 color, const vec3 viewPos)
 {
 	const float shininess = 8.0f; //TODO: material system
 	const vec3 materialSpec = vec3(1.0f);
-	//dir light
-	if (light.pos.w == 0.0f && light.dir.w == 1.0f)
-	{
-		vec3 toLight = normalize(-light.dir.xyz);
-		float diff = max(dot(toLight, normal), 0.0f);
-		vec3 diffuse = color * light.diffuse * diff;
 
-		vec3 toView = normalize(viewPos - pos);
-		vec3 halfwayDir = normalize(toLight + toView);
-		float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
-		vec3 specular = materialSpec * light.specular * spec;
+	const vec3 toLight = normalize(-light.dir.xyz) * and(equal(light.pos.w, 0.0f), equal(light.dir.w, 1.0f)) + normalize(light.pos.xyz - pos) * equal(light.pos.w, 1.0f);
 
-		return diffuse + specular;
-	}
-	//point light
-	else if (light.pos.w == 1.0f && light.dir.w == 0.0f)
-	{
-		vec3 toLight = normalize(light.pos.xyz - pos);
-		float diff = max(dot(toLight, normal), 0.0f);
-		vec3 diffuse = color * light.diffuse * diff;
+	const float distance = length(toLight);
+	const float attenuation = 1.0f / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * distance * distance);
 
-		vec3 toView = normalize(viewPos - pos);
-		vec3 halfwayDir = normalize(toLight + toView);
-		float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
-		vec3 specular = materialSpec * light.specular * spec;
+	const float intensity = clamp((dot(toLight, normalize(-light.dir.xyz)) - light.cutOffs.y) / (light.cutOffs.x - light.cutOffs.y), 0.0f, 1.0f) * greater(light.cutOffs.x, 0.0f)
+								+ equal(light.cutOffs.x, 0.0f);
 
-		float distance = length(toLight);
-		float attenuation = 1.0f / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * distance * distance);
+	const float diff = max(dot(toLight, normal), 0.0f);
+	const vec3 diffuse = color * light.diffuse * diff * attenuation * intensity;
 
-		diffuse *= attenuation;
-		specular *= attenuation;
+	const vec3 halfwayDir = normalize(toLight + normalize(viewPos - pos));
+	const float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
+	const vec3 specular = materialSpec * light.specular * spec * attenuation * intensity;
 
-		return diffuse + specular;
-	}
-	//spot light
-	else if (light.pos.w == 1.0f && light.dir.w == 1.0f)
-	{
-		vec3 toLight = normalize(light.pos.xyz - pos);
-		float diff = max(dot(toLight, normal), 0.0f);
-		vec3 diffuse = color * light.diffuse * diff;
-
-		vec3 toView = normalize(viewPos - pos);
-		vec3 halfwayDir = normalize(toLight + toView);
-		float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
-		vec3 specular = materialSpec * light.specular * spec;
-
-		float distance = length(toLight);
-		float attenuation = 1.0f / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * distance * distance);
-
-		diffuse *= attenuation;
-		specular *= attenuation;
-
-		float theta = dot(toLight, normalize(-light.dir.xyz));
-		float epsilon = light.cutOffs.x - light.cutOffs.y;
-		float intensity = clamp((theta - light.cutOffs.y) / epsilon, 0.0f, 1.0f);
-		diffuse *= intensity;
-		specular *= intensity;
-
-		return diffuse + specular;
-	}
-	return vec3(0.0f);
+	return max((diffuse + specular) * or(not_equal(light.pos.w, 0.0f), not_equal(light.dir.w, 0.0f)), 0.0f);
 }
+
+
+
+
+float equal(float x, float y) { return 1.0f - abs(sign(x - y)); } float not_equal(float x, float y) { return abs(sign(x - y)); } float greater(float x, float y) { return max(sign(x - y), 0.0f); }
+float less(float x, float y) { return max(sign(y - x), 0.0f); } float greater_equal(float x, float y) { return 1.0f - less(x, y); } float less_equal(float x, float y) { return 1.0f - greater(x, y); }
+float and(float a, float b) { return a * b; } float or(float a, float b) { return min(a + b, 1.0f); } float not(float a) { return 1.0f - a; }
+
+vec2 equal(vec2 x, vec2 y) { return 1.0f - abs(sign(x - y)); } vec2 not_equal(vec2 x, vec2 y) { return abs(sign(x - y)); } vec2 greater(vec2 x, vec2 y) { return max(sign(x - y), 0.0f); }
+vec2 less(vec2 x, vec2 y) { return max(sign(y - x), 0.0f); } vec2 greater_equal(vec2 x, vec2 y) { return 1.0f - less(x, y); } vec2 less_equal(vec2 x, vec2 y) { return 1.0f - greater(x, y); }
+vec2 and(vec2 a, vec2 b) { return a * b; } vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0f); } vec2 not(vec2 a) { return 1.0f - a; }
+
+vec3 equal(vec3 x, vec3 y) { return 1.0f - abs(sign(x - y)); } vec3 not_equal(vec3 x, vec3 y) { return abs(sign(x - y)); } vec3 greater(vec3 x, vec3 y) { return max(sign(x - y), 0.0f); }
+vec3 less(vec3 x, vec3 y) { return max(sign(y - x), 0.0f); } vec3 greater_equal(vec3 x, vec3 y) { return 1.0f - less(x, y); } vec3 less_equal(vec3 x, vec3 y) { return 1.0f - greater(x, y); }
+vec3 and(vec3 a, vec3 b) { return a * b; } vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0f); } vec3 not(vec3 a) { return 1.0f - a; }
+
+vec4 equal(vec4 x, vec4 y) { return 1.0f - abs(sign(x - y)); } vec4 not_equal(vec4 x, vec4 y) { return abs(sign(x - y)); } vec4 greater(vec4 x, vec4 y) { return max(sign(x - y), 0.0f); }
+vec4 less(vec4 x, vec4 y) { return max(sign(y - x), 0.0f); } vec4 greater_equal(vec4 x, vec4 y) { return 1.0f - less(x, y); } vec4 less_equal(vec4 x, vec4 y) { return 1.0f - greater(x, y); }
+vec4 and(vec4 a, vec4 b) { return a * b; } vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0f); } vec4 not(vec4 a) { return 1.0f - a; }
