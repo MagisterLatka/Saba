@@ -4,7 +4,7 @@ namespace Saba {
 
 	class TextFile
 	{
-		friend class TextFileReader;
+		friend class TextReader;
 	public:
 		enum Mode {
 			None = 0, Input = BIT(0), Output = BIT(1), Binary = BIT(2), Append = BIT(3), AtEnd = BIT(4), Trunc = BIT(5)

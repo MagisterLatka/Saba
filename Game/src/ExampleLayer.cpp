@@ -26,25 +26,26 @@ ExampleLayer::~ExampleLayer()
 void ExampleLayer::OnAttach()
 {
 	Saba::TextFile shaders("assets/shaders/shaders.txt", Saba::TextFile::Input | Saba::TextFile::Binary);
-	auto& line = Saba::TextFileReader::GetLine(shaders);
+	auto& line = Saba::TextReader::GetLine(shaders);
 	do
 	{
-		size_t a = line.first.find(',');
-		if (a == -1)
+		auto name = Saba::TextReader::GetTillChar(line.first, ',');
+		if (!name)
 		{
 			SB_ERROR("Shaders list syntax error");
 		}
-		std::string name(a, '\0');
-		memcpy(&name[0], line.first.data(), a);
-		size_t b = line.first.find_first_not_of(" \t", a + 1);
-		size_t c = line.first.find_first_of(" \t\0\r\n", b + 1);
-		if (c == -1) c = line.first.size() - 1;
-		std::string path(c - b + 15, '\0');
-		path[0] = 'a'; path[1] = 's'; path[2] = 's'; path[3] = 'e'; path[4] = 't'; path[5] = 's'; path[6] = '/';
-		path[7] = 's'; path[8] = 'h'; path[9] = 'a'; path[10] = 'd'; path[11] = 'e'; path[12] = 'r'; path[13] = 's'; path[14] = '/';
-		memcpy(&path[15], &line.first[b], c - b);
-		Saba::ShaderManager::Add(name, path);
-		line = Saba::TextFileReader::GetLine(shaders);
+		std::string shaderName(name->data(), name->size());
+
+		auto path = Saba::TextReader::GetTillOneOf(line.first, " \t\r\n\0", line.first.find_first_not_of(" \t", name->size() + 1));
+		if (!path)
+		{
+			SB_ERROR("Shaders list syntax error");
+		}
+		std::string filepath(path->size() + 16, '\0');
+		memcpy(&filepath[0], "assets/shaders/", 15);
+		memcpy(&filepath[15], path->data(), path->size());
+		Saba::ShaderManager::Add(shaderName, filepath);
+		line = Saba::TextReader::GetLine(shaders);
 	} while (!line.second);
 
 	Saba::Ref<Saba::Shader> shader = Saba::ShaderManager::Get("3d");

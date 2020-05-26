@@ -14,7 +14,7 @@
 #include <Saba\Layers\Layer.h>
 
 #include <Saba\Utils\TextFile.h>
-#include <Saba\Utils\TextFileReader.h>
+#include <Saba\Utils\TextReader.h>
 
 #include <Saba\Renderer\Buffer.h>
 #include <Saba\Renderer\VertexArray.h>

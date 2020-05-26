@@ -9,6 +9,7 @@
 #include <functional>
 #include <thread>
 #include <chrono>
+#include <optional>
 
 #include <glm\glm.hpp>
 
