@@ -7,6 +7,7 @@ namespace Saba {
 
 	class OpenGLTexture2D : public Texture2D
 	{
+		friend class OpenGLFramebuffer;
 	public:
 		OpenGLTexture2D(const std::string& filepath);
 		OpenGLTexture2D(uint32_t width, uint32_t height);

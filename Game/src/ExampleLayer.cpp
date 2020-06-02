@@ -4,6 +4,8 @@
 
 #include <imgui/imgui.h>
 #include <GLFW\include\GLFW\glfw3.h>
+#include <glm\glm\gtc\matrix_transform.hpp>
+
 
 struct ViewProjMatBufferData
 {
@@ -13,6 +15,10 @@ struct SceneBufferData
 {
 	glm::vec3 viewPos;
 	Saba::Light::LightData lights[10];
+};
+
+constexpr int texIDs[] = {
+	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 };
 
 ExampleLayer::ExampleLayer()
@@ -50,14 +56,15 @@ void ExampleLayer::OnAttach()
 
 	Saba::Ref<Saba::Shader> shader = Saba::ShaderManager::Get("3d");
 	shader->Bind();
-	int texIDs[] = {
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
-	};
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
 	shader = Saba::ShaderManager::Get("3dnolight");
 	shader->Bind();
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
+
+	shader = Saba::ShaderManager::Get("basic");
+	shader->Bind();
+	shader->SetUniformInt1("u_Tex", 1);
 
 	Saba::UniformBufferManager::Add("viewProjMat", nullptr, sizeof(ViewProjMatBufferData));
 	Saba::UniformBufferManager::Get("viewProjMat")->SetBinding(0);
@@ -84,6 +91,16 @@ void ExampleLayer::OnAttach()
 
 	m_Scene.AddLight(new Saba::DirectionalLight({ 0.0f, -1.0f, 0.0f }, { 0.8f, 0.8f, 0.8f }));
 
+
+	m_SceneFramebufferRenderbuffer = Saba::Renderbuffer::Create(1280, 720, Saba::Renderbuffer::Format::DEPTH);
+	m_SceneFramebufferTexture = Saba::Texture2D::Create(1280, 720);
+	m_SceneFramebuffer = Saba::Framebuffer::Create();
+	m_SceneFramebuffer->Bind();
+	m_SceneFramebuffer->AttachTexture(m_SceneFramebufferTexture, Saba::Framebuffer::Attachment::Color0);
+	m_SceneFramebuffer->AttachRenderbuffer(m_SceneFramebufferRenderbuffer, Saba::Framebuffer::Attachment::Depth);
+	m_SceneFramebuffer->Unbind();
+
+
 	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 }
 void ExampleLayer::OnDetach()
@@ -108,6 +125,10 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::RenderCommand::Clear();
 	Saba::Renderer3D::ResetStats();
 
+	m_SceneFramebuffer->Bind();
+	Saba::RenderCommand::EnableDepthTest();
+	Saba::RenderCommand::Clear();
+	
 	Saba::ShaderManager::Get("3d")->Bind();
 
 	Saba::UniformBufferManager::Get("viewProjMat")->Bind();
@@ -130,6 +151,15 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	m_Scene.DrawAllNotLighted();
 	Saba::Renderer3D::EndScene();
 	Saba::Renderer3D::Flush();
+
+	Saba::ShaderManager::Get("basic")->Bind();
+	m_SceneFramebuffer->Unbind();
+	m_SceneFramebufferTexture->Bind(1);
+	Saba::RenderCommand::DisableDepthTest();
+	Saba::Renderer2D::BeginScene();
+	Saba::Renderer2D::DrawQuad({ -1.0f, -1.0f, 0.0f }, { 2.0f, 2.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
+	Saba::Renderer2D::EndScene();
+	Saba::Renderer2D::Flush();
 }
 void ExampleLayer::OnImGuiRender()
 {

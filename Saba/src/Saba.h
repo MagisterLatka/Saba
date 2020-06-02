@@ -16,9 +16,11 @@
 #include <Saba\Utils\TextFile.h>
 #include <Saba\Utils\TextReader.h>
 
+#include <Saba\Renderer\Framebuffer.h>
 #include <Saba\Renderer\Buffer.h>
 #include <Saba\Renderer\VertexArray.h>
 #include <Saba\Renderer\Texture.h>
+#include <Saba\Renderer\Renderbuffer.h>
 #include <Saba\Renderer\Shader.h>
 #include <Saba\Renderer\AssetsManager.h>
 #include <Saba\Renderer\Renderer.h>

@@ -16,6 +16,15 @@ namespace Saba {
 			s_API->SetViewport(x, y, width, height);
 		}
 
+		inline static void EnableDepthTest()
+		{
+			s_API->EnableDepthTest();
+		}
+		inline static void DisableDepthTest()
+		{
+			s_API->DisableDepthTest();
+		}
+
 		inline static void SetClearColor(const glm::vec4& color)
 		{
 			s_API->SetClearColor(color);

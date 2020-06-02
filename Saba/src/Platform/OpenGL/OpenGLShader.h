@@ -16,13 +16,13 @@ namespace Saba {
 		virtual void Unbind() const override;
 
 		virtual void SetUniformFloat1(const std::string& name, float value) override;
-		virtual void SetUniformFloat1v(const std::string& name, float* value, int count) override;
+		virtual void SetUniformFloat1v(const std::string& name, const float* value, int count) override;
 		virtual void SetUniformFloat2(const std::string& name, const glm::vec2& value) override;
 		virtual void SetUniformFloat3(const std::string& name, const glm::vec3& value) override;
 		virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value) override;
 
 		virtual void SetUniformInt1(const std::string& name, int value) override;
-		virtual void SetUniformInt1v(const std::string& name, int* value, int count) override;
+		virtual void SetUniformInt1v(const std::string& name, const int* value, int count) override;
 		virtual void SetUniformInt2(const std::string& name, const glm::ivec2& value) override;
 		virtual void SetUniformInt3(const std::string& name, const glm::ivec3& value) override;
 		virtual void SetUniformInt4(const std::string& name, const glm::ivec4& value) override;

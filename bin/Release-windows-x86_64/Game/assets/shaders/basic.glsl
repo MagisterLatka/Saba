@@ -6,7 +6,7 @@ layout(location = 1) in vec2 i_UV;
 
 out vec2 l_UV;
 
-uniform mat4 u_ViewProjMat;
+uniform mat4 u_ViewProjMat = mat4(1.0f);
 
 void main()
 {

@@ -45,7 +45,7 @@ namespace Saba {
 	{
 		glUniform1f(GetUniformLocation(name), value);
 	}
-	void OpenGLShader::SetUniformFloat1v(const std::string& name, float* value, int count)
+	void OpenGLShader::SetUniformFloat1v(const std::string& name, const float* value, int count)
 	{
 		glUniform1fv(GetUniformLocation(name), count, value);
 	}
@@ -66,7 +66,7 @@ namespace Saba {
 	{
 		glUniform1i(GetUniformLocation(name), value);
 	}
-	void OpenGLShader::SetUniformInt1v(const std::string& name, int* value, int count)
+	void OpenGLShader::SetUniformInt1v(const std::string& name, const int* value, int count)
 	{
 		glUniform1iv(GetUniformLocation(name), count, value);
 	}

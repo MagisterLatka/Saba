@@ -16,4 +16,7 @@ private:
 private:
 	Saba::PerspectiveCameraControler m_CameraControler;
 	Saba::Scene3D m_Scene;
+	Saba::Ref<Saba::Framebuffer> m_SceneFramebuffer;
+	Saba::Ref<Saba::Texture2D> m_SceneFramebufferTexture;
+	Saba::Ref<Saba::Renderbuffer> m_SceneFramebufferRenderbuffer;
 };
