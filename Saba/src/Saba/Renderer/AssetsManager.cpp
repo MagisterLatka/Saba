@@ -56,9 +56,19 @@ namespace Saba {
 		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
 		s_Textures2D[name] = Texture2D::Create(filepath);
 	}
+	void TextureManager::Add2D(const std::string& name, const std::string& filepath, Texture::Format format)
+	{
+		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
+		s_Textures2D[name] = Texture2D::Create(filepath, format);
+	}
 	void TextureManager::Add2D(const std::string& name, int width, int height)
 	{
 		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
 		s_Textures2D[name] = Texture2D::Create(width, height);
+	}
+	void TextureManager::Add2D(const std::string& name, int width, int height, Texture::Format format)
+	{
+		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
+		s_Textures2D[name] = Texture2D::Create(width, height, format);
 	}
 }

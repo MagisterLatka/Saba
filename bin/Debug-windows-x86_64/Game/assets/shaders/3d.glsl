@@ -77,7 +77,7 @@ layout(std140, binding = 1) uniform Scene {
 	Light u_Lights[c_MaxLights];
 };
 
-const float c_Ambient = 0.15f;
+const float c_Ambient = 0.05f;
 
 uniform sampler2D u_Tex[32];
 

@@ -37,7 +37,9 @@ namespace Saba {
 	public:
 		static void Add2D(const std::string& name, Ref<Texture2D> texture);
 		static void Add2D(const std::string& name, const std::string& filepath);
+		static void Add2D(const std::string& name, const std::string& filepath, Texture::Format format);
 		static void Add2D(const std::string& name, int width, int height);
+		static void Add2D(const std::string& name, int width, int height, Texture::Format format);
 
 		static inline Ref<Texture2D> Get2D(const std::string& name) { SB_CORE_ASSERT((s_Textures2D.find(name) != s_Textures2D.end()), "Texture \"{0}\" does not exist", name.c_str());
 																		return s_Textures2D[name]; }

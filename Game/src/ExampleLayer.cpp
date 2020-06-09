@@ -2,6 +2,7 @@
 #include <Saba.h>
 #include "ExampleLayer.h"
 
+#include <GLAD\include\glad\glad.h>
 #include <imgui/imgui.h>
 #include <GLFW\include\GLFW\glfw3.h>
 #include <glm\glm\gtc\matrix_transform.hpp>
@@ -62,7 +63,7 @@ void ExampleLayer::OnAttach()
 	shader->Bind();
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
-	shader = Saba::ShaderManager::Get("basic");
+	shader = Saba::ShaderManager::Get("post");
 	shader->Bind();
 	shader->SetUniformInt1("u_Tex", 1);
 
@@ -72,7 +73,7 @@ void ExampleLayer::OnAttach()
 	Saba::UniformBufferManager::Add("scene", nullptr, sizeof(SceneBufferData));
 	Saba::UniformBufferManager::Get("scene")->SetBinding(1);
 
-	Saba::TextureManager::Add2D("brick", "assets/textures/brick.jpg");
+	Saba::TextureManager::Add2D("brick", "assets/textures/brick.jpg", Saba::Texture::Format::SRGB);
 
 	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 	m_Scene.Add(new Saba::Sphere({ 0.0f,  3.0f, 2.0f }, { 1.5f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
@@ -100,8 +101,8 @@ void ExampleLayer::OnAttach()
 	m_SceneFramebuffer->AttachRenderbuffer(m_SceneFramebufferRenderbuffer, Saba::Framebuffer::Attachment::Depth);
 	m_SceneFramebuffer->Unbind();
 
-
-	Saba::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+	float clearColor = glm::pow(0.1f, 2.2f);
+	Saba::RenderCommand::SetClearColor({ clearColor, clearColor, clearColor, 1.0f });
 }
 void ExampleLayer::OnDetach()
 {
@@ -152,7 +153,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::Renderer3D::EndScene();
 	Saba::Renderer3D::Flush();
 
-	Saba::ShaderManager::Get("basic")->Bind();
+	Saba::ShaderManager::Get("post")->Bind();
 	m_SceneFramebuffer->Unbind();
 	m_SceneFramebufferTexture->Bind(1);
 	Saba::RenderCommand::DisableDepthTest();
