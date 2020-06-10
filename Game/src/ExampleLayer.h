@@ -19,4 +19,5 @@ private:
 	Saba::Ref<Saba::Framebuffer> m_SceneFramebuffer;
 	Saba::Ref<Saba::Texture2D> m_SceneFramebufferTexture;
 	Saba::Ref<Saba::Renderbuffer> m_SceneFramebufferRenderbuffer;
+	float m_Exposure = 1.0f;
 };

@@ -96,7 +96,7 @@ void main()
 
 vec3 CalcLight(const Light light, const vec3 pos, const vec3 normal, const vec3 color, const vec3 viewPos)
 {
-	const float shininess = 8.0f; //TODO: material system
+	const float shininess = 16.0f; //TODO: material system
 	const vec3 materialSpec = vec3(1.0f);
 
 	const vec3 toLight = normalize(-light.dir.xyz) * and(equal(light.pos.w, 0.0f), equal(light.dir.w, 1.0f)) + normalize(light.pos.xyz - pos) * equal(light.pos.w, 1.0f);

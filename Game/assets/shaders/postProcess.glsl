@@ -20,11 +20,13 @@ out vec4 o_Color;
 in vec2 l_UV;
 
 uniform sampler2D u_Tex;
+uniform float u_Exposure;
 
 void main()
 {
 	vec4 color = texture(u_Tex, l_UV);
 
+	color.xyz = vec3(1.0f) - exp(-color.xyz * u_Exposure);
 	color.xyz = pow(color.xyz, vec3(1.0f / 2.2f));
 
 	o_Color = color;

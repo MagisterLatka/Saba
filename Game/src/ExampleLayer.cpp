@@ -2,7 +2,6 @@
 #include <Saba.h>
 #include "ExampleLayer.h"
 
-#include <GLAD\include\glad\glad.h>
 #include <imgui/imgui.h>
 #include <GLFW\include\GLFW\glfw3.h>
 #include <glm\glm\gtc\matrix_transform.hpp>
@@ -82,19 +81,19 @@ void ExampleLayer::OnAttach()
 	m_Scene.Add(new Saba::Sphere({ 0.0f, 1.0f, 2.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 
 	constexpr glm::vec3 lightPos = { 0.0f, 1.0f, 0.0f };
-	m_Scene.Add(new Saba::Sphere(lightPos, { 0.2f, 0.2f, 0.2f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, false));
+	m_Scene.Add(new Saba::Sphere(lightPos, { 0.2f, 0.2f, 0.2f }, { 1.0f, 1.0f, 1.0f }, { 10.0f, 10.0f, 10.0f, 1.0f }, false));
 	m_Scene.AddLight(new Saba::PointLight(lightPos, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
 
 	constexpr glm::vec3 lampPos = { 0.0f, -2.0f, 2.0f };
 	constexpr glm::vec3 lampDir = { 0.0f, 1.0f, 0.0f };
-	m_Scene.Add(new Saba::Cube(lampPos, { 0.5f, 0.3f, 0.3f }, lampDir, { 1.0f, 1.0f, 1.0f, 1.0f }, false));
+	m_Scene.Add(new Saba::Cube(lampPos, { 0.5f, 0.3f, 0.3f }, lampDir, { 10.0f, 10.0f, 10.0f, 1.0f }, false));
 	m_Scene.AddLight(new Saba::SpotLight(lampPos, lampDir, 7.5f, 15.0f, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
 
 	m_Scene.AddLight(new Saba::DirectionalLight({ 0.0f, -1.0f, 0.0f }, { 0.8f, 0.8f, 0.8f }));
 
 
 	m_SceneFramebufferRenderbuffer = Saba::Renderbuffer::Create(1280, 720, Saba::Renderbuffer::Format::DEPTH);
-	m_SceneFramebufferTexture = Saba::Texture2D::Create(1280, 720);
+	m_SceneFramebufferTexture = Saba::Texture2D::Create(1280, 720, Saba::Texture::Format::RGB16F);
 	m_SceneFramebuffer = Saba::Framebuffer::Create();
 	m_SceneFramebuffer->Bind();
 	m_SceneFramebuffer->AttachTexture(m_SceneFramebufferTexture, Saba::Framebuffer::Attachment::Color0);
@@ -154,6 +153,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::Renderer3D::Flush();
 
 	Saba::ShaderManager::Get("post")->Bind();
+	Saba::ShaderManager::Get("post")->SetUniformFloat1("u_Exposure", m_Exposure);
 	m_SceneFramebuffer->Unbind();
 	m_SceneFramebufferTexture->Bind(1);
 	Saba::RenderCommand::DisableDepthTest();
@@ -197,6 +197,7 @@ void ExampleLayer::OnImGuiRender()
 	ImGui::Text("Rotation: %.1f, %.1f, %.1f", dir.x, dir.y, dir.z);
 	auto [x, y] = m_CameraControler.GetRotation();
 	ImGui::Text("\t\tyaw = %.1f, pitch = %.1f", x, y);
+	ImGui::SliderFloat("Exposure level", &m_Exposure, 0.1f, 5.0f);
 }
 
 bool ExampleLayer::OnKeyPress(Saba::KeyPressedEvent& e)
