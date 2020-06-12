@@ -124,6 +124,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 
 	Saba::RenderCommand::Clear();
 	Saba::Renderer3D::ResetStats();
+	Saba::Renderer2D::ResetStats();
 
 	m_SceneFramebuffer->Bind();
 	Saba::RenderCommand::EnableDepthTest();
@@ -164,29 +165,40 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 }
 void ExampleLayer::OnImGuiRender()
 {
+	ImGui::Begin("Stats");
+
 	ImGui::Text("Framerate: %.1f", ImGui::GetIO().Framerate);
-	bool vsync = Saba::Application::Get()->GetWindow()->IsVSync();
-	ImGui::Checkbox("Set VSync", &vsync);
-	Saba::Application::Get()->GetWindow()->SetVSync(vsync);
 
 	ImGui::Text("");
 
-	ImGui::Text("Renderer3D stats:");
-
-	ImGui::Text("\tTriangles:");
-	ImGui::Text("\t\tCount: %d", Saba::Renderer3D::GetStats().triangleCount);
-	ImGui::Text("\t\tDraw calls: %d", Saba::Renderer3D::GetStats().drawCallsOnTriangles);
-
-	ImGui::Text("\tQuads:");
-	ImGui::Text("\t\tCount: %d", Saba::Renderer3D::GetStats().quadCount);
-	ImGui::Text("\t\tDraw calls: %d", Saba::Renderer3D::GetStats().drawCallsOnQuads);
-
-	for (int i = 0; i < Saba::Renderer3D::GetStats().modelStats.size(); i++)
+	static bool r2Dstats;
+	ImGui::Checkbox("Renderer2D stats", &r2Dstats);
+	if (r2Dstats)
 	{
-		ImGui::Text("\tModel (id: %d):", i);
-		ImGui::Text("\t\tVertices count: %d", Saba::Renderer3D::GetStats().modelStats[i].verticesCount);
-		ImGui::Text("\t\tIndices count: %d", Saba::Renderer3D::GetStats().modelStats[i].indicesCount);
-		ImGui::Text("\t\tTimes drawed: %d", Saba::Renderer3D::GetStats().modelStats[i].timesDrawed);
+		ImGui::Text("\tQuads:");
+		ImGui::Text("\t\tCount: %d", Saba::Renderer2D::GetStats().quadCount);
+		ImGui::Text("\t\tDraw calls: %d", Saba::Renderer2D::GetStats().drawCalls);
+	}
+
+	static bool r3Dstats;
+	ImGui::Checkbox("Renderer3D stats:", &r3Dstats);
+	if (r3Dstats)
+	{
+		ImGui::Text("\tTriangles:");
+		ImGui::Text("\t\tCount: %d", Saba::Renderer3D::GetStats().triangleCount);
+		ImGui::Text("\t\tDraw calls: %d", Saba::Renderer3D::GetStats().drawCallsOnTriangles);
+
+		ImGui::Text("\tQuads:");
+		ImGui::Text("\t\tCount: %d", Saba::Renderer3D::GetStats().quadCount);
+		ImGui::Text("\t\tDraw calls: %d", Saba::Renderer3D::GetStats().drawCallsOnQuads);
+
+		for (int i = 0; i < Saba::Renderer3D::GetStats().modelStats.size(); i++)
+		{
+			ImGui::Text("\tModel (id: %d):", i);
+			ImGui::Text("\t\tVertices count: %d", Saba::Renderer3D::GetStats().modelStats[i].verticesCount);
+			ImGui::Text("\t\tIndices count: %d", Saba::Renderer3D::GetStats().modelStats[i].indicesCount);
+			ImGui::Text("\t\tTimes drawed: %d", Saba::Renderer3D::GetStats().modelStats[i].timesDrawed);
+		}
 	}
 
 	ImGui::Text("");
@@ -197,7 +209,20 @@ void ExampleLayer::OnImGuiRender()
 	ImGui::Text("Rotation: %.1f, %.1f, %.1f", dir.x, dir.y, dir.z);
 	auto [x, y] = m_CameraControler.GetRotation();
 	ImGui::Text("\t\tyaw = %.1f, pitch = %.1f", x, y);
+
+	ImGui::End();
+
+
+
+	ImGui::Begin("Options");
+
+	bool vsync = Saba::Application::Get()->GetWindow()->IsVSync();
+	ImGui::Checkbox("VSync", &vsync);
+	Saba::Application::Get()->GetWindow()->SetVSync(vsync);
+
 	ImGui::SliderFloat("Exposure level", &m_Exposure, 0.1f, 5.0f);
+
+	ImGui::End();
 }
 
 bool ExampleLayer::OnKeyPress(Saba::KeyPressedEvent& e)
