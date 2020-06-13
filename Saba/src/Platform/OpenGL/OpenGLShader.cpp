@@ -166,7 +166,14 @@ namespace Saba {
 				char* message = (char*)malloc(lenght);
 				glGetShaderInfoLog(shader, lenght, &lenght, message);
 				glDeleteShader(shader);
-				SB_CORE_FATAL("Failed to compile shader");
+				if (type == GL_VERTEX_SHADER)
+				{
+					SB_CORE_FATAL("Failed to compile vertex shader");
+				}
+				else if (type == GL_FRAGMENT_SHADER)
+				{
+					SB_CORE_FATAL("Failed to compile fragment shader");
+				}
 				SB_CORE_ASSERT(false, "{0}", message);
 				free(message);
 			}

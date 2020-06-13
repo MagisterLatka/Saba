@@ -35,7 +35,6 @@ namespace Saba {
 		glm::mat4 m_Rotate = glm::mat4(1.0f);
 		glm::mat4 m_RotateFromOrigin = glm::mat4(1.0f);
 		glm::vec4 m_Color;
-		const bool m_Textured;
 		Ref<Texture2D> m_Texture;
 	};
 }

@@ -9,7 +9,7 @@ namespace Saba {
 	uint8_t Cube::s_ModelID = 255;
 
 	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted)
-		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(color), m_Textured(false)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(color)
 	{
 		if (s_ModelID == 255)
 			CreateModel();
@@ -17,7 +17,7 @@ namespace Saba {
 		SetDirection(dir);
 	}
 	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted)
-		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Textured(true), m_Texture(texture)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Texture(texture)
 	{
 		if (s_ModelID == 255)
 			CreateModel();
@@ -28,10 +28,7 @@ namespace Saba {
 	void Cube::Draw()
 	{
 		const glm::mat4 modelMat = glm::scale(glm::translate(m_RotateFromOrigin, m_Pos) * m_Rotate, m_Size);
-		if (m_Textured)
-			Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, { m_Texture });
-		else
-			Renderer3D::DrawModel(s_ModelID, modelMat, m_Color);
+		Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, { m_Texture }, m_IsLighted);
 	}
 
 	void Cube::SetPos(glm::vec3 pos)
@@ -130,6 +127,6 @@ namespace Saba {
 			20, 21, 22, 22, 23, 20,
 		};
 
-		Renderer3D::AddModel<Cube>(RendererAPI::Triangles, posNormalUVColorTID, indices, {});
+		Renderer3D::AddModel<Cube>(RendererAPI::Triangles, posNormalUVColorTID, indices);
 	}
 }

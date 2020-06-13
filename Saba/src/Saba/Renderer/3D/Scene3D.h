@@ -19,8 +19,7 @@ namespace Saba {
 		inline Scene3DObject* operator[](uint32_t id) const { return m_Objects[id]; }
 
 		void Draw(uint32_t id);
-		void DrawAllLighted();
-		void DrawAllNotLighted();
+		void DrawAll();
 
 		void AddLight(Light* light);
 		Light* DeleteLight(uint8_t id);

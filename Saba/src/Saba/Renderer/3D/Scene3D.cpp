@@ -21,20 +21,11 @@ namespace Saba {
 		SB_CORE_ASSERT((m_Objects.size() > id), "There is no object with id {0}", id);
 		m_Objects[id]->Draw();
 	}
-	void Scene3D::DrawAllLighted()
+	void Scene3D::DrawAll()
 	{
 		for (auto& o : m_Objects)
 		{
-			if (o->m_IsLighted)
-				o->Draw();
-		}
-	}
-	void Scene3D::DrawAllNotLighted()
-	{
-		for (auto& o : m_Objects)
-		{
-			if (!o->m_IsLighted)
-				o->Draw();
+			o->Draw();
 		}
 	}
 

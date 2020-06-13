@@ -22,8 +22,9 @@ namespace Saba {
 		virtual void RotateFromOrigin(float angleR, glm::vec3 axis) = 0;
 		virtual void SetSize(glm::vec3 size) = 0;
 		virtual void Scale(glm::vec3 scale) = 0;
+	protected:
+		bool m_IsLighted;
 	private:
 		uint32_t m_ID = -1;
-		bool m_IsLighted;
 	};
 }

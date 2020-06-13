@@ -22,8 +22,8 @@ namespace Saba {
 		s_Data.vertexArrayTriangle = VertexArray::Create();
 		Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, c_MaxTriangleCount * 3 * sizeof(VertexData), Dynamic);
 		vbo->SetLayout({
-			{"i_Pos", ShaderDataType::Float3},
-			{ "i_Normal", ShaderDataType::Float3 },
+			{"i_Pos_IsLighted", ShaderDataType::Float4},
+			{"i_Normal", ShaderDataType::Float3 },
 			{"i_UV", ShaderDataType::Float2},
 			{"i_Color", ShaderDataType::Float4},
 			{"i_TexID", ShaderDataType::Float}
@@ -33,13 +33,13 @@ namespace Saba {
 		ModelVertexBuffer dataModel = {
 			glm::mat4(1.0f),
 			glm::vec4(1.0f),
-			0.0f
+			glm::vec2(0.0f, 1.0f)
 		};
 		vbo = VertexBuffer::Create((float*)&dataModel, sizeof(ModelVertexBuffer));
 		vbo->SetLayout({
 			{ "i_ModelMat", ShaderDataType::Mat4, 1 },
 			{ "i_ColorMul", ShaderDataType::Float4, 1 },
-			{ "i_TIDoptional", ShaderDataType::Float, 1 }
+			{ "i_TIDoptional_IsLighted", ShaderDataType::Float2, 1 }
 		});
 		s_Data.vertexArrayTriangle->AddVertexBuffer(vbo);
 
@@ -62,8 +62,8 @@ namespace Saba {
 		s_Data.vertexArrayTriangle->AddVertexBuffer(vbo);
 		Ref<VertexBuffer> vbo2 = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), Dynamic);
 		vbo2->SetLayout({
-			{"i_Pos", ShaderDataType::Float3},
-			{ "i_Normal", ShaderDataType::Float3 },
+			{"i_Pos_IsLighted", ShaderDataType::Float4},
+			{"i_Normal", ShaderDataType::Float3 },
 			{"i_UV", ShaderDataType::Float2},
 			{"i_Color", ShaderDataType::Float4},
 			{"i_TexID", ShaderDataType::Float}
@@ -221,7 +221,7 @@ namespace Saba {
 		}
 	}
 	
-	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, glm::vec4 color)
+	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, glm::vec4 color, bool isLighted)
 	{
 		if (s_Data.triangleCount >= c_MaxTriangleCount)
 		{
@@ -231,7 +231,7 @@ namespace Saba {
 		}
 
 		auto [pos, normal, uv] = posNormalUV[0];
-		s_Data.atTriangle->pos = pos;
+		s_Data.atTriangle->pos_IsLighted = glm::vec4(pos, isLighted ? 1.0f : 0.0f);
 		s_Data.atTriangle->normal = normal;
 		s_Data.atTriangle->uv = uv;
 		s_Data.atTriangle->color = color;
@@ -239,7 +239,7 @@ namespace Saba {
 		s_Data.atTriangle++;
 
 		auto [pos1, normal1, uv1] = posNormalUV[1];
-		s_Data.atTriangle->pos = pos1;
+		s_Data.atTriangle->pos_IsLighted = glm::vec4(pos1, isLighted ? 1.0f : 0.0f);
 		s_Data.atTriangle->normal = normal1;
 		s_Data.atTriangle->uv = uv1;
 		s_Data.atTriangle->color = color;
@@ -247,7 +247,7 @@ namespace Saba {
 		s_Data.atTriangle++;
 
 		auto [pos2, normal2, uv2] = posNormalUV[2];
-		s_Data.atTriangle->pos = pos2;
+		s_Data.atTriangle->pos_IsLighted = glm::vec4(pos2, isLighted ? 1.0f : 0.0f);
 		s_Data.atTriangle->normal = normal2;
 		s_Data.atTriangle->uv = uv2;
 		s_Data.atTriangle->color = color;
@@ -257,7 +257,7 @@ namespace Saba {
 		s_Data.triangleCount++;
 		s_Data.stats.triangleCount++;
 	}
-	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, Ref<Texture2D> texture)
+	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, Ref<Texture2D> texture, bool isLighted)
 	{
 		if (s_Data.triangleCount >= c_MaxTriangleCount || s_Data.texIndexTriangle > c_MaxTextures - 1)
 		{
@@ -283,7 +283,7 @@ namespace Saba {
 		}
 
 		auto [pos, normal, uv] = posNormalUV[0];
-		s_Data.atTriangle->pos = pos;
+		s_Data.atTriangle->pos_IsLighted = glm::vec4(pos, isLighted ? 1.0f : 0.0f);
 		s_Data.atTriangle->normal = normal;
 		s_Data.atTriangle->uv = uv;
 		s_Data.atTriangle->color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -291,7 +291,7 @@ namespace Saba {
 		s_Data.atTriangle++;
 
 		auto [pos1, normal1, uv1] = posNormalUV[1];
-		s_Data.atTriangle->pos = pos1;
+		s_Data.atTriangle->pos_IsLighted = glm::vec4(pos1, isLighted ? 1.0f : 0.0f);
 		s_Data.atTriangle->normal = normal1;
 		s_Data.atTriangle->uv = uv1;
 		s_Data.atTriangle->color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -299,7 +299,7 @@ namespace Saba {
 		s_Data.atTriangle++;
 
 		auto [pos2, normal2, uv2] = posNormalUV[2];
-		s_Data.atTriangle->pos = pos2;
+		s_Data.atTriangle->pos_IsLighted = glm::vec4(pos2, isLighted ? 1.0f : 0.0f);
 		s_Data.atTriangle->normal = normal2;
 		s_Data.atTriangle->uv = uv2;
 		s_Data.atTriangle->color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -310,7 +310,7 @@ namespace Saba {
 		s_Data.stats.triangleCount++;
 	}
 
-	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, glm::vec4 color)
+	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, glm::vec4 color, bool isLighted)
 	{
 		if (s_Data.triangleCount >= c_MaxTriangleCount)
 		{
@@ -319,25 +319,25 @@ namespace Saba {
 			BeginSceneQuad();
 		}
 
-		s_Data.atQuad->pos = posNormal[0].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[0].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[0].second;
 		s_Data.atQuad->color = color;
 		s_Data.atQuad->texID = 0.0f;
 		s_Data.atQuad++;
 
-		s_Data.atQuad->pos = posNormal[1].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[1].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[1].second;
 		s_Data.atQuad->color = color;
 		s_Data.atQuad->texID = 0.0f;
 		s_Data.atQuad++;
 
-		s_Data.atQuad->pos = posNormal[2].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[2].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[2].second;
 		s_Data.atQuad->color = color;
 		s_Data.atQuad->texID = 0.0f;
 		s_Data.atQuad++;
 
-		s_Data.atQuad->pos = posNormal[3].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[3].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[3].second;
 		s_Data.atQuad->color = color;
 		s_Data.atQuad->texID = 0.0f;
@@ -346,7 +346,7 @@ namespace Saba {
 		s_Data.quadCount++;
 		s_Data.stats.quadCount++;
 	}
-	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, Ref<Texture2D> texture)
+	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, Ref<Texture2D> texture, bool isLighted)
 	{
 		if (s_Data.quadCount >= c_MaxQuadCount || s_Data.texIndexQuad > c_MaxTextures - 1)
 		{
@@ -371,25 +371,25 @@ namespace Saba {
 			s_Data.texIndexQuad++;
 		}
 
-		s_Data.atQuad->pos = posNormal[0].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[0].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[0].second;
 		s_Data.atQuad->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_Data.atQuad->texID = tid;
 		s_Data.atQuad++;
 
-		s_Data.atQuad->pos = posNormal[1].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[1].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[1].second;
 		s_Data.atQuad->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_Data.atQuad->texID = tid;
 		s_Data.atQuad++;
 
-		s_Data.atQuad->pos = posNormal[2].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[2].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[2].second;
 		s_Data.atQuad->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_Data.atQuad->texID = tid;
 		s_Data.atQuad++;
 
-		s_Data.atQuad->pos = posNormal[3].first;
+		s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[3].first, isLighted ? 1.0f : 0.0f);
 		s_Data.atQuad->normal = posNormal[3].second;
 		s_Data.atQuad->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		s_Data.atQuad->texID = tid;
@@ -399,7 +399,7 @@ namespace Saba {
 		s_Data.stats.quadCount++;
 	}
 
-	void Renderer3D::DrawModel(uint8_t modelID, glm::vec3 pos, glm::vec3 dir, glm::vec3 scale, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures)
+	void Renderer3D::DrawModel(uint8_t modelID, glm::vec3 pos, glm::vec3 dir, glm::vec3 scale, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures, bool isLighted)
 	{
 		if (s_Data.modelData[modelID].instancesCount >= c_MaxModelInstances || s_Data.modelData[modelID].texIndex + textures.size() >= c_MaxTextures)
 		{
@@ -430,13 +430,13 @@ namespace Saba {
 
 		s_Data.modelData[modelID].at->modelMat = modelMat;
 		s_Data.modelData[modelID].at->color = color;
-		s_Data.modelData[modelID].at->tid = tid;
+		s_Data.modelData[modelID].at->tid_IsLighted = glm::vec2(tid, isLighted ? 1.0f : 0.0f);
 		s_Data.modelData[modelID].at++;
 		s_Data.modelData[modelID].instancesCount++;
 
 		s_Data.stats.modelStats[modelID].timesDrawed++;
 	}
-	void Renderer3D::DrawModel(uint8_t modelID, glm::mat4 modelMat, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures)
+	void Renderer3D::DrawModel(uint8_t modelID, glm::mat4 modelMat, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures, bool isLighted)
 	{
 		if (s_Data.modelData[modelID].instancesCount >= c_MaxModelInstances || s_Data.modelData[modelID].texIndex + textures.size() >= c_MaxTextures)
 		{
@@ -463,7 +463,7 @@ namespace Saba {
 
 		s_Data.modelData[modelID].at->modelMat = modelMat;
 		s_Data.modelData[modelID].at->color = color;
-		s_Data.modelData[modelID].at->tid = tid;
+		s_Data.modelData[modelID].at->tid_IsLighted = glm::vec2(tid, isLighted ? 1.0f : 0.0f);
 		s_Data.modelData[modelID].at++;
 		s_Data.modelData[modelID].instancesCount++;
 

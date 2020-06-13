@@ -53,12 +53,8 @@ void ExampleLayer::OnAttach()
 		Saba::ShaderManager::Add(shaderName, filepath);
 		line = Saba::TextReader::GetLine(shaders);
 	} while (!line.second);
-
+	
 	Saba::Ref<Saba::Shader> shader = Saba::ShaderManager::Get("3d");
-	shader->Bind();
-	shader->SetUniformInt1v("u_Tex", texIDs, 32);
-
-	shader = Saba::ShaderManager::Get("3dnolight");
 	shader->Bind();
 	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
@@ -143,13 +139,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::UniformBufferManager::Get("scene")->SetData(&dataScene, sizeof(SceneBufferData), 0);
 
 	Saba::Renderer3D::BeginScene();
-	m_Scene.DrawAllLighted();
-	Saba::Renderer3D::EndScene();
-	Saba::Renderer3D::Flush();
-
-	Saba::ShaderManager::Get("3dnolight")->Bind();
-	Saba::Renderer3D::BeginScene();
-	m_Scene.DrawAllNotLighted();
+	m_Scene.DrawAll();
 	Saba::Renderer3D::EndScene();
 	Saba::Renderer3D::Flush();
 

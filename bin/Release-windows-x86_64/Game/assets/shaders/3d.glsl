@@ -1,14 +1,14 @@
 #type vertex
 #version 420 core
 
-layout(location = 0) in vec3 i_Pos;
+layout(location = 0) in vec4 i_Pos_IsLighted;
 layout(location = 1) in vec3 i_Normal;
 layout(location = 2) in vec2 i_UV;
 layout(location = 3) in vec4 i_Color;
 layout(location = 4) in float i_TID;
 layout(location = 5) in mat4 i_ModelMat;
 layout(location = 9) in vec4 i_MulColor;
-layout(location = 10) in float i_TIDoptional;
+layout(location = 10) in vec2 i_TIDoptional_IsLighted;
 
 layout(std140, binding = 0) uniform ViewProjMat
 {
@@ -23,18 +23,21 @@ out DATA {
 	float tid;
 	vec4 mulColor;
 	float tidop;
+
+	float isLighted;
 } vs_out;
 
 void main()
 {
-	gl_Position = u_ViewProjMat * i_ModelMat * vec4(i_Pos, 1.0f);
-	vs_out.pos = vec3(i_ModelMat * vec4(i_Pos, 1.0f));
+	gl_Position = u_ViewProjMat * i_ModelMat * vec4(i_Pos_IsLighted.xyz, 1.0f);
+	vs_out.pos = vec3(i_ModelMat * vec4(i_Pos_IsLighted.xyz, 1.0f));
 	vs_out.normal = normalize(mat3(transpose(inverse(i_ModelMat))) * i_Normal);
 	vs_out.uv = i_UV;
 	vs_out.color = i_Color;
 	vs_out.tid = i_TID;
 	vs_out.mulColor = i_MulColor;
-	vs_out.tidop = i_TIDoptional;
+	vs_out.tidop = i_TIDoptional_IsLighted.x;
+	vs_out.isLighted = i_Pos_IsLighted.w * i_TIDoptional_IsLighted.y;
 }
 
 #type fragment
@@ -49,7 +52,9 @@ vec3 and(vec3 a, vec3 b); vec3 or(vec3 a, vec3 b); vec3 not(vec3 a, vec3 b);
 vec4 equal(vec4 x, vec4 y); vec4 not_equal(vec4 x, vec4 y); vec4 greater(vec4 x, vec4 y); vec4 less(vec4 x, vec4 y); vec4 greater_equal(vec4 x, vec4 y); vec4 less_equal(vec4 x, vec4 y);
 vec4 and(vec4 a, vec4 b); vec4 or(vec4 a, vec4 b); vec4 not(vec4 a, vec4 b);
 
+
 out vec4 o_Color;
+
 
 in DATA {
 	vec3 pos;
@@ -59,8 +64,11 @@ in DATA {
 	float tid;
 	vec4 mulColor;
 	float tidop;
+
+	float isLighted;
 } fs_in;
 
+////////////////////////////////
 struct Light
 {
 	vec4 pos;
@@ -77,23 +85,28 @@ layout(std140, binding = 1) uniform Scene {
 	Light u_Lights[c_MaxLights];
 };
 
-const float c_Ambient = 0.05f;
-
 uniform sampler2D u_Tex[32];
 
+////////////////////////////////
+const float c_Ambient = 0.05f;
+
+////////////////////////////////
 vec3 CalcLight(const Light light, const vec3 pos, const vec3 normal, const vec3 color, const vec3 viewPos);
 
-
-
+////////////////////////////////
 void main()
 {
 	const vec4 color = texture(u_Tex[int(fs_in.tid + fs_in.tidop + 0.1f)], fs_in.uv) * fs_in.color * fs_in.mulColor;
+
 	vec3 outputColor = color.rgb * c_Ambient;
 	for (int i = 0; i < c_MaxLights; i++)
 		outputColor += CalcLight(u_Lights[i], fs_in.pos, fs_in.normal, color.rgb, u_ViewPos);
-	o_Color = vec4(outputColor, color.a);
+
+	o_Color = vec4(color.rgb * equal(fs_in.isLighted, 0.0f) + outputColor * not_equal(fs_in.isLighted, 0.0f), color.a);
 }
 
+
+////////////////////////////////
 vec3 CalcLight(const Light light, const vec3 pos, const vec3 normal, const vec3 color, const vec3 viewPos)
 {
 	const float shininess = 16.0f; //TODO: material system
@@ -118,8 +131,7 @@ vec3 CalcLight(const Light light, const vec3 pos, const vec3 normal, const vec3 
 }
 
 
-
-
+////////////////////////////////
 float equal(float x, float y) { return 1.0f - abs(sign(x - y)); } float not_equal(float x, float y) { return abs(sign(x - y)); } float greater(float x, float y) { return max(sign(x - y), 0.0f); }
 float less(float x, float y) { return max(sign(y - x), 0.0f); } float greater_equal(float x, float y) { return 1.0f - less(x, y); } float less_equal(float x, float y) { return 1.0f - greater(x, y); }
 float and(float a, float b) { return a * b; } float or(float a, float b) { return min(a + b, 1.0f); } float not(float a) { return 1.0f - a; }

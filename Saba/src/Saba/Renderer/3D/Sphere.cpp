@@ -18,7 +18,7 @@ namespace Saba {
 		if (s_ModelID == 255)
 		{
 			CreateSphereMesh();
-			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices, {});
+			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices);
 		}
 		SetDirection(dir);
 	}
@@ -28,14 +28,14 @@ namespace Saba {
 		if (s_ModelID == 255)
 		{
 			CreateSphereMesh();
-			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices, {});
+			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices);
 		}
 		SetDirection(dir);
 	}
 	void Sphere::Draw()
 	{
 		const glm::mat4 modelMat = glm::scale(glm::translate(m_RotateFromOrigin, m_Pos) * m_Rotate, m_Size);
-		Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, { m_Texture });
+		Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, { m_Texture }, m_IsLighted);
 	}
 
 	void Sphere::SetPos(glm::vec3 pos)
