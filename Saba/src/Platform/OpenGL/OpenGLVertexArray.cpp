@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "OpenGLVertexArray.h"
+#include "OpenGLError.h"
 
 #include <glad\glad.h>
 
@@ -28,7 +29,7 @@ namespace Saba {
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		glCreateVertexArrays(1, &m_ID);
+		GLCall(glCreateVertexArrays(1, &m_ID));
 	}
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
@@ -37,16 +38,16 @@ namespace Saba {
 
 	void OpenGLVertexArray::Bind() const
 	{
-		glBindVertexArray(m_ID);
+		GLCall(glBindVertexArray(m_ID));
 	}
 	void OpenGLVertexArray::Unbind() const
 	{
-		glBindVertexArray(0);
+		GLCall(glBindVertexArray(0));
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& buffer)
 	{
-		glBindVertexArray(m_ID);
+		GLCall(glBindVertexArray(m_ID));
 		buffer->Bind();
 
 		for (const auto& element : buffer->GetLayout())
@@ -55,9 +56,9 @@ namespace Saba {
 			{
 				for (int i = 0; i < 3; i++)
 				{
-					glEnableVertexAttribArray(m_Index);
-					glVertexAttribPointer(m_Index, 3, GL_FLOAT, element.Normalized, buffer->GetLayout().GetStride(), (const void*)(element.Offset + i * sizeof(glm::vec3)));
-					glVertexAttribDivisor(m_Index, element.AttribDivisor);
+					GLCall(glEnableVertexAttribArray(m_Index));
+					GLCall(glVertexAttribPointer(m_Index, 3, GL_FLOAT, element.Normalized, buffer->GetLayout().GetStride(), (const void*)(element.Offset + i * sizeof(glm::vec3))));
+					GLCall(glVertexAttribDivisor(m_Index, element.AttribDivisor));
 					m_Index++;
 				}
 			}
@@ -65,17 +66,17 @@ namespace Saba {
 			{
 				for (int i = 0; i < 4; i++)
 				{
-					glEnableVertexAttribArray(m_Index);
-					glVertexAttribPointer(m_Index, 4, GL_FLOAT, element.Normalized, buffer->GetLayout().GetStride(), (const void*)(element.Offset + i * sizeof(glm::vec4)));
-					glVertexAttribDivisor(m_Index, element.AttribDivisor);
+					GLCall(glEnableVertexAttribArray(m_Index));
+					GLCall(glVertexAttribPointer(m_Index, 4, GL_FLOAT, element.Normalized, buffer->GetLayout().GetStride(), (const void*)(element.Offset + i * sizeof(glm::vec4))));
+					GLCall(glVertexAttribDivisor(m_Index, element.AttribDivisor));
 					m_Index++;
 				}
 			}
 			else
 			{
-				glEnableVertexAttribArray(m_Index);
-				glVertexAttribPointer(m_Index, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized, buffer->GetLayout().GetStride(), (const void*)element.Offset);
-				glVertexAttribDivisor(m_Index, element.AttribDivisor);
+				GLCall(glEnableVertexAttribArray(m_Index));
+				GLCall(glVertexAttribPointer(m_Index, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized, buffer->GetLayout().GetStride(), (const void*)element.Offset));
+				GLCall(glVertexAttribDivisor(m_Index, element.AttribDivisor));
 				m_Index++;
 			}
 		}
@@ -84,7 +85,7 @@ namespace Saba {
 	}
 	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& buffer)
 	{
-		glBindVertexArray(m_ID);
+		GLCall(glBindVertexArray(m_ID));
 		buffer->Bind();
 
 		m_IndexBuffer = buffer;

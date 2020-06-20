@@ -119,7 +119,7 @@ namespace Saba {
 		constexpr static uint32_t c_MaxTriangleCount = 12000;
 		constexpr static uint32_t c_MaxQuadCount = 9000;
 		constexpr static uint32_t c_MaxModelInstances = 100;
-		constexpr static uint8_t c_MaxTextures = 32;
+		constexpr static uint8_t c_MaxTextures = 29;
 		struct VertexData
 		{
 			glm::vec4 pos_IsLighted;

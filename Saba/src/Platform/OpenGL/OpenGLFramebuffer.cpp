@@ -2,6 +2,7 @@
 #include "OpenGLFramebuffer.h"
 #include "OpenGLTexture.h"
 #include "OpenGLRenderbuffer.h"
+#include "OpenGLError.h"
 
 #include <glad\glad.h>
 
@@ -9,7 +10,7 @@ namespace Saba {
 
 	OpenGLFramebuffer::OpenGLFramebuffer()
 	{
-		glCreateFramebuffers(1, &m_ID);
+		GLCall(glCreateFramebuffers(1, &m_ID));
 	}
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
@@ -18,115 +19,87 @@ namespace Saba {
 
 	void OpenGLFramebuffer::Bind() const
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, m_ID);
+		GLCall(glBindFramebuffer(GL_FRAMEBUFFER, m_ID));
 	}
 	void OpenGLFramebuffer::Unbind() const
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 	void OpenGLFramebuffer::BindRead() const
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_ID);
+		GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, m_ID));
 	}
 	void OpenGLFramebuffer::UnbindRead() const
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
 	}
 	void OpenGLFramebuffer::BindWrite() const
 	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ID);
+		GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ID));
 	}
 	void OpenGLFramebuffer::UnbindWrite() const
 	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+	}
+
+	void OpenGLFramebuffer::DrawMode(Attachment attachments)
+	{
+		GLCall(glDrawBuffer(AttachmentInOpenGL(attachments)));
+	}
+
+	void OpenGLFramebuffer::ReadMode(Attachment attachments)
+	{
+		GLCall(glReadBuffer(AttachmentInOpenGL(attachments)));
 	}
 
 	void OpenGLFramebuffer::AttachTexture(Ref<Texture2D> texture, Attachment attachment)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, AttachmentInOpenGL(attachment), GL_TEXTURE_2D, dynamic_cast<OpenGLTexture2D*>(&*texture)->m_ID, 0);
+		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, AttachmentInOpenGL(attachment), GL_TEXTURE_2D, dynamic_cast<OpenGLTexture2D*>(&*texture)->m_ID, 0));
 	}
 	void OpenGLFramebuffer::AttachRenderbuffer(Ref<Renderbuffer> renderbuffer, Attachment attachment)
 	{
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, AttachmentInOpenGL(attachment), GL_RENDERBUFFER, dynamic_cast<OpenGLRenderbuffer*>(&*renderbuffer)->m_ID);
+		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, AttachmentInOpenGL(attachment), GL_RENDERBUFFER, dynamic_cast<OpenGLRenderbuffer*>(&*renderbuffer)->m_ID));
 	}
 
 	uint32_t OpenGLFramebuffer::AttachmentInOpenGL(Attachment attachment)
 	{
-		switch (attachment)
-		{
-			case Saba::Framebuffer::Attachment::None:
-				return 0;
-			case Saba::Framebuffer::Attachment::Color0:
-				return GL_COLOR_ATTACHMENT0;
-			case Saba::Framebuffer::Attachment::Color1:
-				return GL_COLOR_ATTACHMENT1;
-			case Saba::Framebuffer::Attachment::Color2:
-				return GL_COLOR_ATTACHMENT2;
-			case Saba::Framebuffer::Attachment::Color3:
-				return GL_COLOR_ATTACHMENT3;
-			case Saba::Framebuffer::Attachment::Color4:
-				return GL_COLOR_ATTACHMENT4;
-			case Saba::Framebuffer::Attachment::Color5:
-				return GL_COLOR_ATTACHMENT5;
-			case Saba::Framebuffer::Attachment::Color6:
-				return GL_COLOR_ATTACHMENT6;
-			case Saba::Framebuffer::Attachment::Color7:
-				return GL_COLOR_ATTACHMENT7;
-			case Saba::Framebuffer::Attachment::Color8:
-				return GL_COLOR_ATTACHMENT8;
-			case Saba::Framebuffer::Attachment::Color9:
-				return GL_COLOR_ATTACHMENT9;
-			case Saba::Framebuffer::Attachment::Color10:
-				return GL_COLOR_ATTACHMENT10;
-			case Saba::Framebuffer::Attachment::Color11:
-				return GL_COLOR_ATTACHMENT11;
-			case Saba::Framebuffer::Attachment::Color12:
-				return GL_COLOR_ATTACHMENT12;
-			case Saba::Framebuffer::Attachment::Color13:
-				return GL_COLOR_ATTACHMENT13;
-			case Saba::Framebuffer::Attachment::Color14:
-				return GL_COLOR_ATTACHMENT14;
-			case Saba::Framebuffer::Attachment::Color15:
-				return GL_COLOR_ATTACHMENT15;
-			case Saba::Framebuffer::Attachment::Color16:
-				return GL_COLOR_ATTACHMENT16;
-			case Saba::Framebuffer::Attachment::Color17:
-				return GL_COLOR_ATTACHMENT17;
-			case Saba::Framebuffer::Attachment::Color18:
-				return GL_COLOR_ATTACHMENT18;
-			case Saba::Framebuffer::Attachment::Color19:
-				return GL_COLOR_ATTACHMENT19;
-			case Saba::Framebuffer::Attachment::Color20:
-				return GL_COLOR_ATTACHMENT20;
-			case Saba::Framebuffer::Attachment::Color21:
-				return GL_COLOR_ATTACHMENT21;
-			case Saba::Framebuffer::Attachment::Color22:
-				return GL_COLOR_ATTACHMENT22;
-			case Saba::Framebuffer::Attachment::Color23:
-				return GL_COLOR_ATTACHMENT23;
-			case Saba::Framebuffer::Attachment::Color24:
-				return GL_COLOR_ATTACHMENT24;
-			case Saba::Framebuffer::Attachment::Color25:
-				return GL_COLOR_ATTACHMENT25;
-			case Saba::Framebuffer::Attachment::Color26:
-				return GL_COLOR_ATTACHMENT26;
-			case Saba::Framebuffer::Attachment::Color27:
-				return GL_COLOR_ATTACHMENT27;
-			case Saba::Framebuffer::Attachment::Color28:
-				return GL_COLOR_ATTACHMENT28;
-			case Saba::Framebuffer::Attachment::Color29:
-				return GL_COLOR_ATTACHMENT29;
-			case Saba::Framebuffer::Attachment::Color30:
-				return GL_COLOR_ATTACHMENT30;
-			case Saba::Framebuffer::Attachment::Color31:
-				return GL_COLOR_ATTACHMENT31;
-			case Saba::Framebuffer::Attachment::Depth:
-				return GL_DEPTH_ATTACHMENT;
-			case Saba::Framebuffer::Attachment::Stencil:
-				return GL_STENCIL_ATTACHMENT;
-			case Saba::Framebuffer::Attachment::DepthStencil:
-				return GL_DEPTH_STENCIL_ATTACHMENT;
-		}
-		return 0;
+		GLenum a = 0;
+		if ((uint64_t)attachment & (uint64_t)Attachment::None) a |= GL_NONE;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color0) a |= GL_COLOR_ATTACHMENT0;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color1) a |= GL_COLOR_ATTACHMENT1;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color2) a |= GL_COLOR_ATTACHMENT2;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color3) a |= GL_COLOR_ATTACHMENT3;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color4) a |= GL_COLOR_ATTACHMENT4;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color5) a |= GL_COLOR_ATTACHMENT5;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color6) a |= GL_COLOR_ATTACHMENT6;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color7) a |= GL_COLOR_ATTACHMENT7;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color8) a |= GL_COLOR_ATTACHMENT8;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color9) a |= GL_COLOR_ATTACHMENT9;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color10) a |= GL_COLOR_ATTACHMENT10;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color11) a |= GL_COLOR_ATTACHMENT11;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color12) a |= GL_COLOR_ATTACHMENT12;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color13) a |= GL_COLOR_ATTACHMENT13;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color14) a |= GL_COLOR_ATTACHMENT14;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color15) a |= GL_COLOR_ATTACHMENT15;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color16) a |= GL_COLOR_ATTACHMENT16;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color17) a |= GL_COLOR_ATTACHMENT17;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color18) a |= GL_COLOR_ATTACHMENT18;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color19) a |= GL_COLOR_ATTACHMENT19;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color20) a |= GL_COLOR_ATTACHMENT20;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color21) a |= GL_COLOR_ATTACHMENT21;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color22) a |= GL_COLOR_ATTACHMENT22;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color23) a |= GL_COLOR_ATTACHMENT23;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color24) a |= GL_COLOR_ATTACHMENT24;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color25) a |= GL_COLOR_ATTACHMENT25;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color26) a |= GL_COLOR_ATTACHMENT26;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color27) a |= GL_COLOR_ATTACHMENT27;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color28) a |= GL_COLOR_ATTACHMENT28;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color29) a |= GL_COLOR_ATTACHMENT29;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color30) a |= GL_COLOR_ATTACHMENT30;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Color31) a |= GL_COLOR_ATTACHMENT31;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Depth) a |= GL_DEPTH_ATTACHMENT;
+		if ((uint64_t)attachment & (uint64_t)Attachment::Stencil) a |= GL_STENCIL_ATTACHMENT;
+		if ((uint64_t)attachment & (uint64_t)Attachment::DepthStencil) a |= GL_DEPTH_STENCIL_ATTACHMENT;
+		return a;
 	}
 }

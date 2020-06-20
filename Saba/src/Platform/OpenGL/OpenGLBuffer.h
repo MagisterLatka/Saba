@@ -12,8 +12,8 @@ namespace Saba {
 		OpenGLVertexBuffer(float* data, uint32_t size, BufferUsage usage);
 		virtual ~OpenGLVertexBuffer();
 
-		void Bind() const override;
-		void Unbind() const override;
+		virtual void Bind() const override;
+		virtual void Unbind() const override;
 
 		virtual void SetData(void* data, uint32_t size, uint32_t offset) override;
 
@@ -30,8 +30,8 @@ namespace Saba {
 		OpenGLIndexBuffer(uint32_t* data, uint32_t count, BufferUsage usage);
 		virtual ~OpenGLIndexBuffer();
 
-		void Bind() const override;
-		void Unbind() const override;
+		virtual void Bind() const override;
+		virtual void Unbind() const override;
 
 		virtual void SetData(void* data, uint32_t size, uint32_t offset) override;
 
@@ -47,8 +47,8 @@ namespace Saba {
 		OpenGLUniformBuffer(void* data, uint32_t size, BufferUsage usage);
 		virtual ~OpenGLUniformBuffer();
 
-		void Bind() const override;
-		void Unbind() const override;
+		virtual void Bind() const override;
+		virtual void Unbind() const override;
 
 		virtual void SetBinding(uint8_t binding) override;
 

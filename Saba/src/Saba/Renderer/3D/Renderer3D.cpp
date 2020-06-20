@@ -59,7 +59,6 @@ namespace Saba {
 
 
 		s_Data.vertexArrayQuad = VertexArray::Create();
-		s_Data.vertexArrayTriangle->AddVertexBuffer(vbo);
 		Ref<VertexBuffer> vbo2 = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), Dynamic);
 		vbo2->SetLayout({
 			{"i_Pos_IsLighted", ShaderDataType::Float4},
@@ -90,7 +89,7 @@ namespace Saba {
 		s_Data.vertexArrayQuad->SetIndexBuffer(ibo);
 
 
-		Ref<Texture2D> whiteTex = Texture2D::Create(1, 1);
+		Ref<Texture2D> whiteTex = Texture2D::Create(1, 1, Saba::Texture::Format::RGBA8);
 		uint32_t texData = 0xffffffff;
 		whiteTex->SetData(&texData, sizeof(uint32_t));
 		s_Data.texturesTriangle[0] = whiteTex;

@@ -18,14 +18,18 @@ namespace Saba {
 		virtual void SetSpecularColor(glm::vec3 color) = 0;
 		inline virtual glm::vec3 GetSpecularColor() const { return m_SpecularColor; }
 
+		virtual glm::mat4 SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace) = 0;
+		
 		struct LightData
 		{
 			glm::vec4 pos;
 			glm::vec4 dir;
-			alignas(16) glm::vec3 diffuseColor;
-			alignas(16) glm::vec3 specularColor;
-			alignas(16) glm::vec2 cutsoff;
-			alignas(16) glm::vec3 attenuation;
+			glm::vec4 diffuseColor;
+			glm::vec4 specularColor;
+			glm::vec4 cutsoff;
+			glm::vec4 attenuation;
+			glm::vec4 shadowTextureSpace;
+			glm::mat4 dirLightSpace;
 		};
 		virtual LightData* GetData() = 0;
 		virtual LightData* GetData(LightData* bufferPtr) = 0;
@@ -35,6 +39,8 @@ namespace Saba {
 		glm::vec3 m_DiffuseColor;
 		glm::vec3 m_SpecularColor;
 		float m_CutOff, m_OuterCutOff;
+
+		std::pair<glm::vec2, glm::vec2> m_ShadowTextureSpace;
 
 		float m_AttConstant, m_AttLinear, m_AttQuadratic;
 	};

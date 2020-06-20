@@ -6,7 +6,7 @@ namespace Saba {
 	{
 	public:
 		enum class Format {
-			None = 0, RGB, RGBA, RGB16, RGBA16, DEPTH, DEPTH16, DEPTH24, DEPTH32, DEPTH24STENCIL8
+			None = 0, RGB, RGBA, RGB16, RGBA16, Depth, Depth16, Depth24, Depth32, Depth24Stencil8
 		};
 	public:
 		virtual ~Renderbuffer() = default;

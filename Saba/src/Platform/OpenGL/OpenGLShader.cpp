@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "OpenGLShader.h"
+#include "OpenGLError.h"
 
 #include <glm\gtc\type_ptr.hpp>
 
@@ -9,6 +10,8 @@ namespace Saba {
 	{
 		if (type == "vertex")
 			return GL_VERTEX_SHADER;
+		else if (type == "geometry")
+			return GL_GEOMETRY_SHADER;
 		else if (type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
 
@@ -34,62 +37,62 @@ namespace Saba {
 
 	void OpenGLShader::Bind() const
 	{
-		glUseProgram(m_ID);
+		GLCall(glUseProgram(m_ID));
 	}
 	void OpenGLShader::Unbind() const
 	{
-		glUseProgram(0);
+		GLCall(glUseProgram(0));
 	}
 
 	void OpenGLShader::SetUniformFloat1(const std::string& name, float value)
 	{
-		glUniform1f(GetUniformLocation(name), value);
+		GLCall(glUniform1f(GetUniformLocation(name), value));
 	}
 	void OpenGLShader::SetUniformFloat1v(const std::string& name, const float* value, int count)
 	{
-		glUniform1fv(GetUniformLocation(name), count, value);
+		GLCall(glUniform1fv(GetUniformLocation(name), count, value));
 	}
 	void OpenGLShader::SetUniformFloat2(const std::string& name, const glm::vec2& value)
 	{
-		glUniform2f(GetUniformLocation(name), value.x, value.y);
+		GLCall(glUniform2f(GetUniformLocation(name), value.x, value.y));
 	}
 	void OpenGLShader::SetUniformFloat3(const std::string& name, const glm::vec3& value)
 	{
-		glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
+		GLCall(glUniform3f(GetUniformLocation(name), value.x, value.y, value.z));
 	}
 	void OpenGLShader::SetUniformFloat4(const std::string& name, const glm::vec4& value)
 	{
-		glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w);
+		GLCall(glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w));
 	}
 
 	void OpenGLShader::SetUniformInt1(const std::string& name, int value)
 	{
-		glUniform1i(GetUniformLocation(name), value);
+		GLCall(glUniform1i(GetUniformLocation(name), value));
 	}
 	void OpenGLShader::SetUniformInt1v(const std::string& name, const int* value, int count)
 	{
-		glUniform1iv(GetUniformLocation(name), count, value);
+		GLCall(glUniform1iv(GetUniformLocation(name), count, value));
 	}
 	void OpenGLShader::SetUniformInt2(const std::string& name, const glm::ivec2& value)
 	{
-		glUniform2i(GetUniformLocation(name), value.x, value.y);
+		GLCall(glUniform2i(GetUniformLocation(name), value.x, value.y));
 	}
 	void OpenGLShader::SetUniformInt3(const std::string& name, const glm::ivec3& value)
 	{
-		glUniform3i(GetUniformLocation(name), value.x, value.y, value.z);
+		GLCall(glUniform3i(GetUniformLocation(name), value.x, value.y, value.z));
 	}
 	void OpenGLShader::SetUniformInt4(const std::string& name, const glm::ivec4& value)
 	{
-		glUniform4i(GetUniformLocation(name), value.x, value.y, value.z, value.w);
+		GLCall(glUniform4i(GetUniformLocation(name), value.x, value.y, value.z, value.w));
 	}
 
 	void OpenGLShader::SetUniformMat3(const std::string& name, const glm::mat3& value)
 	{
-		glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+		GLCall(glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value)));
 	}
 	void OpenGLShader::SetUniformMat4(const std::string& name, const glm::mat4& value)
 	{
-		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+		GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value)));
 	}
 
 	std::string OpenGLShader::Read(const std::string& filepath)
@@ -154,21 +157,25 @@ namespace Saba {
 			GLenum shader = glCreateShader(type);
 
 			const GLchar* src = source.c_str();
-			glShaderSource(shader, 1, &src, nullptr);
-			glCompileShader(shader);
+			GLCall(glShaderSource(shader, 1, &src, nullptr));
+			GLCall(glCompileShader(shader));
 
 			int result;
-			glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+			GLCall(glGetShaderiv(shader, GL_COMPILE_STATUS, &result));
 			if (result == GL_FALSE)
 			{
 				int lenght;
-				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &lenght);
+				GLCall(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &lenght));
 				char* message = (char*)malloc(lenght);
-				glGetShaderInfoLog(shader, lenght, &lenght, message);
-				glDeleteShader(shader);
+				GLCall(glGetShaderInfoLog(shader, lenght, &lenght, message));
+				GLCall(glDeleteShader(shader));
 				if (type == GL_VERTEX_SHADER)
 				{
 					SB_CORE_FATAL("Failed to compile vertex shader");
+				}
+				else if (type == GL_GEOMETRY_SHADER)
+				{
+					SB_CORE_FATAL("Failed to compile geometry shader");
 				}
 				else if (type == GL_FRAGMENT_SHADER)
 				{
@@ -178,24 +185,26 @@ namespace Saba {
 				free(message);
 			}
 
-			glAttachShader(m_ID, shader);
-			glDeleteShader(shader); //Only marked as TO_DELETE, will be destroyed when detached
+			GLCall(glAttachShader(m_ID, shader));
+			GLCall(glDeleteShader(shader)); //Only marked as TO_DELETE, will be destroyed when detached
 			shaders[index++] = shader;
 		}
 
-		glLinkProgram(m_ID);
+		GLCall(glLinkProgram(m_ID));
 		for (int i = 0; i < index; i++)
-			glDetachShader(m_ID, shaders[i]);
+		{
+			GLCall(glDetachShader(m_ID, shaders[i]));
+		}
 
 		int result;
-		glGetProgramiv(m_ID, GL_LINK_STATUS, &result);
+		GLCall(glGetProgramiv(m_ID, GL_LINK_STATUS, &result));
 		if (result == GL_FALSE)
 		{
 			int lenght;
-			glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &lenght);
+			GLCall(glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &lenght));
 			char* message = (char*)malloc(lenght);
-			glGetProgramInfoLog(m_ID, lenght, &lenght, message);
-			glDeleteProgram(m_ID);
+			GLCall(glGetProgramInfoLog(m_ID, lenght, &lenght, message));
+			GLCall(glDeleteProgram(m_ID));
 			SB_CORE_FATAL("Failed to link shader");
 			SB_CORE_ASSERT(false, "{0}", message);
 			free(message);

@@ -18,6 +18,9 @@ namespace Saba {
 		virtual void BindWrite() const override;
 		virtual void UnbindWrite() const override;
 
+		virtual void DrawMode(Attachment attachments) override;
+		virtual void ReadMode(Attachment attachments) override;
+
 		virtual void AttachTexture(Ref<Texture2D> texture, Attachment attachment) override;
 		virtual void AttachRenderbuffer(Ref<Renderbuffer> renderbuffer, Attachment attachment) override;
 	private:

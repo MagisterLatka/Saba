@@ -1,5 +1,7 @@
 2d, 2D.glsl
 3d, 3D.glsl
+basic3d, basic3D.glsl
 basic, basic.glsl
 particle, particle.glsl
 post, postProcess.glsl
+dirShadow, dirShadow.glsl

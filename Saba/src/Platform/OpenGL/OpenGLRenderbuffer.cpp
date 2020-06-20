@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "OpenGLRenderbuffer.h"
+#include "OpenGLError.h"
 
 #include <glad\glad.h>
 
@@ -8,9 +9,9 @@ namespace Saba {
 	OpenGLRenderbuffer::OpenGLRenderbuffer(uint32_t width, uint32_t height, Format format)
 		: m_Width(width), m_Height(height)
 	{
-		glCreateRenderbuffers(1, &m_ID);
-		glBindRenderbuffer(GL_RENDERBUFFER, m_ID);
-		glRenderbufferStorage(GL_RENDERBUFFER, FormatInOpenGL(format), width, height);
+		GLCall(glCreateRenderbuffers(1, &m_ID));
+		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_ID));
+		GLCall(glRenderbufferStorage(GL_RENDERBUFFER, FormatInOpenGL(format), width, height));
 	}
 	OpenGLRenderbuffer::~OpenGLRenderbuffer()
 	{
@@ -19,11 +20,11 @@ namespace Saba {
 
 	void OpenGLRenderbuffer::Bind() const
 	{
-		glBindRenderbuffer(GL_RENDERBUFFER, m_ID);
+		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, m_ID));
 	}
 	void OpenGLRenderbuffer::Unbind() const
 	{
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 	}
 
 	uint32_t OpenGLRenderbuffer::FormatInOpenGL(Format format)
@@ -40,15 +41,15 @@ namespace Saba {
 				return GL_RGB16F;
 			case Saba::Renderbuffer::Format::RGBA16:
 				return GL_RGBA16F;
-			case Saba::Renderbuffer::Format::DEPTH:
+			case Saba::Renderbuffer::Format::Depth:
 				return GL_DEPTH_COMPONENT;
-			case Saba::Renderbuffer::Format::DEPTH16:
+			case Saba::Renderbuffer::Format::Depth16:
 				return GL_DEPTH_COMPONENT16;
-			case Saba::Renderbuffer::Format::DEPTH24:
+			case Saba::Renderbuffer::Format::Depth24:
 				return GL_DEPTH_COMPONENT24;
-			case Saba::Renderbuffer::Format::DEPTH32:
+			case Saba::Renderbuffer::Format::Depth32:
 				return GL_DEPTH_COMPONENT32F;
-			case Saba::Renderbuffer::Format::DEPTH24STENCIL8:
+			case Saba::Renderbuffer::Format::Depth24Stencil8:
 				return GL_DEPTH24_STENCIL8;
 		}
 		return 0;

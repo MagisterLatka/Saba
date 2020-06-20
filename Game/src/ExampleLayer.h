@@ -15,9 +15,13 @@ private:
 	bool OnKeyPress(Saba::KeyPressedEvent& e);
 private:
 	Saba::PerspectiveCameraControler m_CameraControler;
+
 	Saba::Scene3D m_Scene;
 	Saba::Ref<Saba::Framebuffer> m_SceneFramebuffer;
 	Saba::Ref<Saba::Texture2D> m_SceneFramebufferTexture;
 	Saba::Ref<Saba::Renderbuffer> m_SceneFramebufferRenderbuffer;
 	float m_Exposure = 1.0f;
+
+	Saba::Ref<Saba::Framebuffer> m_DirShadowFramebuffer;
+	Saba::Ref<Saba::Texture2D> m_DirShadowTexture;
 };
