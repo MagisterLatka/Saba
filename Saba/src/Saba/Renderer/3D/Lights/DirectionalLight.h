@@ -15,12 +15,12 @@ namespace Saba {
 		virtual void SetDiffuseColor(glm::vec3 color) override;
 		virtual void SetSpecularColor(glm::vec3 color) override;
 
-		virtual glm::mat4 SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace) override;
+		virtual glm::mat4* SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace) override;
 
 		virtual LightData* GetData() override;
 		virtual LightData* GetData(LightData* bufferPtr) override;
 	private:
-		static constexpr float c_NearPlane = 1.0f, c_FarPlane = 20.0f;
+		static constexpr float c_NearPlane = 0.5f, c_FarPlane = 20.0f;
 		glm::mat4 m_LightSpace;
 	};
 }

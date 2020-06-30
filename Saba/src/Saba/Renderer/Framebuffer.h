@@ -30,6 +30,7 @@ namespace Saba {
 		virtual void ReadMode(Attachment attachments) = 0;
 
 		virtual void AttachTexture(Ref<Texture2D> texture, Attachment attachment) = 0;
+		virtual void AttachTexture(Ref<TextureCubemap> texture, Attachment attachment) = 0;
 		virtual void AttachRenderbuffer(Ref<Renderbuffer> renderbuffer, Attachment attachment) = 0;
 
 		static Ref<Framebuffer> Create();

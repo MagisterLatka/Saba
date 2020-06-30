@@ -10,6 +10,7 @@ namespace Saba {
 	public:
 		OpenGLShader(const std::string& filepath);
 		OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc);
+		OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc, const std::string& geometrySrc);
 		virtual ~OpenGLShader();
 
 		virtual void Bind() const override;

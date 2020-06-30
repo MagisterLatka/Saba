@@ -98,7 +98,7 @@ namespace Saba {
 
 	bool PerspectiveCameraControler::OnMouseScrolled(MouseScrolledEvent& e)
 	{
-		m_Zoom -= e.GetYOffset();
+		m_Zoom -= e.GetYOffset() * m_ScrollSensivity;
 		if (m_Zoom > 90.0f) m_Zoom = 90.0f;
 		if (m_Zoom < 1.0f)  m_Zoom = 1.0f;
 		return false;

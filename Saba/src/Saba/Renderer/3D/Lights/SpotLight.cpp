@@ -3,7 +3,21 @@
 
 namespace Saba {
 
-	SpotLight::SpotLight(glm::vec3 pos, glm::vec3 dir, float cutOff, float outerCutOff, float range, glm::vec3 diffuseColor, glm::vec3 specularColor)
+	SpotLight::SpotLight(uint32_t objectID, glm::vec3 pos, glm::vec3 dir, float cutOff, float outerCutOff, float range, glm::vec3 diffuseColor, glm::vec3 specularColor)
+		: Light(objectID)
+	{
+		m_Pos = pos;
+		m_Dir = dir;
+		m_CutOff = glm::cos(glm::radians(cutOff));
+		m_OuterCutOff = glm::cos(glm::radians(outerCutOff));
+		m_DiffuseColor = diffuseColor;
+		m_SpecularColor = specularColor;
+		m_AttConstant = 1.0f;
+		m_AttLinear = 4.5f / range;
+		m_AttQuadratic = 75.0f / (range * range);
+	}
+	SpotLight::SpotLight(Scene3DObject* object, glm::vec3 pos, glm::vec3 dir, float cutOff, float outerCutOff, float range, glm::vec3 diffuseColor, glm::vec3 specularColor)
+		: Light(object)
 	{
 		m_Pos = pos;
 		m_Dir = dir;
@@ -33,11 +47,11 @@ namespace Saba {
 		m_SpecularColor = color;
 	}
 
-	glm::mat4 SpotLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
+	glm::mat4* SpotLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
 	{
 		m_ShadowTextureSpace = shadowTextureSpace;
 
-		return glm::mat4(1.0f);
+		return nullptr;
 	}
 
 	Light::LightData* SpotLight::GetData()
@@ -47,7 +61,7 @@ namespace Saba {
 		data->dir = glm::vec4(m_Dir, 1.0f);
 		data->diffuseColor = glm::vec4(m_DiffuseColor, 0.0f);
 		data->specularColor = glm::vec4(m_SpecularColor, 0.0f);
-		data->cutsoff = glm::vec4(m_CutOff, m_OuterCutOff, 0.0f, 0.0f);
+		data->cutsoff_FarPlane = glm::vec4(m_CutOff, m_OuterCutOff, 0.0f, 0.0f);
 		data->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		data->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
 		data->dirLightSpace = glm::mat4(1.0f);
@@ -59,7 +73,7 @@ namespace Saba {
 		bufferPtr->dir = glm::vec4(m_Dir, 1.0f);
 		bufferPtr->diffuseColor = glm::vec4(m_DiffuseColor, 0.0f);
 		bufferPtr->specularColor = glm::vec4(m_SpecularColor, 0.0f);
-		bufferPtr->cutsoff = glm::vec4(m_CutOff, m_OuterCutOff, 0.0f, 0.0f);
+		bufferPtr->cutsoff_FarPlane = glm::vec4(m_CutOff, m_OuterCutOff, 0.0f, 0.0f);
 		bufferPtr->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		bufferPtr->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
 		bufferPtr->dirLightSpace = glm::mat4(1.0f);

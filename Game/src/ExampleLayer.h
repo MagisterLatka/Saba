@@ -22,6 +22,11 @@ private:
 	Saba::Ref<Saba::Renderbuffer> m_SceneFramebufferRenderbuffer;
 	float m_Exposure = 1.0f;
 
+	static constexpr int m_MaxDirLights = 4;
 	Saba::Ref<Saba::Framebuffer> m_DirShadowFramebuffer;
 	Saba::Ref<Saba::Texture2D> m_DirShadowTexture;
+
+	static constexpr int m_MaxPointLights = 1;
+	Saba::Ref<Saba::Framebuffer> m_PointShadowFramebuffer;
+	Saba::Ref<Saba::TextureCubemap> m_PointShadowTexture;
 };

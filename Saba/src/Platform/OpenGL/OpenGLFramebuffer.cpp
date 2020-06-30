@@ -56,6 +56,10 @@ namespace Saba {
 	{
 		GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, AttachmentInOpenGL(attachment), GL_TEXTURE_2D, dynamic_cast<OpenGLTexture2D*>(&*texture)->m_ID, 0));
 	}
+	void OpenGLFramebuffer::AttachTexture(Ref<TextureCubemap> texture, Attachment attachment)
+	{
+		GLCall(glFramebufferTexture(GL_FRAMEBUFFER, AttachmentInOpenGL(attachment), dynamic_cast<OpenGLTextureCubemap*>(&*texture)->m_ID, 0));
+	}
 	void OpenGLFramebuffer::AttachRenderbuffer(Ref<Renderbuffer> renderbuffer, Attachment attachment)
 	{
 		GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, AttachmentInOpenGL(attachment), GL_RENDERBUFFER, dynamic_cast<OpenGLRenderbuffer*>(&*renderbuffer)->m_ID));

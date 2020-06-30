@@ -6,6 +6,7 @@
 namespace Saba {
 
 	DirectionalLight::DirectionalLight(glm::vec3 dir, glm::vec3 diffuseColor, glm::vec3 specularColor)
+		: Light(-1)
 	{
 		m_Dir = glm::normalize(dir);
 		m_DiffuseColor = diffuseColor;
@@ -38,11 +39,11 @@ namespace Saba {
 		m_SpecularColor = color;
 	}
 
-	glm::mat4 DirectionalLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
+	glm::mat4* DirectionalLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
 	{
 		m_ShadowTextureSpace = shadowTextureSpace;
 
-		return m_LightSpace;
+		return &m_LightSpace;
 	}
 	Light::LightData* DirectionalLight::GetData()
 	{
@@ -51,7 +52,7 @@ namespace Saba {
 		data->dir = glm::vec4(m_Dir, 1.0f);
 		data->diffuseColor = glm::vec4(m_DiffuseColor, 0.0f);
 		data->specularColor = glm::vec4(m_SpecularColor, 0.0f);
-		data->cutsoff = glm::vec4(0.0f);
+		data->cutsoff_FarPlane = glm::vec4(0.0f);
 		data->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		data->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
 		data->dirLightSpace = m_LightSpace;
@@ -63,7 +64,7 @@ namespace Saba {
 		bufferPtr->dir = glm::vec4(m_Dir, 1.0f);
 		bufferPtr->diffuseColor = glm::vec4(m_DiffuseColor, 0.0f);
 		bufferPtr->specularColor = glm::vec4(m_SpecularColor, 0.0f);
-		bufferPtr->cutsoff = glm::vec4(0.0f);
+		bufferPtr->cutsoff_FarPlane = glm::vec4(0.0f);
 		bufferPtr->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		bufferPtr->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
 		bufferPtr->dirLightSpace = m_LightSpace;

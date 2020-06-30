@@ -28,6 +28,7 @@ namespace Saba {
 		virtual void SetUniformMat4(const std::string& name, const glm::mat4& value) = 0;
 
 		static Ref<Shader> Create(const std::string& vertexSrc, const std::string& fragmentSrc);
+		static Ref<Shader> Create(const std::string& vertexSrc, const std::string& fragmentSrc, const std::string& geometrySrc);
 		static Ref<Shader> Create(const std::string& filepath);
 	};
 

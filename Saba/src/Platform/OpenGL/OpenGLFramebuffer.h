@@ -22,6 +22,7 @@ namespace Saba {
 		virtual void ReadMode(Attachment attachments) override;
 
 		virtual void AttachTexture(Ref<Texture2D> texture, Attachment attachment) override;
+		virtual void AttachTexture(Ref<TextureCubemap> texture, Attachment attachment) override;
 		virtual void AttachRenderbuffer(Ref<Renderbuffer> renderbuffer, Attachment attachment) override;
 	private:
 		static uint32_t AttachmentInOpenGL(Attachment attachment);

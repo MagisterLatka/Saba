@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "PointLight.h"
+#include <glm\gtc\matrix_transform.hpp>
 
 namespace Saba {
 
-	PointLight::PointLight(glm::vec3 pos, float range, glm::vec3 diffuseColor, glm::vec3 specularColor)
+	PointLight::PointLight(uint32_t objectID, glm::vec3 pos, float range, glm::vec3 diffuseColor, glm::vec3 specularColor)
+		: Light(objectID), m_FarPlane(range)
 	{
 		m_Pos = pos;
 		m_DiffuseColor = diffuseColor;
@@ -11,11 +13,24 @@ namespace Saba {
 		m_AttConstant = 1.0f;
 		m_AttLinear = 4.5f / range;
 		m_AttQuadratic = 75.0f / (range * range);
+		SetLightSpace();
+	}
+	PointLight::PointLight(Scene3DObject* object, glm::vec3 pos, float range, glm::vec3 diffuseColor, glm::vec3 specularColor)
+		: Light(object), m_FarPlane(range)
+	{
+		m_Pos = pos;
+		m_DiffuseColor = diffuseColor;
+		m_SpecularColor = specularColor;
+		m_AttConstant = 1.0f;
+		m_AttLinear = 4.5f / range;
+		m_AttQuadratic = 75.0f / (range * range);
+		SetLightSpace();
 	}
 
 	void PointLight::SetPos(glm::vec3 pos)
 	{
 		m_Pos = pos;
+		SetLightSpace();
 	}
 	void PointLight::SetDiffuseColor(glm::vec3 color)
 	{
@@ -26,11 +41,11 @@ namespace Saba {
 		m_SpecularColor = color;
 	}
 
-	glm::mat4 PointLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
+	glm::mat4* PointLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
 	{
 		m_ShadowTextureSpace = shadowTextureSpace;
 
-		return glm::mat4(1.0f);
+		return m_LightSpace;
 	}
 
 	Light::LightData* PointLight::GetData()
@@ -40,7 +55,7 @@ namespace Saba {
 		data->dir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f); //not vec4(0.0f, 0.0f, 0.0f, 0.0f) because of 0 / 0 when normalizing in shader
 		data->diffuseColor = glm::vec4(m_DiffuseColor, 0.0f);
 		data->specularColor = glm::vec4(m_SpecularColor, 0.0f);
-		data->cutsoff = glm::vec4(0.0f);
+		data->cutsoff_FarPlane = glm::vec4(0.0f, 0.0f, m_FarPlane, 0.0f);
 		data->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		data->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
 		data->dirLightSpace = glm::mat4(1.0f);
@@ -52,10 +67,21 @@ namespace Saba {
 		bufferPtr->dir = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);;
 		bufferPtr->diffuseColor = glm::vec4(m_DiffuseColor, 0.0f);
 		bufferPtr->specularColor = glm::vec4(m_SpecularColor, 0.0f);
-		bufferPtr->cutsoff = glm::vec4(0.0f);
+		bufferPtr->cutsoff_FarPlane = glm::vec4(0.0f, 0.0f, m_FarPlane, 0.0f);;
 		bufferPtr->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		bufferPtr->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
 		bufferPtr->dirLightSpace = glm::mat4(1.0f);
 		return bufferPtr;
+	}
+
+	void PointLight::SetLightSpace()
+	{
+		glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, c_NearPlane, m_FarPlane);
+		m_LightSpace[0] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+		m_LightSpace[1] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+		m_LightSpace[2] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
+		m_LightSpace[3] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
+		m_LightSpace[4] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+		m_LightSpace[5] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
 	}
 }

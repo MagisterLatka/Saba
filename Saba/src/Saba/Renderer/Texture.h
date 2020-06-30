@@ -32,9 +32,19 @@ namespace Saba {
 	{
 	public:
 		static Ref<Texture2D> Create(const std::string& filepath);
-		static Ref<Texture2D> Create(const std::string& filepath, Format format, Wrap wrap = Wrap::Repeat);
+		static Ref<Texture2D> Create(const std::string& filepath, Format format, Wrap wrapMode = Wrap::Repeat);
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
-		static Ref<Texture2D> Create(uint32_t width, uint32_t height, Format format, Wrap wrap = Wrap::Repeat);
+		static Ref<Texture2D> Create(uint32_t width, uint32_t height, Format format, Wrap wrapMode = Wrap::Repeat);
 	};
 
+	class TextureCubemap : public Texture
+	{
+	public:
+		static Ref<TextureCubemap> Create(const std::string& filepath);
+		static Ref<TextureCubemap> Create(const std::string& filepath, Format format, Wrap wrapMode = Wrap::Repeat);
+		static Ref<TextureCubemap> Create(const std::array<std::string, 6>& filepaths);
+		static Ref<TextureCubemap> Create(const std::array<std::string, 6>& filepaths, Format format, Wrap wrapMode = Wrap::Repeat);
+		static Ref<TextureCubemap> Create(uint32_t width, uint32_t height);
+		static Ref<TextureCubemap> Create(uint32_t width, uint32_t height, Format format, Wrap wrapMode = Wrap::Repeat);
+	};
 }

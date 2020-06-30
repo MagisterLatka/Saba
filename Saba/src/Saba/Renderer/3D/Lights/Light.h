@@ -1,12 +1,17 @@
 #pragma once
 
+#include "Saba\Renderer\3D\Scene3DObject.h"
+
 namespace Saba {
 
 	class Light
 	{
 		friend class Scene3D;
 	public:
-		Light() = default;
+		Light(uint32_t objectID)
+			: m_ObjectID(objectID) {}
+		Light(Scene3DObject* object)
+			: m_ObjectID(object->m_ID) {}
 		virtual ~Light() = default;
 
 		virtual void SetPos(glm::vec3 pos) = 0;
@@ -18,7 +23,9 @@ namespace Saba {
 		virtual void SetSpecularColor(glm::vec3 color) = 0;
 		inline virtual glm::vec3 GetSpecularColor() const { return m_SpecularColor; }
 
-		virtual glm::mat4 SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace) = 0;
+		inline virtual uint32_t GetObjectID() const { return m_ObjectID; }
+
+		virtual glm::mat4* SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace) = 0;
 		
 		struct LightData
 		{
@@ -26,7 +33,7 @@ namespace Saba {
 			glm::vec4 dir;
 			glm::vec4 diffuseColor;
 			glm::vec4 specularColor;
-			glm::vec4 cutsoff;
+			glm::vec4 cutsoff_FarPlane;
 			glm::vec4 attenuation;
 			glm::vec4 shadowTextureSpace;
 			glm::mat4 dirLightSpace;
@@ -34,6 +41,7 @@ namespace Saba {
 		virtual LightData* GetData() = 0;
 		virtual LightData* GetData(LightData* bufferPtr) = 0;
 	protected:
+		uint32_t m_ObjectID;
 		glm::vec3 m_Pos;
 		glm::vec3 m_Dir;
 		glm::vec3 m_DiffuseColor;

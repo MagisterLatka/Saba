@@ -39,6 +39,7 @@ namespace Saba {
 	private:
 		float m_AspectRatio;
 		float m_Zoom = 90.0f;
+		float m_ScrollSensivity = 2.0f;
 		float m_Near, m_Far;
 		PerspectiveCamera m_Camera;
 

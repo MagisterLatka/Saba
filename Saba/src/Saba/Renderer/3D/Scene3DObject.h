@@ -6,6 +6,7 @@ namespace Saba {
 	{
 		friend class Scene3D;
 		friend class Renderer3D;
+		friend class Light;
 	public:
 		Scene3DObject(bool isLighted)
 			: m_IsLighted(isLighted)
