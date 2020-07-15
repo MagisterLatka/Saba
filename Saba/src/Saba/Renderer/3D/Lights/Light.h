@@ -25,7 +25,7 @@ namespace Saba {
 
 		inline virtual uint32_t GetObjectID() const { return m_ObjectID; }
 
-		virtual glm::mat4* SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace) = 0;
+		virtual const glm::mat4* SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace) = 0;
 		
 		struct LightData
 		{

@@ -26,8 +26,8 @@ void main()
 {
 	vec4 color = texture(u_Tex, l_UV);
 
-	color.xyz = vec3(1.0f) - exp(-color.xyz * u_Exposure);
-	color.xyz = pow(color.xyz, vec3(1.0f / 2.2f));
+	color.rgb = vec3(1.0f) - exp(-color.rgb * u_Exposure);
+	color.rgb = pow(color.rgb, vec3(1.0f / 2.2f));
 
 	o_Color = color;
 }

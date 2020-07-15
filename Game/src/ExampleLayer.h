@@ -26,7 +26,7 @@ private:
 	Saba::Ref<Saba::Framebuffer> m_DirShadowFramebuffer;
 	Saba::Ref<Saba::Texture2D> m_DirShadowTexture;
 
-	static constexpr int m_MaxPointLights = 1;
+	static constexpr int m_MaxPointLights = 4;
 	Saba::Ref<Saba::Framebuffer> m_PointShadowFramebuffer;
-	Saba::Ref<Saba::TextureCubemap> m_PointShadowTexture;
+	Saba::Ref<Saba::Texture2D> m_PointShadowTexture;
 };

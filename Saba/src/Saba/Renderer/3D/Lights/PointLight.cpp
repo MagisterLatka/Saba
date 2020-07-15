@@ -41,7 +41,7 @@ namespace Saba {
 		m_SpecularColor = color;
 	}
 
-	glm::mat4* PointLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
+	const glm::mat4* PointLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
 	{
 		m_ShadowTextureSpace = shadowTextureSpace;
 
@@ -76,12 +76,7 @@ namespace Saba {
 
 	void PointLight::SetLightSpace()
 	{
-		glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, c_NearPlane, m_FarPlane);
-		m_LightSpace[0] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-		m_LightSpace[1] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-		m_LightSpace[2] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
-		m_LightSpace[3] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
-		m_LightSpace[4] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-		m_LightSpace[5] = proj * glm::lookAt(m_Pos, m_Pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+		m_LightSpace[0] = glm::lookAt(m_Pos, m_Pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		m_LightSpace[1] = glm::lookAt(m_Pos, m_Pos + glm::vec3(0.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 }

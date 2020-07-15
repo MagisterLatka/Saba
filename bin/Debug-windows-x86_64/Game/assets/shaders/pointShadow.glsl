@@ -13,21 +13,32 @@ void main()
 #version 330 core
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices = 18) out;
+layout(triangle_strip, max_vertices = 6) out;
 
-uniform mat4 u_LightSpace[6];
+uniform mat4 u_LightSpace[2];
+uniform float u_FarPlane;
 
-out vec4 l_Pos;
+out float l_Depth;
 
 void main()
 {
-	for (int face = 0; face < 6; face++)
+	for (int i = 0; i < 2; i++)
 	{
-		gl_Layer = face;
-		for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
 		{
-			l_Pos = gl_in[i].gl_Position;
-			gl_Position = u_LightSpace[face] * l_Pos;
+			gl_Position = gl_in[j].gl_Position;
+			gl_Position = u_LightSpace[i] * gl_Position;
+
+			float distance = -gl_Position.z;
+			l_Depth = length(gl_Position.xyz);
+
+			gl_Position.xyz = normalize(gl_Position.xyz);
+			gl_Position.xy /= 1.0f - gl_Position.z;
+			gl_Position.z = (distance / u_FarPlane) * 2.0f - 1.0f;
+			gl_Position.w = 1.0f;
+
+			gl_Position.x = gl_Position.x * 0.5f - 0.5f + float(i);
+
 			EmitVertex();
 		}
 		EndPrimitive();
@@ -37,12 +48,11 @@ void main()
 #type fragment
 #version 330 core
 
-in vec4 l_Pos;
+in float l_Depth;
 
-uniform vec3 u_LightPos;
 uniform float u_FarPlane;
 
 void main()
 {
-	gl_FragDepth = length(l_Pos.xyz - u_LightPos) / u_FarPlane;
+	gl_FragDepth = l_Depth / u_FarPlane;
 }

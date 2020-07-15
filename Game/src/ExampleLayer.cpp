@@ -15,7 +15,7 @@ struct SceneBufferData
 {
 	Saba::Light::LightData lights[10];
 	glm::vec4 viewPos;
-	int dirShadowTextureIndex;
+	glm::ivec4 shadowTextureIndexes;
 };
 
 constexpr int texIDs[] = {
@@ -33,7 +33,6 @@ ExampleLayer::~ExampleLayer()
 void ExampleLayer::OnAttach()
 {
 	SB_ASSERT((sqrt(m_MaxDirLights) == (int)sqrt(m_MaxDirLights)), "Max directional lights count must be square of a natural number");
-	SB_ASSERT((sqrt(m_MaxPointLights) == (int)sqrt(m_MaxPointLights)), "Max point lights count must be square of a natural number");
 
 	Saba::TextFile shaders("assets/shaders/shaders.txt", Saba::TextFile::Input | Saba::TextFile::Binary);
 	auto& line = Saba::TextReader::GetLine(shaders);
@@ -57,11 +56,10 @@ void ExampleLayer::OnAttach()
 		Saba::ShaderManager::Add(shaderName, filepath);
 		line = Saba::TextReader::GetLine(shaders);
 	} while (!line.second);
-	
+
 	Saba::Ref<Saba::Shader> shader = Saba::ShaderManager::Get("3d");
 	shader->Bind();
-	shader->SetUniformInt1v("u_Tex", texIDs, 31);
-	shader->SetUniformInt1("u_PointShadowTex", 31);
+	shader->SetUniformInt1v("u_Tex", texIDs, 32);
 
 	shader = Saba::ShaderManager::Get("post");
 	shader->Bind();
@@ -79,7 +77,7 @@ void ExampleLayer::OnAttach()
 	{
 		for (int j = -5; j <= 5; j++)
 		{
-			m_Scene.Add(new Saba::Cube({ (float)i + 0.0001f, -3.0f, (float)j + 0.0001f }, { 0.9998f, 1.0f, 0.9998f }, {1.0f, 0.0f, 0.0f}, Saba::TextureManager::Get2D("brick")));
+			m_Scene.Add(new Saba::Cube({ (float)i + 0.0001f, -3.0f, (float)j + 0.0001f }, { 0.9998f, 1.0f, 0.9998f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 		}
 	}
 
@@ -87,6 +85,7 @@ void ExampleLayer::OnAttach()
 	m_Scene.Add(new Saba::Sphere({ 0.0f, -1.0f, 0.0f }, { 1.0f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }));
 	m_Scene.Add(new Saba::Sphere({ 1.5f,  0.0f, 2.0f }, { 1.0f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 	m_Scene.Add(new Saba::Sphere({ 0.0f, 1.0f, 2.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
+	m_Scene.Add(new Saba::Sphere({ 2.0f, 1.0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
 
 	constexpr glm::vec3 lightPos = { 0.0f, 1.0f, 0.0f };
@@ -94,7 +93,7 @@ void ExampleLayer::OnAttach()
 					 lightPos, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
 
 	constexpr glm::vec3 lampPos = { 0.0f, -2.0f, 2.0f };
-	constexpr glm::vec3 lampDir = { 0.0f, 1.0f, 0.0f };;
+	constexpr glm::vec3 lampDir = { 0.0f, 1.0f, 0.0f };
 	m_Scene.AddLight(new Saba::SpotLight(m_Scene.Add(new Saba::Cube(lampPos, { 0.5f, 0.3f, 0.3f }, lampDir, { 10.0f, 10.0f, 10.0f, 1.0f }, false)),
 					 lampPos, lampDir, 7.5f, 15.0f, 10.0f, { 0.5f, 0.5f, 0.5f }, { 0.8f, 0.8f, 0.8f }));
 
@@ -116,7 +115,7 @@ void ExampleLayer::OnAttach()
 	m_DirShadowFramebuffer->ReadMode(Saba::Framebuffer::Attachment::None);
 	
 	m_PointShadowFramebuffer = Saba::Framebuffer::Create();
-	m_PointShadowTexture = Saba::TextureCubemap::Create((int)sqrt(m_MaxPointLights) * 1024, (int)sqrt(m_MaxPointLights) * 1024, Saba::Texture::Format::Depth16);
+	m_PointShadowTexture = Saba::Texture2D::Create(2048, m_MaxPointLights * 1024, Saba::Texture::Format::Depth16);
 	m_PointShadowFramebuffer->Bind();
 	m_PointShadowFramebuffer->AttachTexture(m_PointShadowTexture, Saba::Framebuffer::Attachment::Depth);
 	m_PointShadowFramebuffer->DrawMode(Saba::Framebuffer::Attachment::None);
@@ -170,7 +169,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 			{
 				const uint32_t x = directionalLights % (int)sqrt(m_MaxDirLights), y = directionalLights / (int)sqrt(m_MaxDirLights);
 				Saba::RenderCommand::SetViewport(x * 1024, y * 1024, 1024, 1024);
-				glm::mat4* lightSpace = light->SetShadowData({ {(float)x / (int)sqrt(m_MaxDirLights), (float)y / (int)sqrt(m_MaxDirLights)},
+				auto lightSpace = light->SetShadowData({ {(float)x / (int)sqrt(m_MaxDirLights), (float)y / (int)sqrt(m_MaxDirLights)},
 															 {(float)x / (int)sqrt(m_MaxDirLights) + 1.0f / (int)sqrt(m_MaxDirLights),
 															 (float)y / (int)sqrt(m_MaxDirLights) + 1.0f / (int)sqrt(m_MaxDirLights)} });
 				shader->SetUniformMat4("u_LightSpace", *lightSpace);
@@ -198,15 +197,12 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 			}
 			if (pointLights < m_MaxPointLights)
 			{
-				const uint32_t x = pointLights % (int)sqrt(m_MaxPointLights), y = pointLights / (int)sqrt(m_MaxPointLights);
-				Saba::RenderCommand::SetViewport(x * 1024, y * 1024, 1024, 1024);
-				glm::mat4* lightSpace = light->SetShadowData({ {(float)x / (int)sqrt(m_MaxPointLights), (float)y / (int)sqrt(m_MaxPointLights)},
-															 {(float)x / (int)sqrt(m_MaxPointLights) + 1.0f / (int)sqrt(m_MaxPointLights),
-															 (float)y / (int)sqrt(m_MaxPointLights) + 1.0f / (int)sqrt(m_MaxPointLights)} });
-				for (int j = 0; j < 6; j++)
+				Saba::RenderCommand::SetViewport(0, pointLights * 1024, 2048, 1024);
+				auto lightSpace = light->SetShadowData({ {0.0f, (float)pointLights / (float)m_MaxPointLights}, {1.0f, (float)pointLights / (float)m_MaxPointLights + 1.0f / (float)m_MaxPointLights} });
+				for (int j = 0; j < 2; j++)
 					shader->SetUniformMat4("u_LightSpace[" + std::to_string(j) + "]", lightSpace[j]);
-				shader->SetUniformFloat3("u_LightPos", light->GetPos());
 				shader->SetUniformFloat1("u_FarPlane", light->GetFarPlane());
+
 				Saba::Renderer3D::BeginScene();
 				for (uint32_t k = 0; k < m_Scene.GetCount() && k != light->GetObjectID(); k++)
 					m_Scene.Draw(k);
@@ -230,7 +226,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	SceneBufferData dataScene = {};
 	m_Scene.GetLightsData(dataScene.lights);
 	dataScene.viewPos = glm::vec4(m_CameraControler.GetPosition(), 0.0f);
-	dataScene.dirShadowTextureIndex = 29;
+	dataScene.shadowTextureIndexes = { 29, 30, 0, 0 };
 	Saba::UniformBufferManager::Get("scene")->SetData(&dataScene, sizeof(SceneBufferData), 0);
 	
 	m_SceneFramebuffer->Bind();
@@ -238,7 +234,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::RenderCommand::Clear();
 
 	m_DirShadowTexture->Bind(29);
-	m_PointShadowTexture->Bind(31);
+	m_PointShadowTexture->Bind(30);
 	Saba::Renderer3D::BeginScene();
 	m_Scene.DrawAll();
 	Saba::Renderer3D::EndScene();

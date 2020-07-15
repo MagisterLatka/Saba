@@ -47,7 +47,7 @@ namespace Saba {
 		m_SpecularColor = color;
 	}
 
-	glm::mat4* SpotLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
+	const glm::mat4* SpotLight::SetShadowData(const std::pair<glm::vec2, glm::vec2>& shadowTextureSpace)
 	{
 		m_ShadowTextureSpace = shadowTextureSpace;
 
