@@ -173,9 +173,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 															 {(float)x / (int)sqrt(m_MaxDirLights) + 1.0f / (int)sqrt(m_MaxDirLights),
 															 (float)y / (int)sqrt(m_MaxDirLights) + 1.0f / (int)sqrt(m_MaxDirLights)} });
 				shader->SetUniformMat4("u_LightSpace", *lightSpace);
-				Saba::Renderer3D::BeginScene();
 				m_Scene.DrawAll();
-				Saba::Renderer3D::EndScene();
 				Saba::Renderer3D::Flush();
 			}
 			directionalLights++;
@@ -203,10 +201,8 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 					shader->SetUniformMat4("u_LightSpace[" + std::to_string(j) + "]", lightSpace[j]);
 				shader->SetUniformFloat1("u_FarPlane", light->GetFarPlane());
 
-				Saba::Renderer3D::BeginScene();
 				for (uint32_t k = 0; k < m_Scene.GetCount() && k != light->GetObjectID(); k++)
 					m_Scene.Draw(k);
-				Saba::Renderer3D::EndScene();
 				Saba::Renderer3D::Flush();
 			}
 			pointLights++;
@@ -235,9 +231,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 
 	m_DirShadowTexture->Bind(29);
 	m_PointShadowTexture->Bind(30);
-	Saba::Renderer3D::BeginScene();
 	m_Scene.DrawAll();
-	Saba::Renderer3D::EndScene();
 	Saba::Renderer3D::Flush();
 
 
@@ -251,9 +245,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 
 	m_SceneFramebufferTexture->Bind(1);
 	Saba::RenderCommand::DisableDepthTest();
-	Saba::Renderer2D::BeginScene();
-	Saba::Renderer2D::DrawQuad({ -1.0f, -1.0f }, { 2.0f, 2.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
-	Saba::Renderer2D::EndScene();
+	Saba::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 2.0f, 2.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 	Saba::Renderer2D::Flush();
 }
 void ExampleLayer::OnImGuiRender()

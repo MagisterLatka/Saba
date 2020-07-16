@@ -12,20 +12,10 @@ namespace Saba {
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene();
-		static void EndScene();
 		static void Flush();
 
-		static void BeginSceneTriangle();
-		static void EndSceneTriangle();
 		static void FlushQuad();
-
-		static void BeginSceneQuad();
-		static void EndSceneQuad();
 		static void FlushTriangle();
-
-		static void BeginSceneModel(uint8_t modelID);
-		static void EndSceneModel(uint8_t modelID);
 		static void FlushModel(uint8_t modelID);
 
 		static void DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posUV, glm::vec4 color, bool isLighted = true);
