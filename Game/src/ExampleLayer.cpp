@@ -58,17 +58,17 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 
 	Saba::ShaderManager::Get("2D")->Bind();
 	Saba::ShaderManager::Get("2D")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
-	Saba::Renderer2D::BeginScene();
-	Saba::Renderer2D::DrawQuad({ -5.0f, -5.0f }, { 10.0f, 10.0f }, Saba::TextureManager::Get2D("checkerboard"));
+	static float rotation = 0.0f;
+	rotation += (float)ts * 50.0f;
+	Saba::Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f }, { 10.0f, 10.0f }, rotation, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::TextureManager::Get2D("checkerboard"), 20.0f);
 
 	for (float y = 0.0f; y < 10.0; y += 0.1f)
 	{
 		for (float x = 0.0f; x < 10.0f; x += 0.1f)
 		{
-			Saba::Renderer2D::DrawQuad({ x - 5.0f + 0.01f, y - 5.0f + 0.01f }, { 0.08f, 0.08f }, {x / 10.0f, y / 10.0f, 1.0f, 1.0f});
+			Saba::Renderer2D::DrawQuad({ x - 5.0f + 0.05f, y - 5.0f + 0.05f }, { 0.06f, 0.06f }, {x / 10.0f, y / 10.0f, 1.0f, 1.0f});
 		}
 	}
-	Saba::Renderer2D::EndScene();
 	Saba::Renderer2D::Flush();
 
 	if (m_EnableParticles)

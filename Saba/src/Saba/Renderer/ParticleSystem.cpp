@@ -97,14 +97,11 @@ namespace Saba {
 				auto& particle = m_Particles[i];
 				if (!particle.Active)
 				{
-					at->color.a = 0.0f;
-					at++;
-					at->color.a = 0.0f;
-					at++;
-					at->color.a = 0.0f;
-					at++;
-					at->color.a = 0.0f;
-					at++;
+					for (int j = 0; j < 4; j++)
+					{
+						at->color.a = 0.0f;
+						at++;
+					}
 					continue;
 				}
 
@@ -124,18 +121,12 @@ namespace Saba {
 				glm::mat4 transform = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), { particle.Position.x, particle.Position.y, 0.0f }),
 												 particle.Rotation, { 0.0f, 0.0f, 1.0f }), glm::vec3(size, size, 0.0f));
 
-				at->pos = glm::vec3(transform * data[0]);
-				at->color = color;
-				at++;
-				at->pos = glm::vec3(transform * data[1]);
-				at->color = color;
-				at++;
-				at->pos = glm::vec3(transform * data[2]);
-				at->color = color;
-				at++;
-				at->pos = glm::vec3(transform * data[3]);
-				at->color = color;
-				at++;
+				for (int j = 0; j < 4; j++)
+				{
+					at->pos = glm::vec3(transform * data[j]);
+					at->color = color;
+					at++;
+				}
 			}
 			m_VAO->GetVertexBuffers()[0]->Bind();
 			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 28LL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));

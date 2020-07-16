@@ -4,6 +4,8 @@
 #include "VertexArray.h"
 #include "Renderer.h"
 
+#include <glm\gtc\matrix_transform.hpp>
+
 namespace Saba {
 
 	constexpr uint32_t c_MaxQuadCount = 10000;
@@ -14,7 +16,7 @@ namespace Saba {
 		glm::vec3 pos;
 		glm::vec2 uv;
 		glm::vec4 color;
-		float texID;
+		glm::vec2 texID_TillingFactor;
 	};
 
 	struct Renderer2DData
@@ -50,7 +52,7 @@ namespace Saba {
 			{"i_Pos", ShaderDataType::Float3},
 			{"i_UV", ShaderDataType::Float2},
 			{"i_Color", ShaderDataType::Float4},
-			{"i_TexID", ShaderDataType::Float}
+			{"i_TexID_TillingFactor", ShaderDataType::Float2}
 		});
 		s_RendererData->vertexArray->AddVertexBuffer(vbo);
 
@@ -82,122 +84,126 @@ namespace Saba {
 		delete s_RendererData;
 	}
 
-	void Renderer2D::BeginScene()
-	{
-		s_RendererData->at = s_RendererData->buffer;
-	}
-	void Renderer2D::EndScene()
-	{
-		s_RendererData->vertexArray->GetVertexBuffers()[0]->Bind();
-		s_RendererData->vertexArray->GetVertexBuffers()[0]->SetData(s_RendererData->buffer, s_RendererData->quadCount * 4 * sizeof(VertexData), 0);
-		s_RendererData->texIndex = 1;
-	}
 	void Renderer2D::Flush()
 	{
-		int index = 0;
-		for (Ref<Texture2D> texture : s_RendererData->textures)
+		if (s_RendererData->quadCount > 0)
 		{
-			if (texture)
+			s_RendererData->vertexArray->GetVertexBuffers()[0]->Bind();
+			s_RendererData->vertexArray->GetVertexBuffers()[0]->SetData(s_RendererData->buffer, s_RendererData->quadCount * 4 * sizeof(VertexData), 0);
+			s_RendererData->texIndex = 1;
+
+			int index = 0;
+			for (Ref<Texture2D> texture : s_RendererData->textures)
 			{
-				texture->Bind(index);
-				index++;
+				if (texture)
+				{
+					texture->Bind(index);
+					index++;
+				}
+				else break;
 			}
-			else break;
+
+			s_RendererData->vertexArray->Bind();
+			RenderCommand::DrawIndexed(s_RendererData->quadCount * 6);
+
+			s_RendererData->quadCount = 0;
+			s_RendererData->at = s_RendererData->buffer;
+			for (int i = 1; i < c_MaxTextures; i++)
+				s_RendererData->textures[i].reset();
+			s_RendererData->stats.drawCalls++;
 		}
-
-		s_RendererData->vertexArray->Bind();
-		RenderCommand::DrawIndexed(s_RendererData->quadCount * 6);
-
-		s_RendererData->stats.drawCalls++;
-		s_RendererData->quadCount = 0;
-		for (int i = 1; i < c_MaxTextures; i++)
-			s_RendererData->textures[i].reset();
 	}
 
-	void Renderer2D::DrawQuad(glm::vec2 pos, glm::vec2 size, glm::vec4 color)
+	void Renderer2D::DrawQuad(glm::vec2 pos, glm::vec2 size, glm::vec4 color, Ref<Texture2D> texture, float tillingFactor)
 	{
-		DrawQuad({ pos.x, pos.y, 0.0f }, size, color);
+		DrawQuad({ pos.x, pos.y, 0.0f }, size, color, texture, tillingFactor);
 	}
-	void Renderer2D::DrawQuad(glm::vec3 pos, glm::vec2 size, glm::vec4 color)
+	void Renderer2D::DrawQuad(glm::vec3 pos, glm::vec2 size, glm::vec4 color, Ref<Texture2D> texture, float tillingFactor)
 	{
-		if (s_RendererData->quadCount >= c_MaxQuadCount)
-		{
-			EndScene();
+		if (s_RendererData->quadCount >= c_MaxQuadCount || s_RendererData->texIndex > c_MaxTextures - 1)
 			Flush();
-			BeginScene();
+
+		float tid = 0.0f;
+		if (texture)
+		{
+			for (uint8_t i = 1; i < s_RendererData->texIndex; i++)
+			{
+				if (s_RendererData->textures[i] == texture)
+				{
+					tid = (float)i;
+					break;
+				}
+			}
+			if (tid == 0.0f)
+			{
+				tid = (float)s_RendererData->texIndex;
+				s_RendererData->textures[s_RendererData->texIndex] = texture;
+				s_RendererData->texIndex++;
+			}
 		}
 
-		s_RendererData->at->pos = pos;
-		s_RendererData->at->color = color;
-		s_RendererData->at->texID = 0.0f;
-		s_RendererData->at++;
+		static constexpr glm::vec3 data[4] = {
+			{ -0.5f, -0.5f, 0.0f },
+			{  0.5f, -0.5f, 0.0f },
+			{  0.5f,  0.5f, 0.0f },
+			{ -0.5f,  0.5f, 0.0f }
+		};
 
-		s_RendererData->at->pos = pos + glm::vec3(size.x, 0.0f, 0.0f);
-		s_RendererData->at->color = color;
-		s_RendererData->at->texID = 0.0f;
-		s_RendererData->at++;
-
-		s_RendererData->at->pos = pos + glm::vec3(size.x, size.y, 0.0f);
-		s_RendererData->at->color = color;
-		s_RendererData->at->texID = 0.0f;
-		s_RendererData->at++;
-
-		s_RendererData->at->pos = pos + glm::vec3(0.0f, size.y, 0.0f);
-		s_RendererData->at->color = color;
-		s_RendererData->at->texID = 0.0f;
-		s_RendererData->at++;
+		for (int i = 0; i < 4; i++)
+		{
+			s_RendererData->at->pos = data[i] * glm::vec3(size, 1.0f) + pos;
+			s_RendererData->at->color = color;
+			s_RendererData->at->texID_TillingFactor = { tid, tillingFactor };
+			s_RendererData->at++;
+		}
 
 		s_RendererData->quadCount++;
 		s_RendererData->stats.quadCount++;
 	}
-	void Renderer2D::DrawQuad(glm::vec2 pos, glm::vec2 size, Ref<Texture2D> texture)
+
+	void Renderer2D::DrawRotatedQuad(glm::vec2 pos, glm::vec2 size, float angleD, glm::vec4 color, Ref<Texture2D> texture, float tillingFactor)
 	{
-		DrawQuad({ pos.x, pos.y, 0.0f }, size, texture);
+		DrawRotatedQuad({ pos.x, pos.y, 0.0f }, size, angleD, color, texture, tillingFactor);
 	}
-	void Renderer2D::DrawQuad(glm::vec3 pos, glm::vec2 size, Ref<Texture2D> texture)
+	void Renderer2D::DrawRotatedQuad(glm::vec3 pos, glm::vec2 size, float angleD, glm::vec4 color, Ref<Texture2D> texture, float tillingFactor)
 	{
 		if (s_RendererData->quadCount >= c_MaxQuadCount || s_RendererData->texIndex > c_MaxTextures - 1)
-		{
-			EndScene();
 			Flush();
-			BeginScene();
-		}
 
 		float tid = 0.0f;
-		for (uint8_t i = 1; i < s_RendererData->texIndex; i++)
+		if (texture)
 		{
-			if (s_RendererData->textures[i] == texture)
+			for (uint8_t i = 1; i < s_RendererData->texIndex; i++)
 			{
-				tid = (float)i;
-				break;
+				if (s_RendererData->textures[i] == texture)
+				{
+					tid = (float)i;
+					break;
+				}
+			}
+			if (tid == 0.0f)
+			{
+				tid = (float)s_RendererData->texIndex;
+				s_RendererData->textures[s_RendererData->texIndex] = texture;
+				s_RendererData->texIndex++;
 			}
 		}
-		if (tid == 0.0f)
+
+		static constexpr glm::vec3 data[4] = {
+			{ -0.5f, -0.5f, 0.0f },
+			{  0.5f, -0.5f, 0.0f },
+			{  0.5f,  0.5f, 0.0f },
+			{ -0.5f,  0.5f, 0.0f }
+		};
+		glm::mat3 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(angleD), { 0.0f, 0.0f, 1.0f });
+
+		for (int i = 0; i < 4; i++)
 		{
-			tid = (float)s_RendererData->texIndex;
-			s_RendererData->textures[s_RendererData->texIndex] = texture;
-			s_RendererData->texIndex++;
+			s_RendererData->at->pos = (rotate * data[i]) * glm::vec3(size, 1.0f) + pos;
+			s_RendererData->at->color = color;
+			s_RendererData->at->texID_TillingFactor = { tid, tillingFactor };
+			s_RendererData->at++;
 		}
-
-		s_RendererData->at->pos = pos;
-		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		s_RendererData->at->texID = tid;
-		s_RendererData->at++;
-
-		s_RendererData->at->pos = pos + glm::vec3(size.x, 0.0f, 0.0f);
-		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		s_RendererData->at->texID = tid;
-		s_RendererData->at++;
-
-		s_RendererData->at->pos = pos + glm::vec3(size.x, size.y, 0.0f);
-		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		s_RendererData->at->texID = tid;
-		s_RendererData->at++;
-
-		s_RendererData->at->pos = pos + glm::vec3(0.0f, size.y, 0.0f);
-		s_RendererData->at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		s_RendererData->at->texID = tid;
-		s_RendererData->at++;
 
 		s_RendererData->quadCount++;
 		s_RendererData->stats.quadCount++;
@@ -205,8 +211,7 @@ namespace Saba {
 
 	void Renderer2D::ResetStats()
 	{
-		s_RendererData->stats.drawCalls = 0;
-		s_RendererData->stats.quadCount = 0;
+		memset(&s_RendererData->stats, 0, sizeof(Renderer2D::Stats));
 	}
 
 	const Renderer2D::Stats& Renderer2D::GetStats()

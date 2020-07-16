@@ -11,14 +11,12 @@ namespace Saba {
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene();
-		static void EndScene();
 		static void Flush();
 
-		static void DrawQuad(glm::vec2 pos, glm::vec2 size, glm::vec4 color);
-		static void DrawQuad(glm::vec3 pos, glm::vec2 size, glm::vec4 color);
-		static void DrawQuad(glm::vec2 pos, glm::vec2 size, Ref<Texture2D> texture);
-		static void DrawQuad(glm::vec3 pos, glm::vec2 size, Ref<Texture2D> texture);
+		static void DrawQuad(glm::vec2 pos, glm::vec2 size, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f);
+		static void DrawQuad(glm::vec3 pos, glm::vec2 size, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f);
+		static void DrawRotatedQuad(glm::vec2 pos, glm::vec2 size, float angleD = 0.0f, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f);
+		static void DrawRotatedQuad(glm::vec3 pos, glm::vec2 size, float angleD = 0.0f, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f);
 
 		struct Stats
 		{
