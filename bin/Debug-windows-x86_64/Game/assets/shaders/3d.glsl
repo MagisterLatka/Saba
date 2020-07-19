@@ -1,5 +1,6 @@
 #type vertex
-#version 420 core
+#version 330 core
+#extension ARB_shading_language_420pack:enable
 
 layout(location = 0) in vec4 i_Pos_IsLighted;
 layout(location = 1) in vec3 i_Normal;
@@ -65,7 +66,8 @@ void main()
 }
 
 #type fragment
-#version 420 core
+#version 330 core
+#extension ARB_shading_language_420pack:enable
 
 float equal(float x, float y); float not_equal(float x, float y); float greater(float x, float y); float less(float x, float y); float greater_equal(float x, float y); float less_equal(float x, float y);
 float and(float a, float b); float or(float a, float b); float not(float a);
