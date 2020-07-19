@@ -27,6 +27,8 @@ namespace Saba {
 		void EnableRotation(bool enable) { m_EnableRotation = enable; }
 		inline bool IsRotationEnabled() const { return m_EnableRotation; }
 
+		inline glm::vec3 GetDirection() const { return m_Camera.GetDirection(); }
+
 		void SetMovementSpeed(float speed);
 		inline float GetMovementSpeed() const { return m_CameraMovementSpeed; }
 

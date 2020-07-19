@@ -48,6 +48,7 @@ namespace Saba {
 	}
 	void Sphere::SetDirection(glm::vec3 dir)
 	{
+		dir = glm::normalize(dir);
 		if (dir == glm::vec3(1.0f, 0.0f, 0.0f))
 			m_Rotate = glm::mat4(1.0f);
 		else if (dir == glm::vec3(-1.0f, 0.0f, 0.0f))
@@ -66,6 +67,7 @@ namespace Saba {
 
 	void Sphere::SetDirectionFromOrigin(glm::vec3 dir)
 	{
+		dir = glm::normalize(dir);
 		if (dir == glm::vec3(1.0f, 0.0f, 0.0f))
 			m_RotateFromOrigin = glm::mat4(1.0f);
 		else if (dir == glm::vec3(-1.0f, 0.0f, 0.0f))

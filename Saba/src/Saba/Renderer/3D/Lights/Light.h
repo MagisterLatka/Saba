@@ -36,7 +36,7 @@ namespace Saba {
 			glm::vec4 cutsoff_FarPlane;
 			glm::vec4 attenuation;
 			glm::vec4 shadowTextureSpace;
-			glm::mat4 dirLightSpace;
+			glm::mat4 lightSpace;
 		};
 		virtual LightData* GetData() = 0;
 		virtual LightData* GetData(LightData* bufferPtr) = 0;

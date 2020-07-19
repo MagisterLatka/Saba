@@ -29,4 +29,8 @@ private:
 	static constexpr int m_MaxPointLights = 4;
 	Saba::Ref<Saba::Framebuffer> m_PointShadowFramebuffer;
 	Saba::Ref<Saba::Texture2D> m_PointShadowTexture;
+
+	static constexpr int m_MaxSpotLights = 4;
+	Saba::Ref<Saba::Framebuffer> m_SpotShadowFramebuffer;
+	Saba::Ref<Saba::Texture2D> m_SpotShadowTexture;
 };

@@ -27,7 +27,7 @@ out DATA {
 
 	float isLighted;
 
-	vec3 posInDirLightSpace[c_MaxLights];
+	vec3 posInLightSpace[c_MaxLights];
 } vs_out;
 
 struct Light
@@ -41,7 +41,7 @@ struct Light
 	vec4 attenuation;
 
 	vec4 shadowTextureSpace;
-	mat4 dirLightSpace;
+	mat4 lightSpace;
 };
 layout(std140, binding = 1) uniform Scene {
 	Light u_Lights[c_MaxLights];
@@ -61,7 +61,7 @@ void main()
 	vs_out.tidop = i_TIDoptional_IsLighted.x;
 	vs_out.isLighted = i_Pos_IsLighted.w * i_TIDoptional_IsLighted.y;
 	for (int i = 0; i < c_MaxLights; i++)
-		vs_out.posInDirLightSpace[i] = vec3(u_Lights[i].dirLightSpace * vec4(vs_out.pos, 1.0f));
+		vs_out.posInLightSpace[i] = vec3(u_Lights[i].lightSpace * vec4(vs_out.pos, 1.0f));
 }
 
 #type fragment
@@ -92,7 +92,7 @@ in DATA {
 
 	float isLighted;
 
-	vec3 posInDirLightSpace[c_MaxLights];
+	vec3 posInLightSpace[c_MaxLights];
 } fs_in;
 
 ////////////////////////////////
@@ -107,7 +107,7 @@ struct Light
 	vec4 attenuation;
 
 	vec4 shadowTextureSpace;
-	mat4 dirLightSpace;
+	mat4 lightSpace;
 };
 layout(std140, binding = 1) uniform Scene {
 	Light u_Lights[c_MaxLights];
@@ -123,8 +123,9 @@ const float c_Ambient = 0.05f;
 ////////////////////////////////
 float CalcDirShadow(const vec3 pos, const float toLightNormal, const vec4 shadowTextureSpace);
 float CalcPointShadow(const vec3 lightToPos, const float toLightNormal, const vec4 shadowTextureSpace, const float farPlane);
+float CalcSpotShadow(const vec3 pos, const float outerCutOff, const float toLightNormal, const vec4 shadowTextureSpace, const float farPlane);
 
-vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInDirLightSpace, const vec3 normal, const vec3 color, const vec3 viewPos);
+vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInLightSpace, const vec3 normal, const vec3 color, const vec3 viewPos);
 
 ////////////////////////////////
 void main()
@@ -133,7 +134,7 @@ void main()
 
 	vec3 outputColor = color.rgb * c_Ambient;
 	for (int i = 0; i < c_MaxLights; i++)
-		outputColor += CalcLight(u_Lights[i], fs_in.pos, fs_in.posInDirLightSpace[i], fs_in.normal, color.rgb, u_ViewPos.xyz);
+		outputColor += CalcLight(u_Lights[i], fs_in.pos, fs_in.posInLightSpace[i], fs_in.normal, color.rgb, u_ViewPos.xyz);
 
 	o_Color = vec4(color.rgb * equal(fs_in.isLighted, 0.0f) + outputColor * not_equal(fs_in.isLighted, 0.0f), color.a);
 }
@@ -184,18 +185,29 @@ float CalcPointShadow(const vec3 lightToPos, const float toLightNormal, const ve
 
 	return shadow * and(and(greater(uv.x, shadowTextureSpace.x), less(uv.x, shadowTextureSpace.z)), and(greater(uv.y, shadowTextureSpace.y), less(uv.y, shadowTextureSpace.w)));
 }
+float CalcSpotShadow(const vec3 pos, const float outerCutOff, const float toLightNormal, const vec4 shadowTextureSpace, const float farPlane)
+{
+	const float current = length(pos);
+	const float bias = max(0.4f * (1.0f - toLightNormal), 0.05f);
 
-vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInDirLightSpace, const vec3 normal, const vec3 color, const vec3 viewPos)
+	const vec2 uv = mix(shadowTextureSpace.xy, shadowTextureSpace.zw, (pos.xy / (tan(outerCutOff) * -pos.z)) * 0.5f + 0.5f);
+
+	const float closest = texture(u_Tex[u_ShadowTexIndexes.z], uv).r * farPlane;
+
+	return greater(current - bias, closest) * and(and(greater(uv.x, shadowTextureSpace.x), less(uv.x, shadowTextureSpace.z)), and(greater(uv.y, shadowTextureSpace.y), less(uv.y, shadowTextureSpace.w)));
+}
+
+vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInLightSpace, const vec3 normal, const vec3 color, const vec3 viewPos)
 {
 	const float shininess = 32.0f; //TODO: material system
-	const vec3 materialSpec = vec3(1.0f);
+	const vec3 materialSpec = vec3(0.5f);
 
-	const vec3 toLight = normalize(-light.dir.xyz) * and(equal(light.pos.w, 0.0f), equal(light.dir.w, 1.0f)) + normalize(light.pos.xyz - pos) * equal(light.pos.w, 1.0f);
+	const vec3 toLight = -light.dir.xyz * and(equal(light.pos.w, 0.0f), equal(light.dir.w, 1.0f)) + normalize(light.pos.xyz - pos) * equal(light.pos.w, 1.0f);
 
 	const float distance = length(toLight);
 	const float attenuation = 1.0f / (light.attenuation.x + light.attenuation.y * distance + light.attenuation.z * distance * distance);
 
-	const float intensity = clamp((dot(toLight, normalize(-light.dir.xyz)) - light.cutOffs_FarPlane.y) / (light.cutOffs_FarPlane.x - light.cutOffs_FarPlane.y), 0.0f, 1.0f) *
+	const float intensity = clamp((dot(toLight, -light.dir.xyz) - cos(light.cutOffs_FarPlane.y)) / (cos(light.cutOffs_FarPlane.x) - cos(light.cutOffs_FarPlane.y)), 0.0f, 1.0f) *
 								greater(light.cutOffs_FarPlane.x, 0.0f) + equal(light.cutOffs_FarPlane.x, 0.0f);
 
 	const float dTLN = dot(toLight, normal);
@@ -205,8 +217,9 @@ vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInDirLightSpace,
 	const float spec = pow(max(dot(halfwayDir, normal), 0.0f), shininess);
 	const vec3 specular = materialSpec * light.specular.rgb * spec * attenuation * intensity;
 
-	const float shadow = CalcDirShadow(posInDirLightSpace, dTLN, light.shadowTextureSpace) * and(equal(light.pos.w, 0.0f), equal(light.dir.w, 1.0f)) +
-				CalcPointShadow(pos - light.pos.xyz, dTLN, light.shadowTextureSpace, light.cutOffs_FarPlane.z) * and(equal(light.pos.w, 1.0f), equal(light.dir.w, 0.0f));
+	const float shadow = CalcDirShadow(posInLightSpace, dTLN, light.shadowTextureSpace) * and(equal(light.pos.w, 0.0f), equal(light.dir.w, 1.0f)) +
+				CalcPointShadow(pos - light.pos.xyz, dTLN, light.shadowTextureSpace, light.cutOffs_FarPlane.z) * and(equal(light.pos.w, 1.0f), equal(light.dir.w, 0.0f)) +
+				CalcSpotShadow(posInLightSpace, light.cutOffs_FarPlane.y, dTLN, light.shadowTextureSpace, light.cutOffs_FarPlane.z) * and(equal(light.pos.w, 1.0f), equal(light.dir.w, 1.0f));
 	return max((diffuse + specular) * (1.0f - shadow), 0.0f);
 }
 

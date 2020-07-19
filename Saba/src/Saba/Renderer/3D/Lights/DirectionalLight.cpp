@@ -23,7 +23,7 @@ namespace Saba {
 
 	void DirectionalLight::SetDir(glm::vec3 dir)
 	{
-		m_Dir = dir;
+		m_Dir = glm::normalize(dir);
 
 		m_LightSpace = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, c_NearPlane, c_FarPlane) *
 		glm::lookAt(-m_Dir * 0.5f * c_FarPlane, { 0.0f, 0.0f, 0.0f },
@@ -55,7 +55,7 @@ namespace Saba {
 		data->cutsoff_FarPlane = glm::vec4(0.0f);
 		data->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		data->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
-		data->dirLightSpace = m_LightSpace;
+		data->lightSpace = m_LightSpace;
 		return data;
 	}
 	Light::LightData* DirectionalLight::GetData(LightData* bufferPtr)
@@ -67,7 +67,7 @@ namespace Saba {
 		bufferPtr->cutsoff_FarPlane = glm::vec4(0.0f);
 		bufferPtr->attenuation = glm::vec4(m_AttConstant, m_AttLinear, m_AttQuadratic, 0.0f);
 		bufferPtr->shadowTextureSpace = glm::vec4(m_ShadowTextureSpace.first, m_ShadowTextureSpace.second);
-		bufferPtr->dirLightSpace = m_LightSpace;
+		bufferPtr->lightSpace = m_LightSpace;
 		return bufferPtr;
 	}
 }

@@ -6,4 +6,5 @@ particle, particle.glsl
 post, postProcess.glsl
 dirShadow, dirShadow.glsl
 pointShadow, pointShadow.glsl
+spotShadow, spotShadow.glsl
 cubeView, cubemapView.glsl

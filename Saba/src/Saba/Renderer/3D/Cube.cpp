@@ -13,7 +13,7 @@ namespace Saba {
 	{
 		if (s_ModelID == 255)
 			CreateModel();
-
+		
 		SetDirection(dir);
 	}
 	Cube::Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted)
@@ -42,6 +42,7 @@ namespace Saba {
 
 	void Cube::SetDirection(glm::vec3 dir)
 	{
+		dir = glm::normalize(dir);
 		if (dir == glm::vec3(1.0f, 0.0f, 0.0f))
 			m_Rotate = glm::mat4(1.0f);
 		else if (dir == glm::vec3(-1.0f, 0.0f, 0.0f))
@@ -55,11 +56,12 @@ namespace Saba {
 	}
 	void Cube::Rotate(float angle, glm::vec3 axis)
 	{
-		m_Rotate = glm::rotate(m_Rotate, angle, axis);
+		m_Rotate = glm::rotate(m_Rotate, angle, glm::normalize(axis));
 	}
 
 	void Cube::SetDirectionFromOrigin(glm::vec3 dir)
 	{
+		dir = glm::normalize(dir);
 		if (dir == glm::vec3(1.0f, 0.0f, 0.0f))
 			m_RotateFromOrigin = glm::mat4(1.0f);
 		else if (dir == glm::vec3(-1.0f, 0.0f, 0.0f))
@@ -73,7 +75,7 @@ namespace Saba {
 	}
 	void Cube::RotateFromOrigin(float angleR, glm::vec3 axis)
 	{
-		m_RotateFromOrigin = glm::rotate(m_RotateFromOrigin, angleR, axis);
+		m_RotateFromOrigin = glm::rotate(m_RotateFromOrigin, angleR, glm::normalize(axis));
 	}
 
 	void Cube::SetSize(glm::vec3 size)

@@ -21,5 +21,13 @@ namespace Saba {
 
 		virtual LightData* GetData() override;
 		virtual LightData* GetData(LightData* bufferPtr) override;
+
+		inline float GetOuterCutOff() const { return m_OuterCutOff; }
+		inline float GetFarPlane() const { return m_FarPlane; }
+	private:
+		void SetLightSpace();
+	private:
+		glm::mat4 m_LightSpace;
+		const float m_FarPlane;
 	};
 }

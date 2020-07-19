@@ -25,7 +25,6 @@ namespace Saba {
 	private:
 		void SetLightSpace();
 	private:
-		static constexpr float c_NearPlane = 0.5f;
 		glm::mat4 m_LightSpace[2];
 		const float m_FarPlane;
 	};
