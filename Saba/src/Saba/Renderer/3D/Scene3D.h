@@ -2,7 +2,9 @@
 
 #include "Scene3DObject.h"
 #include "Lights\Light.h"
-#include "Saba\Renderer\Buffer.h"
+#include "Saba\Renderer\Framebuffer.h"
+#include "Saba\Renderer\Texture.h"
+#include "Saba\Renderer\Shader.h"
 
 namespace Saba {
 
@@ -33,9 +35,18 @@ namespace Saba {
 		inline uint32_t GetLightsCount() const { return c_MaxLights; };
 		Light::LightData* GetLightsData();
 		Light::LightData* GetLightsData(Light::LightData* bufferPtr);
+
+		void DrawShadows(Ref<Shader> dirShadowShader, Ref<Shader> pointShadowShader, Ref<Shader> spotShadowShader);
+		void BindShadowTextures(uint8_t dirShadowTexIndex, uint8_t pointShadowTexIndex, uint8_t spotShadowTexIndex);
+		void BindShadowTextures(glm::u8vec3 shadowTexIndexes);
 	private:
-		constexpr static uint8_t c_MaxLights = 10;
+		static constexpr uint8_t c_MaxLights = 10;
 		std::vector<Scene3DObject*> m_Objects;
 		std::array<Light*, c_MaxLights> m_Lights;
+
+		static constexpr uint32_t c_ShadowTexResolution = 1024;
+		static constexpr int c_MaxDirLights = 4, c_MaxPointLights = 4, c_MaxSpotLights = 4;
+		Ref<Framebuffer> m_DirShadowFramebuffer, m_PointShadowFramebuffer, m_SpotShadowFramebuffer;
+		Ref<Texture2D> m_DirShadowTexture, m_PointShadowTexture, m_SpotShadowTexture;
 	};
 }

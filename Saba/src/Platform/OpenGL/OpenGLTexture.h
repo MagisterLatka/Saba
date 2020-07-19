@@ -20,7 +20,7 @@ namespace Saba {
 
 		virtual void SetData(void* data, uint32_t size) override;
 
-		virtual void Bind(uint32_t slot) override;
+		virtual void Bind(uint8_t slot) override;
 	private:
 		static uint32_t FormatToOpenGL(Format format);
 		static uint32_t InternalFormatToOpenGL(Format format);
@@ -50,7 +50,7 @@ namespace Saba {
 
 		virtual void SetData(void* data, uint32_t size) override;
 
-		virtual void Bind(uint32_t slot) override;
+		virtual void Bind(uint8_t slot) override;
 	private:
 		static uint32_t FormatToOpenGL(Format format);
 		static uint32_t InternalFormatToOpenGL(Format format);

@@ -163,7 +163,7 @@ namespace Saba {
 		GLCall(glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, m_Format, GetDataType(m_InternalFormat), data));
 	}
 
-	void OpenGLTexture2D::Bind(uint32_t slot)
+	void OpenGLTexture2D::Bind(uint8_t slot)
 	{
 		GLCall(glBindTextureUnit(slot, m_ID));
 	}
@@ -615,7 +615,7 @@ namespace Saba {
 		SB_CORE_ASSERT((bpp * m_Width * m_Height == size), "Size must be the size of whole texture!");
 		GLCall(glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, m_Format, GetDataType(m_InternalFormat), data));
 	}
-	void OpenGLTextureCubemap::Bind(uint32_t slot)
+	void OpenGLTextureCubemap::Bind(uint8_t slot)
 	{
 		GLCall(glBindTextureUnit(slot, m_ID));
 	}

@@ -25,7 +25,7 @@ namespace Saba {
 
 		virtual void SetData(void* data, uint32_t size) = 0;
 				
-		virtual void Bind(uint32_t slot = 0) = 0;
+		virtual void Bind(uint8_t slot = 0) = 0;
 	};
 
 	class Texture2D : public Texture

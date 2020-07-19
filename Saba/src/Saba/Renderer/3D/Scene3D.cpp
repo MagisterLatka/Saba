@@ -1,11 +1,40 @@
 #include "pch.h"
 #include "Scene3D.h"
 
+#include "Lights\DirectionalLight.h"
+#include "Lights\PointLight.h"
+#include "Lights\SpotLight.h"
+
+#include "Saba\Renderer\3D\Renderer3D.h"
+#include "Saba\Renderer\RenderCommand.h"
+
 namespace Saba {
 
 	Scene3D::Scene3D()
 	{
 		m_Lights.fill(nullptr);
+
+		m_DirShadowFramebuffer = Saba::Framebuffer::Create();
+		m_DirShadowTexture = Saba::Texture2D::Create((int)sqrt(c_MaxDirLights) * c_ShadowTexResolution, (int)sqrt(c_MaxDirLights) * c_ShadowTexResolution, Saba::Texture::Format::Depth16);
+		m_DirShadowFramebuffer->Bind();
+		m_DirShadowFramebuffer->AttachTexture(m_DirShadowTexture, Saba::Framebuffer::Attachment::Depth);
+		m_DirShadowFramebuffer->DrawMode(Saba::Framebuffer::Attachment::None);
+		m_DirShadowFramebuffer->ReadMode(Saba::Framebuffer::Attachment::None);
+	
+		m_PointShadowFramebuffer = Saba::Framebuffer::Create();
+		m_PointShadowTexture = Saba::Texture2D::Create(2 * c_ShadowTexResolution, c_MaxPointLights * c_ShadowTexResolution, Saba::Texture::Format::Depth16);
+		m_PointShadowFramebuffer->Bind();
+		m_PointShadowFramebuffer->AttachTexture(m_PointShadowTexture, Saba::Framebuffer::Attachment::Depth);
+		m_PointShadowFramebuffer->DrawMode(Saba::Framebuffer::Attachment::None);
+		m_PointShadowFramebuffer->ReadMode(Saba::Framebuffer::Attachment::None);
+
+		m_SpotShadowFramebuffer = Saba::Framebuffer::Create();
+		m_SpotShadowTexture = Saba::Texture2D::Create((int)sqrt(c_MaxSpotLights) * c_ShadowTexResolution, (int)sqrt(c_MaxSpotLights) * c_ShadowTexResolution, Saba::Texture::Format::Depth16);
+		m_SpotShadowFramebuffer->Bind();
+		m_SpotShadowFramebuffer->AttachTexture(m_SpotShadowTexture, Saba::Framebuffer::Attachment::Depth);
+		m_SpotShadowFramebuffer->DrawMode(Saba::Framebuffer::Attachment::None);
+		m_SpotShadowFramebuffer->ReadMode(Saba::Framebuffer::Attachment::None);
+		m_SpotShadowFramebuffer->Unbind();
 	}
 	Scene3D::~Scene3D()
 	{}
@@ -143,5 +172,98 @@ namespace Saba {
 		}
 
 		return bufferPtr;
+	}
+
+	void Scene3D::DrawShadows(Ref<Shader> dirShadowShader, Ref<Shader> pointShadowShader, Ref<Shader> spotShadowShader)
+	{
+		for (int i = 0, directionalLights = 0; i < c_MaxLights; i++)
+		{
+			if (auto light = dynamic_cast<DirectionalLight*>(m_Lights[i]))
+			{
+				if (directionalLights == 0)
+				{
+					dirShadowShader->Bind();
+					m_DirShadowFramebuffer->Bind();
+					RenderCommand::Clear();
+				}
+				if (directionalLights < c_MaxDirLights)
+				{
+					const int x = directionalLights % (int)sqrt(c_MaxDirLights), y = directionalLights / (int)sqrt(c_MaxDirLights);
+					RenderCommand::SetViewport(x * c_ShadowTexResolution, y * c_ShadowTexResolution, c_ShadowTexResolution, c_ShadowTexResolution);
+					auto lightSpace = light->SetShadowData({ {(float)x / sqrtf(c_MaxDirLights), (float)y / sqrtf(c_MaxDirLights)},
+															 {(float)x / sqrtf(c_MaxDirLights) + 1.0f / sqrtf(c_MaxDirLights),
+															 (float)y / sqrtf(c_MaxDirLights) + 1.0f / sqrtf(c_MaxDirLights)} });
+					dirShadowShader->SetUniformMat4("u_LightSpace", *lightSpace);
+					DrawAll();
+					Renderer3D::Flush();
+				}
+				directionalLights++;
+			}
+		}
+		for (int i = 0, pointLights = 0; i < c_MaxLights; i++)
+		{
+			if (auto light = dynamic_cast<PointLight*>(m_Lights[i]))
+			{
+				if (pointLights == 0)
+				{
+					pointShadowShader->Bind();
+					m_PointShadowFramebuffer->Bind();
+					RenderCommand::Clear();
+				}
+				if (pointLights < c_MaxPointLights)
+				{
+					RenderCommand::SetViewport(0, pointLights * c_ShadowTexResolution, 2 * c_ShadowTexResolution, c_ShadowTexResolution);
+					auto lightSpace = light->SetShadowData({ {0.0f, (float)pointLights / (float)c_MaxPointLights}, {1.0f, (float)pointLights / (float)c_MaxPointLights + 1.0f / (float)c_MaxPointLights} });
+					for (int j = 0; j < 2; j++)
+						pointShadowShader->SetUniformMat4("u_LightSpace[" + std::to_string(j) + "]", lightSpace[j]);
+					pointShadowShader->SetUniformFloat1("u_FarPlane", light->GetFarPlane());
+
+					for (uint32_t j = 0; j < GetCount() && j != light->GetObjectID(); j++)
+						Draw(j);
+					Renderer3D::Flush();
+				}
+				pointLights++;
+			}
+		}
+		for (int i = 0, spotLights = 0; i < c_MaxLights; i++)
+		{
+			if (auto light = dynamic_cast<SpotLight*>(m_Lights[i]))
+			{
+				if (spotLights == 0)
+				{
+					spotShadowShader->Bind();
+					m_SpotShadowFramebuffer->Bind();
+					RenderCommand::Clear();
+				}
+				if (spotLights < c_MaxSpotLights)
+				{
+					const int x = spotLights % (int)sqrt(c_MaxSpotLights), y = spotLights / (int)sqrt(c_MaxSpotLights);
+					RenderCommand::SetViewport(x * c_ShadowTexResolution, y * c_ShadowTexResolution, c_ShadowTexResolution, c_ShadowTexResolution);
+					auto lightSpace = light->SetShadowData({ {(float)x / sqrtf((float)c_MaxSpotLights), (float)y / sqrtf((float)c_MaxSpotLights)},
+													   {(float)x / sqrtf((float)c_MaxSpotLights) + 1.0f / sqrtf((float)c_MaxSpotLights),
+													   (float)y / sqrtf((float)c_MaxSpotLights) + 1.0f / sqrtf((float)c_MaxSpotLights)} });
+					spotShadowShader->SetUniformMat4("u_LightSpace", *lightSpace);
+					spotShadowShader->SetUniformFloat1("u_CutOff", light->GetOuterCutOff());
+					spotShadowShader->SetUniformFloat1("u_FarPlane", light->GetFarPlane());
+
+					for (uint32_t j = 0; j < GetCount() && j != light->GetObjectID(); j++)
+						Draw(j);
+					Renderer3D::Flush();
+				}
+				spotLights++;
+			}
+		}
+	}
+	void Scene3D::BindShadowTextures(uint8_t dirShadowTexIndex, uint8_t pointShadowTexIndex, uint8_t spotShadowTexIndex)
+	{
+		m_DirShadowTexture->Bind(dirShadowTexIndex);
+		m_PointShadowTexture->Bind(pointShadowTexIndex);
+		m_SpotShadowTexture->Bind(spotShadowTexIndex);
+	}
+	void Scene3D::BindShadowTextures(glm::u8vec3 shadowTexIndexes)
+	{
+		m_DirShadowTexture->Bind(shadowTexIndexes.x);
+		m_PointShadowTexture->Bind(shadowTexIndexes.y);
+		m_SpotShadowTexture->Bind(shadowTexIndexes.z);
 	}
 }
