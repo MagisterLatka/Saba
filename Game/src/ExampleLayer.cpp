@@ -70,21 +70,18 @@ void ExampleLayer::OnAttach()
 	Saba::UniformBufferManager::Get("scene")->SetBinding(1);
 
 	Saba::TextureManager::Add2D("brick", "assets/textures/brick.jpg", Saba::Texture::Format::SRGB);
+	Saba::TextureManager::Add2D("brickSpec", "assets/textures/brickSpec.jpg", Saba::Texture::Format::RGB8);
 
-	for (int i = -5; i <= 5; i++)
-	{
-		for (int j = -5; j <= 5; j++)
-		{
-			m_Scene.Add(new Saba::Cube({ (float)i + 0.0001f, -3.0f, (float)j + 0.0001f }, { 0.9998f, 1.0f, 0.9998f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
-		}
-	}
 
-	m_Scene.Add(new Saba::Sphere({ 0.0f,  3.0f, 2.0f }, { 1.5f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
-	m_Scene.Add(new Saba::Sphere({ 0.0f, -1.0f, 0.0f }, { 1.0f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }));
-	m_Scene.Add(new Saba::Sphere({ 1.5f,  0.0f, 2.0f }, { 1.0f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
-	m_Scene.Add(new Saba::Sphere({ 0.0f, 1.0f, 2.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
-	m_Scene.Add(new Saba::Sphere({ 2.0f, 1.0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
-	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick")));
+
+	m_Scene.Add(new Saba::Quad({ 0.0f, -4.0f, 0.0f }, { 1.0f, 15.0f, 15.0f }, { 0.0f, 1.0f, 0.0f }, Saba::TextureManager::Get2D("brick"), Saba::TextureManager::Get2D("brickSpec"), true, 16.0f));
+
+	m_Scene.Add(new Saba::Sphere({ 0.0f,  3.0f, 2.0f }, { 1.5f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick"), Saba::TextureManager::Get2D("brickSpec"), true, 16.0f));
+	m_Scene.Add(new Saba::Sphere({ 0.0f, -1.0f, 0.0f }, { 1.0f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, true, 32.0f));
+	m_Scene.Add(new Saba::Sphere({ 1.5f,  0.0f, 2.0f }, { 1.0f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick"), Saba::TextureManager::Get2D("brickSpec"), true, 16.0f));
+	m_Scene.Add(new Saba::Sphere({ 0.0f, 1.0f, 2.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick"), Saba::TextureManager::Get2D("brickSpec"), true, 16.0f));
+	m_Scene.Add(new Saba::Sphere({ 2.0f, 1.0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick"), Saba::TextureManager::Get2D("brickSpec"), true, 16.0f));
+	m_Scene.Add(new Saba::Cube({ 0.0f, 0.0f, 2.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f }, Saba::TextureManager::Get2D("brick"), Saba::TextureManager::Get2D("brickSpec"), true, 16.0f));
 
 	constexpr glm::vec3 lightPos = { 0.0f, 1.0f, 0.0f };
 	m_Scene.AddLight(new Saba::PointLight(m_Scene.Add(new Saba::Sphere(lightPos, { 0.2f, 0.2f, 0.2f }, { 1.0f, 1.0f, 1.0f }, { 10.0f, 10.0f, 10.0f, 1.0f }, false)),
@@ -230,9 +227,12 @@ void ExampleLayer::OnImGuiRender()
 
 	ImGui::Begin("Options");
 
+	static bool prevVSync = true;
 	bool vsync = Saba::Application::Get()->GetWindow()->IsVSync();
 	ImGui::Checkbox("VSync", &vsync);
-	Saba::Application::Get()->GetWindow()->SetVSync(vsync);
+	if (prevVSync != vsync)
+		Saba::Application::Get()->GetWindow()->SetVSync(vsync);
+	prevVSync = vsync;
 
 	ImGui::SliderFloat("Exposure level", &m_Exposure, 0.1f, 5.0f);
 

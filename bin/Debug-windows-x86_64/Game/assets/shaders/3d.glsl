@@ -3,13 +3,12 @@
 #extension ARB_shading_language_420pack:enable
 
 layout(location = 0) in vec4 i_Pos_IsLighted;
-layout(location = 1) in vec3 i_Normal;
-layout(location = 2) in vec2 i_UV;
+layout(location = 1) in vec4 i_Normal_Shininess;
+layout(location = 2) in vec4 i_UV_TID_SpecTID;
 layout(location = 3) in vec4 i_Color;
-layout(location = 4) in float i_TID;
-layout(location = 5) in mat4 i_ModelMat;
-layout(location = 9) in vec4 i_MulColor;
-layout(location = 10) in vec2 i_TIDoptional_IsLighted;
+layout(location = 4) in mat4 i_ModelMat;
+layout(location = 8) in vec4 i_MulColor;
+layout(location = 9) in vec4 i_TIDoptional_SpecTIDoptional_IsLighted_Shininess;
 
 layout(std140, binding = 0) uniform ViewProjMat
 {
@@ -23,10 +22,10 @@ out DATA {
 	vec2 uv;
 	vec4 color;
 	float tid;
-	vec4 mulColor;
-	float tidop;
+	float specTID;
 
 	float isLighted;
+	float shininess;
 
 	vec3 posInLightSpace[c_MaxLights];
 } vs_out;
@@ -54,13 +53,13 @@ void main()
 {
 	gl_Position = u_ViewProjMat * i_ModelMat * vec4(i_Pos_IsLighted.xyz, 1.0f);
 	vs_out.pos = vec3(i_ModelMat * vec4(i_Pos_IsLighted.xyz, 1.0f));
-	vs_out.normal = normalize(mat3(transpose(inverse(i_ModelMat))) * i_Normal);
-	vs_out.uv = i_UV;
-	vs_out.color = i_Color;
-	vs_out.tid = i_TID;
-	vs_out.mulColor = i_MulColor;
-	vs_out.tidop = i_TIDoptional_IsLighted.x;
-	vs_out.isLighted = i_Pos_IsLighted.w * i_TIDoptional_IsLighted.y;
+	vs_out.normal = normalize(mat3(transpose(inverse(i_ModelMat))) * i_Normal_Shininess.xyz);
+	vs_out.uv = i_UV_TID_SpecTID.xy;
+	vs_out.color = i_Color * i_MulColor;
+	vs_out.tid = i_UV_TID_SpecTID.z + i_TIDoptional_SpecTIDoptional_IsLighted_Shininess.x;
+	vs_out.specTID = i_UV_TID_SpecTID.w + i_TIDoptional_SpecTIDoptional_IsLighted_Shininess.y;
+	vs_out.isLighted = i_Pos_IsLighted.w * i_TIDoptional_SpecTIDoptional_IsLighted_Shininess.z;
+	vs_out.shininess = i_Normal_Shininess.w * i_TIDoptional_SpecTIDoptional_IsLighted_Shininess.w;
 	for (int i = 0; i < c_MaxLights; i++)
 		vs_out.posInLightSpace[i] = vec3(u_Lights[i].lightSpace * vec4(vs_out.pos, 1.0f));
 }
@@ -89,10 +88,10 @@ in DATA {
 	vec2 uv;
 	vec4 color;
 	float tid;
-	vec4 mulColor;
-	float tidop;
+	float specTID;
 
 	float isLighted;
+	float shininess;
 
 	vec3 posInLightSpace[c_MaxLights];
 } fs_in;
@@ -127,16 +126,17 @@ float CalcDirShadow(const vec3 pos, const float toLightNormal, const vec4 shadow
 float CalcPointShadow(const vec3 lightToPos, const float toLightNormal, const vec4 shadowTextureSpace, const float farPlane);
 float CalcSpotShadow(const vec3 pos, const float outerCutOff, const float toLightNormal, const vec4 shadowTextureSpace, const float farPlane);
 
-vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInLightSpace, const vec3 normal, const vec3 color, const vec3 viewPos);
+vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInLightSpace, const vec3 normal, const vec3 color, const vec3 materialSpec, const float shininess, const vec3 viewPos);
 
 ////////////////////////////////
 void main()
 {
-	const vec4 color = texture(u_Tex[int(fs_in.tid + fs_in.tidop + 0.1f)], fs_in.uv) * fs_in.color * fs_in.mulColor;
+	const vec4 color = texture(u_Tex[int(fs_in.tid + 0.1f)], fs_in.uv) * fs_in.color;
+	const vec3 materialSpec = texture(u_Tex[int(fs_in.specTID + 0.1f)], fs_in.uv).rgb;
 
 	vec3 outputColor = color.rgb * c_Ambient;
 	for (int i = 0; i < c_MaxLights; i++)
-		outputColor += CalcLight(u_Lights[i], fs_in.pos, fs_in.posInLightSpace[i], fs_in.normal, color.rgb, u_ViewPos.xyz);
+		outputColor += CalcLight(u_Lights[i], fs_in.pos, fs_in.posInLightSpace[i], fs_in.normal, color.rgb, materialSpec, fs_in.shininess, u_ViewPos.xyz);
 
 	o_Color = vec4(color.rgb * equal(fs_in.isLighted, 0.0f) + outputColor * not_equal(fs_in.isLighted, 0.0f), color.a);
 }
@@ -199,11 +199,8 @@ float CalcSpotShadow(const vec3 pos, const float outerCutOff, const float toLigh
 	return greater(current - bias, closest) * and(and(greater(uv.x, shadowTextureSpace.x), less(uv.x, shadowTextureSpace.z)), and(greater(uv.y, shadowTextureSpace.y), less(uv.y, shadowTextureSpace.w)));
 }
 
-vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInLightSpace, const vec3 normal, const vec3 color, const vec3 viewPos)
+vec3 CalcLight(const Light light, const vec3 pos, const vec3 posInLightSpace, const vec3 normal, const vec3 color, const vec3 materialSpec, const float shininess, const vec3 viewPos)
 {
-	const float shininess = 32.0f; //TODO: material system
-	const vec3 materialSpec = vec3(0.5f);
-
 	const vec3 toLight = -light.dir.xyz * and(equal(light.pos.w, 0.0f), equal(light.dir.w, 1.0f)) + normalize(light.pos.xyz - pos) * equal(light.pos.w, 1.0f);
 
 	const float distance = length(toLight);

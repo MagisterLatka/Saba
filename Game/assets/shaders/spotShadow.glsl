@@ -2,7 +2,7 @@
 #version 330 core
 
 layout(location = 0) in vec3 i_Pos;
-layout(location = 5) in mat4 i_ModelMat;
+layout(location = 4) in mat4 i_ModelMat;
 
 out float l_Depth;
 

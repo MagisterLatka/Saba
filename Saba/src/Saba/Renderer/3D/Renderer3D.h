@@ -18,14 +18,14 @@ namespace Saba {
 		static void FlushTriangle();
 		static void FlushModel(uint8_t modelID);
 
-		static void DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posUV, glm::vec4 color, bool isLighted = true);
-		static void DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posUV, Ref<Texture2D> texture, bool isLighted = true);
+		static void DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posUV, glm::vec4 color, bool isLighted = true, float shininess = 1.0f);
+		static void DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posUV, Ref<Texture2D> texture, Ref<Texture2D> specTexture = {}, bool isLighted = true, float shininess = 1.0f);
 
-		static void DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & pos, glm::vec4 color, bool isLighted = true);
-		static void DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & pos, Ref<Texture2D> texture, bool isLighted = true);
+		static void DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & pos, glm::vec4 color, bool isLighted = true, float shininess = 1.0f);
+		static void DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & pos, Ref<Texture2D> texture, Ref<Texture2D> specTexture = {}, bool isLighted = true, float shininess = 1.0f);
 
 		template<class T>
-		inline static void AddModel(RendererAPI::RenderTopology topology, const std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float>>& posNormalUVColorTID, const std::vector<uint32_t>& indices)
+		inline static void AddModel(RendererAPI::RenderTopology topology, const std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float, float, float>>& posNormalUVColorTIDSpecTIDShininess, const std::vector<uint32_t>& indices)
 		{
 			uint8_t id = (uint8_t)s_Data.modelData.size();
 			T::SetModelID(id);
@@ -36,25 +36,23 @@ namespace Saba {
 			s_Data.modelData[id].modelMatBuffer = new ModelVertexBuffer[c_MaxModelInstances];
 			s_Data.modelData[id].at = s_Data.modelData[id].modelMatBuffer;
 
-			VertexData* data = (VertexData*)malloc(posNormalUVColorTID.size() * sizeof(VertexData));
+			VertexData* data = (VertexData*)malloc(posNormalUVColorTIDSpecTIDShininess.size() * sizeof(VertexData));
 			VertexData* at = data;
-			for (auto [pos, normal, uv, color, tid] : posNormalUVColorTID)
+			for (auto [pos, normal, uv, color, tid, specTID, shininess] : posNormalUVColorTIDSpecTIDShininess)
 			{
 				at->pos_IsLighted = glm::vec4(pos, 1.0f);
-				at->normal = normal;
-				at->uv = uv;
+				at->normal_Shininess = glm::vec4(normal, shininess);
+				at->uv_texID_specTexID = glm::vec4(uv, tid, specTID);
 				at->color = color;
-				at->texID = tid;
 				at++;
 			}
-			Ref<VertexBuffer> vbo = VertexBuffer::Create((float*)data, (uint32_t)(posNormalUVColorTID.size() * sizeof(VertexData)));
+			Ref<VertexBuffer> vbo = VertexBuffer::Create((float*)data, (uint32_t)(posNormalUVColorTIDSpecTIDShininess.size() * sizeof(VertexData)));
 			free(data);
 			vbo->SetLayout({
 				{ "i_Pos_IsLighted", ShaderDataType::Float4 },
-				{ "i_Normal", ShaderDataType::Float3 },
-				{ "i_UV", ShaderDataType::Float2 },
-				{ "i_Color", ShaderDataType::Float4 },
-				{ "i_TID", ShaderDataType::Float }
+				{ "i_Normal_Shininess", ShaderDataType::Float4 },
+				{ "i_UV_TID_SpecTID", ShaderDataType::Float4 },
+				{ "i_Color", ShaderDataType::Float4 }
 			});
 			s_Data.modelData[id].vertexArray->AddVertexBuffer(vbo);
 
@@ -62,7 +60,7 @@ namespace Saba {
 			vbo->SetLayout({
 				{ "i_ModelMat", ShaderDataType::Mat4, 1 },
 				{ "i_ColorMul", ShaderDataType::Float4, 1 },
-				{ "i_TIDoptional_IsLighted", ShaderDataType::Float2, 1 }
+				{ "i_TIDoptional_SpecTIDoptional_IsLighted_Shininess", ShaderDataType::Float4, 1 }
 			});
 			s_Data.modelData[id].vertexArray->AddVertexBuffer(vbo);
 
@@ -80,11 +78,11 @@ namespace Saba {
 			s_Data.modelData[id].textures[0] = s_Data.whiteTex;
 
 			s_Data.stats.modelStats.emplace_back();
-			s_Data.stats.modelStats[id].verticesCount = (uint32_t)posNormalUVColorTID.size();
+			s_Data.stats.modelStats[id].verticesCount = (uint32_t)posNormalUVColorTIDSpecTIDShininess.size();
 			s_Data.stats.modelStats[id].indicesCount = (uint32_t)indices.size();
 		}
-		static void DrawModel(uint8_t modelID, glm::vec3 pos, glm::vec3 dir = { 1.0f, 0.0f, 0.0f }, glm::vec3 scale = { 1.0f, 1.0f, 1.0f }, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, const std::vector<Ref<Texture2D>>& textures = {}, bool isLighted = true);
-		static void DrawModel(uint8_t modelID, glm::mat4 modelMat, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, const std::vector<Ref<Texture2D>>& textures = {}, bool isLighted = true);
+		static void DrawModel(uint8_t modelID, glm::vec3 pos, glm::vec3 dir = { 1.0f, 0.0f, 0.0f }, glm::vec3 scale = { 1.0f, 1.0f, 1.0f }, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, const std::vector<Ref<Texture2D>>& textures = {}, const std::vector<Ref<Texture2D>>& specTextures = {}, bool isLighted = true, float shininess = 1.0f);
+		static void DrawModel(uint8_t modelID, glm::mat4 modelMat, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, const std::vector<Ref<Texture2D>>& textures = {}, const std::vector<Ref<Texture2D>>& specTextures = {}, bool isLighted = true, float shininess = 1.0f);
 
 		struct Stats
 		{
@@ -113,16 +111,15 @@ namespace Saba {
 		struct VertexData
 		{
 			glm::vec4 pos_IsLighted;
-			glm::vec3 normal;
-			glm::vec2 uv;
+			glm::vec4 normal_Shininess;
+			glm::vec4 uv_texID_specTexID;
 			glm::vec4 color;
-			float texID;
 		};
 		struct ModelVertexBuffer
 		{
 			glm::mat4 modelMat;
 			glm::vec4 color;
-			glm::vec2 tid_IsLighted;
+			glm::vec4 tid_SpecTID_IsLighted_Shininess;
 		};
 
 		struct ModelData

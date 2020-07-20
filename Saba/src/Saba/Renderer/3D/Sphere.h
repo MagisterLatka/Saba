@@ -9,8 +9,8 @@ namespace Saba {
 	{
 		friend class Renderer3D;
 	public:
-		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted = true);
-		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted = true);
+		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted = true, float shininess = 1.0f);
+		Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, Ref<Texture2D> specTexture = {}, bool isLighted = true, float shininess = 1.0f);
 		~Sphere() = default;
 
 		virtual void Draw() override;
@@ -28,13 +28,13 @@ namespace Saba {
 		static void CreateSphereMesh();
 	private:
 		static uint8_t s_ModelID;
-		static std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float>> s_PosNormalUVColorTID;
-		static std::vector<uint32_t> s_Indices;
 		glm::vec3 m_Pos;
 		glm::vec3 m_Size;
 		glm::mat4 m_Rotate = glm::mat4(1.0f);
 		glm::mat4 m_RotateFromOrigin = glm::mat4(1.0f);
 		glm::vec4 m_Color;
+		float m_Shininess;
 		Ref<Texture2D> m_Texture;
+		Ref<Texture2D> m_SpecTexture;
 	};
 }

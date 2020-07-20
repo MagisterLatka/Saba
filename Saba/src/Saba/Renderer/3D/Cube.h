@@ -10,9 +10,9 @@ namespace Saba {
 		friend class Renderer3D;
 	public:
 		//pos of the cube, size of the cube, dir of X+ side and color of the cube
-		Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, bool isLighted = true);
+		Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, bool isLighted = true, float shininess = 1.0f);
 		//pos of the cube, size of the cube, dir of X+ side and texture - same for all sides
-		Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted = true);
+		Cube(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, Ref<Texture2D> specTexture = {}, bool isLighted = true, float shininess = 1.0f);
 		~Cube() = default;
 
 		virtual void Draw() override;
@@ -35,6 +35,8 @@ namespace Saba {
 		glm::mat4 m_Rotate = glm::mat4(1.0f);
 		glm::mat4 m_RotateFromOrigin = glm::mat4(1.0f);
 		glm::vec4 m_Color;
+		float m_Shininess;
 		Ref<Texture2D> m_Texture;
+		Ref<Texture2D> m_SpecTexture;
 	};
 }

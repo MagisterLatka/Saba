@@ -2,12 +2,11 @@
 #version 330 core
 
 layout(location = 0) in vec3 i_Pos;
-layout(location = 2) in vec2 i_UV;
+layout(location = 2) in vec3 i_UV_TID;
 layout(location = 3) in vec4 i_Color;
-layout(location = 4) in float i_TID;
-layout(location = 5) in mat4 i_ModelMat;
-layout(location = 9) in vec4 i_MulColor;
-layout(location = 10) in float i_TIDOptional;
+layout(location = 4) in mat4 i_ModelMat;
+layout(location = 8) in vec4 i_MulColor;
+layout(location = 9) in float i_TIDOptional;
 
 out DATA {
 	vec2 uv;
@@ -22,9 +21,9 @@ uniform mat4 u_ViewProjMat;
 void main()
 {
 	gl_Position = u_ViewProjMat * i_ModelMat * vec4(i_Pos, 1.0f);
-	vs_out.uv = i_UV;
+	vs_out.uv = i_UV_TID.xy;
 	vs_out.color = i_Color;
-	vs_out.tid = i_TID;
+	vs_out.tid = i_UV_TID.z;
 	vs_out.mulColor = i_MulColor;
 	vs_out.tidOptional = i_TIDOptional;
 }

@@ -13,33 +13,32 @@ namespace Saba {
 	{
 		for (uint32_t i = 0; i < c_MaxQuadCount * 4; i += 4)
 		{
-			s_Data.bufferQuad[i + 0].uv = { 0.0f, 0.0f };
-			s_Data.bufferQuad[i + 1].uv = { 1.0f, 0.0f };
-			s_Data.bufferQuad[i + 2].uv = { 1.0f, 1.0f };
-			s_Data.bufferQuad[i + 3].uv = { 0.0f, 1.0f };
+			s_Data.bufferQuad[i + 0].uv_texID_specTexID = { 0.0f, 0.0f, 0.0f, 0.0f };
+			s_Data.bufferQuad[i + 1].uv_texID_specTexID = { 1.0f, 0.0f, 0.0f, 0.0f };
+			s_Data.bufferQuad[i + 2].uv_texID_specTexID = { 1.0f, 1.0f, 0.0f, 0.0f };
+			s_Data.bufferQuad[i + 3].uv_texID_specTexID = { 0.0f, 1.0f, 0.0f, 0.0f };
 		}
 		
 		s_Data.vertexArrayTriangle = VertexArray::Create();
 		Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, c_MaxTriangleCount * 3 * sizeof(VertexData), Dynamic);
 		vbo->SetLayout({
 			{"i_Pos_IsLighted", ShaderDataType::Float4},
-			{"i_Normal", ShaderDataType::Float3 },
-			{"i_UV", ShaderDataType::Float2},
-			{"i_Color", ShaderDataType::Float4},
-			{"i_TexID", ShaderDataType::Float}
+			{"i_Normal_Shininess", ShaderDataType::Float4 },
+			{"i_UV_TID_SpecTID", ShaderDataType::Float4},
+			{"i_Color", ShaderDataType::Float4}
 		});
 		s_Data.vertexArrayTriangle->AddVertexBuffer(vbo);
 
 		ModelVertexBuffer dataModel = {
 			glm::mat4(1.0f),
 			glm::vec4(1.0f),
-			glm::vec2(0.0f, 1.0f)
+			glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
 		};
 		vbo = VertexBuffer::Create((float*)&dataModel, sizeof(ModelVertexBuffer));
 		vbo->SetLayout({
 			{ "i_ModelMat", ShaderDataType::Mat4, 1 },
 			{ "i_ColorMul", ShaderDataType::Float4, 1 },
-			{ "i_TIDoptional_IsLighted", ShaderDataType::Float2, 1 }
+			{ "i_TIDoptional_SpecTIDoptional_IsLighted", ShaderDataType::Float4, 1 }
 		});
 		s_Data.vertexArrayTriangle->AddVertexBuffer(vbo);
 
@@ -62,10 +61,9 @@ namespace Saba {
 		Ref<VertexBuffer> vbo2 = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), Dynamic);
 		vbo2->SetLayout({
 			{"i_Pos_IsLighted", ShaderDataType::Float4},
-			{"i_Normal", ShaderDataType::Float3 },
-			{"i_UV", ShaderDataType::Float2},
-			{"i_Color", ShaderDataType::Float4},
-			{"i_TexID", ShaderDataType::Float}
+			{"i_Normal_Shininess", ShaderDataType::Float4 },
+			{"i_UV_TID_SpecTID", ShaderDataType::Float4},
+			{"i_Color", ShaderDataType::Float4}
 		});
 		s_Data.vertexArrayQuad->AddVertexBuffer(vbo2);
 		s_Data.vertexArrayQuad->AddVertexBuffer(vbo);
@@ -195,7 +193,7 @@ namespace Saba {
 	}
 
 	
-	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, glm::vec4 color, bool isLighted)
+	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, glm::vec4 color, bool isLighted, float shininess)
 	{
 		if (s_Data.triangleCount >= c_MaxTriangleCount)
 			FlushTriangle();
@@ -204,27 +202,35 @@ namespace Saba {
 		{
 			auto [pos, normal, uv] = posNormalUV[i];
 			s_Data.atTriangle->pos_IsLighted = glm::vec4(pos, isLighted ? 1.0f : 0.0f);
-			s_Data.atTriangle->normal = normal;
-			s_Data.atTriangle->uv = uv;
+			s_Data.atTriangle->normal_Shininess = glm::vec4(normal, shininess);
+			s_Data.atTriangle->uv_texID_specTexID = glm::vec4(uv, 0.0f, 0.0f);
 			s_Data.atTriangle->color = color;
-			s_Data.atTriangle->texID = 0.0f;
 			s_Data.atTriangle++;
 		}
 
 		s_Data.triangleCount++;
 		s_Data.stats.triangleCount++;
 	}
-	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, Ref<Texture2D> texture, bool isLighted)
+	void Renderer3D::DrawTriangle(const std::array<std::tuple<glm::vec3, glm::vec3, glm::vec2>, 3> & posNormalUV, Ref<Texture2D> texture, Ref<Texture2D> specTexture, bool isLighted, float shininess)
 	{
-		if (s_Data.triangleCount >= c_MaxTriangleCount || s_Data.texIndexTriangle > c_MaxTextures - 1)
+		if (s_Data.triangleCount >= c_MaxTriangleCount || (s_Data.texIndexTriangle > c_MaxTextures - 2 && specTexture) || s_Data.texIndexTriangle > c_MaxTextures - 1)
 			FlushTriangle();
 
 		float tid = 0.0f;
+		float specTID = 0.0f;
 		for (uint8_t i = 1; i < s_Data.texIndexTriangle; i++)
 		{
 			if (s_Data.texturesTriangle[i] == texture)
 			{
 				tid = (float)i;
+				break;
+			}
+		}
+		for (uint8_t i = 1; i < s_Data.texIndexTriangle; i++)
+		{
+			if (s_Data.texturesTriangle[i] == specTexture)
+			{
+				specTID = (float)i;
 				break;
 			}
 		}
@@ -234,15 +240,20 @@ namespace Saba {
 			s_Data.texturesTriangle[s_Data.texIndexTriangle] = texture;
 			s_Data.texIndexTriangle++;
 		}
+		if (specTID == 0.0f && specTexture)
+		{
+			specTID = (float)s_Data.texIndexTriangle;
+			s_Data.texturesTriangle[s_Data.texIndexTriangle] = specTexture;
+			s_Data.texIndexTriangle++;
+		}
 
 		for (int i = 0; i < 3; i++)
 		{
 			auto [pos, normal, uv] = posNormalUV[i];
 			s_Data.atTriangle->pos_IsLighted = glm::vec4(pos, isLighted ? 1.0f : 0.0f);
-			s_Data.atTriangle->normal = normal;
-			s_Data.atTriangle->uv = uv;
+			s_Data.atTriangle->normal_Shininess = glm::vec4(normal, shininess);
+			s_Data.atTriangle->uv_texID_specTexID = glm::vec4(uv, tid, specTID);
 			s_Data.atTriangle->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-			s_Data.atTriangle->texID = tid;
 			s_Data.atTriangle++;
 		}
 
@@ -250,7 +261,7 @@ namespace Saba {
 		s_Data.stats.triangleCount++;
 	}
 
-	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, glm::vec4 color, bool isLighted)
+	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, glm::vec4 color, bool isLighted, float shininess)
 	{
 		if (s_Data.triangleCount >= c_MaxTriangleCount)
 			FlushQuad();
@@ -258,26 +269,36 @@ namespace Saba {
 		for (int i = 0; i < 4; i++)
 		{
 			s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[i].first, isLighted ? 1.0f : 0.0f);
-			s_Data.atQuad->normal = posNormal[i].second;
+			s_Data.atQuad->normal_Shininess = glm::vec4(posNormal[i].second, shininess);
 			s_Data.atQuad->color = color;
-			s_Data.atQuad->texID = 0.0f;
+			s_Data.atQuad->uv_texID_specTexID.z = 0.0f;
+			s_Data.atQuad->uv_texID_specTexID.w = 0.0f;
 			s_Data.atQuad++;
 		}
 
 		s_Data.quadCount++;
 		s_Data.stats.quadCount++;
 	}
-	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, Ref<Texture2D> texture, bool isLighted)
+	void Renderer3D::DrawQuad(const std::array<std::pair<glm::vec3, glm::vec3>, 4> & posNormal, Ref<Texture2D> texture, Ref<Texture2D> specTexture, bool isLighted, float shininess)
 	{
-		if (s_Data.quadCount >= c_MaxQuadCount || s_Data.texIndexQuad > c_MaxTextures - 1)
+		if (s_Data.quadCount >= c_MaxQuadCount || (s_Data.texIndexQuad > c_MaxTextures - 1 && specTexture) || s_Data.texIndexQuad > c_MaxTextures - 1)
 			FlushQuad();
 
 		float tid = 0.0f;
+		float specTID = 0.0f;
 		for (uint8_t i = 1; i < s_Data.texIndexQuad; i++)
 		{
 			if (s_Data.texturesQuad[i] == texture)
 			{
 				tid = (float)i;
+				break;
+			}
+		}
+		for (uint8_t i = 1; i < s_Data.texIndexQuad; i++)
+		{
+			if (s_Data.texturesQuad[i] == specTexture)
+			{
+				specTID = (float)i;
 				break;
 			}
 		}
@@ -287,13 +308,20 @@ namespace Saba {
 			s_Data.texturesQuad[s_Data.texIndexQuad] = texture;
 			s_Data.texIndexQuad++;
 		}
+		if (specTID == 0.0f)
+		{
+			specTID = (float)s_Data.texIndexQuad;
+			s_Data.texturesQuad[s_Data.texIndexQuad] = specTexture;
+			s_Data.texIndexQuad++;
+		}
 
 		for (int i = 0; i < 4; i++)
 		{
 			s_Data.atQuad->pos_IsLighted = glm::vec4(posNormal[i].first, isLighted ? 1.0f : 0.0f);
-			s_Data.atQuad->normal = posNormal[i].second;
+			s_Data.atQuad->normal_Shininess = glm::vec4(posNormal[i].second, shininess);
 			s_Data.atQuad->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-			s_Data.atQuad->texID = tid;
+			s_Data.atQuad->uv_texID_specTexID.z = tid;
+			s_Data.atQuad->uv_texID_specTexID.w = specTID;
 			s_Data.atQuad++;
 		}
 
@@ -301,9 +329,9 @@ namespace Saba {
 		s_Data.stats.quadCount++;
 	}
 
-	void Renderer3D::DrawModel(uint8_t modelID, glm::vec3 pos, glm::vec3 dir, glm::vec3 scale, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures, bool isLighted)
+	void Renderer3D::DrawModel(uint8_t modelID, glm::vec3 pos, glm::vec3 dir, glm::vec3 scale, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures, const std::vector<Ref<Texture2D>>& specTextures, bool isLighted, float shininess)
 	{
-		if (s_Data.modelData[modelID].instancesCount >= c_MaxModelInstances || s_Data.modelData[modelID].texIndex + textures.size() >= c_MaxTextures)
+		if (s_Data.modelData[modelID].instancesCount >= c_MaxModelInstances || s_Data.modelData[modelID].texIndex + textures.size() + specTextures.size() >= c_MaxTextures)
 			FlushModel(modelID);
 
 		const float angle = glm::acos(glm::dot(dir, {1.0f, 0.0f, 0.0f}));
@@ -311,6 +339,7 @@ namespace Saba {
 		const glm::mat4 modelMat = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), pos), angle, axis), scale);
 
 		float tid = 0.0f;
+		float specTID = 0.0f;
 		if (textures[0])
 		{
 			auto it = std::search(s_Data.modelData[modelID].textures.begin(), s_Data.modelData[modelID].textures.end(), textures.begin(), textures.end());
@@ -325,21 +354,36 @@ namespace Saba {
 				s_Data.modelData[modelID].texIndex += (uint8_t)textures.size();
 			}
 		}
+		if (!specTextures.empty() && specTextures[0])
+		{
+			auto it = std::search(s_Data.modelData[modelID].textures.begin(), s_Data.modelData[modelID].textures.end(), specTextures.begin(), specTextures.end());
+			if (it != s_Data.modelData[modelID].textures.end())
+			{
+				specTID = (float)(it - s_Data.modelData[modelID].textures.begin());
+			}
+			else
+			{
+				specTID = (float)s_Data.modelData[modelID].texIndex;
+				std::copy(specTextures.begin(), specTextures.end(), s_Data.modelData[modelID].textures.begin() + s_Data.modelData[modelID].texIndex);
+				s_Data.modelData[modelID].texIndex += (uint8_t)specTextures.size();
+			}
+		}
 
 		s_Data.modelData[modelID].at->modelMat = modelMat;
 		s_Data.modelData[modelID].at->color = color;
-		s_Data.modelData[modelID].at->tid_IsLighted = glm::vec2(tid, isLighted ? 1.0f : 0.0f);
+		s_Data.modelData[modelID].at->tid_SpecTID_IsLighted_Shininess = glm::vec4(tid, specTID, isLighted ? 1.0f : 0.0f, shininess);
 		s_Data.modelData[modelID].at++;
 		s_Data.modelData[modelID].instancesCount++;
 
 		s_Data.stats.modelStats[modelID].timesDrawed++;
 	}
-	void Renderer3D::DrawModel(uint8_t modelID, glm::mat4 modelMat, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures, bool isLighted)
+	void Renderer3D::DrawModel(uint8_t modelID, glm::mat4 modelMat, glm::vec4 color, const std::vector<Ref<Texture2D>>& textures, const std::vector<Ref<Texture2D>>& specTextures, bool isLighted, float shininess)
 	{
-		if (s_Data.modelData[modelID].instancesCount >= c_MaxModelInstances || s_Data.modelData[modelID].texIndex + textures.size() >= c_MaxTextures)
+		if (s_Data.modelData[modelID].instancesCount >= c_MaxModelInstances || s_Data.modelData[modelID].texIndex + textures.size() + specTextures.size() >= c_MaxTextures)
 			FlushModel(modelID);
 
 		float tid = 0.0f;
+		float specTID = 0.0f;
 		if (!textures.empty() && textures[0])
 		{
 			auto it = std::search(s_Data.modelData[modelID].textures.begin(), s_Data.modelData[modelID].textures.end(), textures.begin(), textures.end());
@@ -354,10 +398,24 @@ namespace Saba {
 				s_Data.modelData[modelID].texIndex += (uint8_t)textures.size();
 			}
 		}
+		if (!specTextures.empty() && specTextures[0])
+		{
+			auto it = std::search(s_Data.modelData[modelID].textures.begin(), s_Data.modelData[modelID].textures.end(), specTextures.begin(), specTextures.end());
+			if (it != s_Data.modelData[modelID].textures.end())
+			{
+				specTID = (float)(it - s_Data.modelData[modelID].textures.begin());
+			}
+			else
+			{
+				specTID = (float)s_Data.modelData[modelID].texIndex;
+				std::copy(specTextures.begin(), specTextures.end(), s_Data.modelData[modelID].textures.begin() + s_Data.modelData[modelID].texIndex);
+				s_Data.modelData[modelID].texIndex += (uint8_t)specTextures.size();
+			}
+		}
 
 		s_Data.modelData[modelID].at->modelMat = modelMat;
 		s_Data.modelData[modelID].at->color = color;
-		s_Data.modelData[modelID].at->tid_IsLighted = glm::vec2(tid, isLighted ? 1.0f : 0.0f);
+		s_Data.modelData[modelID].at->tid_SpecTID_IsLighted_Shininess = glm::vec4(tid, specTID, isLighted ? 1.0f : 0.0f, shininess);
 		s_Data.modelData[modelID].at++;
 		s_Data.modelData[modelID].instancesCount++;
 

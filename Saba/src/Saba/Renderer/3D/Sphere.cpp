@@ -6,36 +6,28 @@
 
 namespace Saba {
 
-	std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float>> Sphere::s_PosNormalUVColorTID;
-	std::vector<uint32_t> Sphere::s_Indices;
 	uint8_t Sphere::s_ModelID = 255;
 
 	constexpr uint8_t c_Segments = 32;
 
-	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted)
-		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(color)
+	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, glm::vec4 color, bool isLighted, float shininess)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(color), m_Shininess(shininess)
 	{
 		if (s_ModelID == 255)
-		{
 			CreateSphereMesh();
-			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices);
-		}
 		SetDirection(dir);
 	}
-	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, bool isLighted)
-		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Texture(texture)
+	Sphere::Sphere(glm::vec3 pos, glm::vec3 size, glm::vec3 dir, Ref<Texture2D> texture, Ref<Texture2D> specTexture, bool isLighted, float shininess)
+		: Scene3DObject(isLighted), m_Pos(pos), m_Size(size), m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Shininess(shininess), m_Texture(texture), m_SpecTexture(specTexture)
 	{
 		if (s_ModelID == 255)
-		{
 			CreateSphereMesh();
-			Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, s_PosNormalUVColorTID, s_Indices);
-		}
 		SetDirection(dir);
 	}
 	void Sphere::Draw()
 	{
 		const glm::mat4 modelMat = glm::scale(glm::translate(m_RotateFromOrigin, m_Pos) * m_Rotate, m_Size);
-		Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, { m_Texture }, m_IsLighted);
+		Renderer3D::DrawModel(s_ModelID, modelMat, m_Color, { m_Texture }, { m_SpecTexture }, m_IsLighted, m_Shininess);
 	}
 
 	void Sphere::SetPos(glm::vec3 pos)
@@ -94,7 +86,10 @@ namespace Saba {
 	}
 
 	void Sphere::CreateSphereMesh()
-	{
+	{	
+		static std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec2, glm::vec4, float, float, float>> posNormalUVColorTIDSpecTIDShininess;
+		static std::vector<uint32_t> indices;
+
 		constexpr float radius = 1.0f;
 		for (uint8_t y = 0; y <= c_Segments; y++)
 		{
@@ -106,12 +101,12 @@ namespace Saba {
 				const float yPos = glm::cos(ySegment * glm::pi<float>());
 				const float zPos = glm::sin(xSegment * 2.0f * glm::pi<float>()) * glm::sin(ySegment * glm::pi<float>());
 
-				s_PosNormalUVColorTID.push_back({
+				posNormalUVColorTIDSpecTIDShininess.push_back({
 					{xPos, yPos, zPos},
 					{xPos, yPos, zPos},
 					{xSegment, ySegment},
 					{1.0f, 1.0f, 1.0f, 1.0f},
-					0.0f
+					0.0f, 0.0f, 1.0f
 				});
 			}
 		}
@@ -123,19 +118,20 @@ namespace Saba {
 			{
 				for (int x = 0; x <= c_Segments; x++)
 				{
-					s_Indices.push_back(y       * (c_Segments + 1) + x);
-					s_Indices.push_back((y + 1) * (c_Segments + 1) + x);
+					indices.push_back(y       * (c_Segments + 1) + x);
+					indices.push_back((y + 1) * (c_Segments + 1) + x);
 				}
 			}
 			else
 			{
 				for (int x = c_Segments; x >= 0; x--)
 				{
-					s_Indices.push_back((y + 1) * (c_Segments + 1) + x);
-					s_Indices.push_back(y       * (c_Segments + 1) + x);
+					indices.push_back((y + 1) * (c_Segments + 1) + x);
+					indices.push_back(y       * (c_Segments + 1) + x);
 				}
 			}
 			oddRow = !oddRow;
 		}
+		Renderer3D::AddModel<Sphere>(RendererAPI::TriangleStrip, posNormalUVColorTIDSpecTIDShininess, indices);
 	}
 }

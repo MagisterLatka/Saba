@@ -21,7 +21,7 @@ out vec4 o_Color;
 
 in vec3 l_UV;
 
-layout(binding = 31) uniform samplerCube u_Tex;
+uniform samplerCube u_Tex;
 
 void main()
 {
