@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Events\Event.h"
+#include "Saba/Core.h"
+#include "Saba/Events/Event.h"
 
 namespace Saba {
 
@@ -31,7 +32,7 @@ namespace Saba {
 
 		virtual void* GetNativeWindow() const = 0;
 
-		static Ref<Window> Create(const WindowProps& props = WindowProps());
+		static Scope<Window> Create(const WindowProps& props = WindowProps());
 	};
 
 }

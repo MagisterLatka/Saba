@@ -1,7 +1,8 @@
 #include "pch.h"
-#include "OpenGLVertexArray.h"
+#include "Platform/OpenGL/OpenGLVertexArray.h"
+#include "Platform/OpenGL/OpenGLBuffer.h"
 
-#include <glad\glad.h>
+#include <glad/glad.h>
 
 namespace Saba {
 
@@ -47,7 +48,7 @@ namespace Saba {
 	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& buffer)
 	{
 		glBindVertexArray(m_ID);
-		buffer->Bind();
+		dynamic_cast<OpenGLVertexBuffer*>(&*buffer)->Bind();
 
 		for (const auto& element : buffer->GetLayout())
 		{
@@ -82,7 +83,7 @@ namespace Saba {
 	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& buffer)
 	{
 		glBindVertexArray(m_ID);
-		buffer->Bind();
+		dynamic_cast<OpenGLIndexBuffer*>(&*buffer)->Bind();
 
 		m_IndexBuffer = buffer;
 	}

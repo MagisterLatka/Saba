@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "OrthographicCamera.h"
+#include "Saba/Renderer/Camera/OrthographicCamera.h"
 
-#include <glm\gtc\matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Saba {
 

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "AssetsManager.h"
+#include "Saba/Renderer/AssetsManager.h"
 
 namespace Saba {
 
@@ -38,6 +38,12 @@ namespace Saba {
 		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
 		s_Textures2D[name] = texture;
 	}
+	void TextureManager::Add2D(const std::string& name, const TextureData& data)
+	{
+		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
+		s_Textures2D[name] = Texture2D::Create(data);
+
+	}
 	void TextureManager::Add2D(const std::string& name, const std::string& filepath)
 	{
 		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
@@ -48,5 +54,4 @@ namespace Saba {
 		SB_CORE_ASSERT((s_Textures2D.find(name) == s_Textures2D.end()), "Texture \"{0}\" already exist", name.c_str());
 		s_Textures2D[name] = Texture2D::Create(width, height);
 	}
-
 }

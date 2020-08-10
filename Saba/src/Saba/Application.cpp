@@ -1,34 +1,29 @@
 #include "pch.h"
-#include "Application.h"
-#include "Renderer\Renderer.h"
-
-#include "Events\KeyEvent.h"
-#include "Events\MouseEvent.h"
+#include "Saba/Application.h"
+#include "Saba/Renderer/Renderer.h"
 
 namespace Saba {
 
-#define BIND_EVENT_FUNC(x) std::bind(&Application::x, this, std::placeholders::_1)
-
 	Application* Application::s_Application = nullptr;
 
-	Application::Application()
+	Application::Application(const std::string& name)
 	{
 		SB_CORE_ASSERT(!s_Application, "Application already exist!");
 		s_Application = this;
 		SB_CORE_INFO("Created application!");
 
-		m_LayerStack = MakeScope<LayerStack>();
-
-		m_Window = Window::Create();
-		m_Window->SetEventCallback(BIND_EVENT_FUNC(OnEvent));
-
-		m_ImGuiLayer = new ImGuiLayer;
-		PushOverlay(m_ImGuiLayer);
+		m_Window = Window::Create(WindowProps(name));
+		m_Window->SetEventCallback(SB_BIND_EVENT_FUNC(Application::OnEvent));
 
 		Renderer::Init();
+
+		m_LayerStack = MakeScope<LayerStack>();
+		m_ImGuiLayer = new ImGuiLayer;
+		PushOverlay(m_ImGuiLayer);
 	}
 	Application::~Application()
 	{
+		delete m_LayerStack.release();
 		Renderer::Shutdown();
 	}
 
@@ -46,12 +41,12 @@ namespace Saba {
 			{
 				for (auto layer : *m_LayerStack)
 					layer->OnUpdate(ts);
-			}
 
-			m_ImGuiLayer->Begin();
-			for (auto layer : *m_LayerStack)
-				layer->OnImGuiRender();
-			m_ImGuiLayer->End();
+				m_ImGuiLayer->Begin();
+				for (auto layer : *m_LayerStack)
+					layer->OnImGuiRender();
+				m_ImGuiLayer->End();
+			}
 
 			m_Window->OnUpdate();
 		}
@@ -73,16 +68,16 @@ namespace Saba {
 	void Application::OnEvent(Event& event)
 	{
 		Dispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FUNC(OnClose));
+		dispatcher.Dispatch<WindowCloseEvent>(SB_BIND_EVENT_FUNC(Application::OnWindowClose));
 
 		for (auto it = m_LayerStack->rbegin(); it != m_LayerStack->rend(); it++)
 		{
-			(*it)->OnEvent(event);
 			if (event.p_Handled)
 				break;
+			(*it)->OnEvent(event);
 		}
 	}
-	bool Application::OnClose(WindowCloseEvent& event)
+	bool Application::OnWindowClose(WindowCloseEvent& event)
 	{
 		m_Running = false;
 		return false;

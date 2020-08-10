@@ -1,10 +1,119 @@
 #include "pch.h"
-#include "OpenGLTexture.h"
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 #include <stb_image.h>
 
 namespace Saba {
 
+	OpenGLTexture2D::OpenGLTexture2D(const TextureData& texData)
+	{
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
+
+		int width = 0, height = 0, channels = 0;
+		stbi_uc* data = nullptr;
+		if (texData.Filepath != "")
+		{
+			stbi_set_flip_vertically_on_load(1);
+			data = stbi_load(texData.Filepath.c_str(), &width, &height, &channels, 0);
+			SB_CORE_ASSERT(data, "Failed to load texture {0}!", texData.Filepath);
+
+			if (!(texData.Width && texData.Height))
+			{
+				m_Width = width;
+				m_Height = height;
+			}
+			else
+			{
+				SB_CORE_ASSERT(width == texData.Width && height == texData.Height, "Width/height does not match texture width/height!");
+				m_Width = width;
+				m_Height = height;
+			}
+		}
+		else
+		{
+			SB_CORE_ASSERT(texData.Width && texData.Height, "Width and height of a texture must be > 0");
+			m_Width = texData.Width;
+			m_Height = texData.Height;
+		}
+
+		if (channels == 0)
+		{
+			m_InternalFormat = InternalFormatInOpenGL(texData.TexFormat);
+			m_Format = FormatInOpenGL(texData.TexFormat);
+		}
+		else
+		{
+			switch (texData.TexFormat)
+			{
+				case Format::None:
+					if (channels == 1)
+					{
+						m_InternalFormat = GL_R8;
+						m_Format = GL_RED;
+					}
+					else if (channels == 2)
+					{
+						m_InternalFormat = GL_RG8;
+						m_Format = GL_RG;
+					}
+					else if (channels == 3)
+					{
+						m_InternalFormat = GL_RGB8;
+						m_Format = GL_RGB;
+					}
+					else if (channels == 4)
+					{
+						m_InternalFormat = GL_RGBA8;
+						m_Format = GL_RGBA;
+					}
+					break;
+				case Format::R8:
+				case Format::R16:
+				case Format::R16F:
+				case Format::R32F:
+					SB_CORE_ASSERT(channels == 1, "Format does not match texture format!");
+				case Format::RG8:
+				case Format::RG16:
+				case Format::RG16F:
+				case Format::RG32F:
+					SB_CORE_ASSERT(channels == 2, "Format does not match texture format!");
+				case Format::RGB8:
+				case Format::RGB16:
+				case Format::RGB16F:
+				case Format::RGB32F:
+				case Format::SRGB:
+					SB_CORE_ASSERT(channels == 3, "Format does not match texture format!");
+				case Format::RGBA8:
+				case Format::RGBA16:
+				case Format::RGBA16F:
+				case Format::RGBA32F:
+				case Format::SRGB_ALPHA:
+					SB_CORE_ASSERT(channels == 4, "Format does not match texture format!");
+					
+					m_InternalFormat = InternalFormatInOpenGL(texData.TexFormat);
+					m_Format = FormatInOpenGL(texData.TexFormat);
+			}
+		}
+
+		GLenum wrapMode = WrapModeInOpenGL(texData.TexWrapMode);
+		GLenum minFilter = MinFilterInOpenGL(texData.MinificationFilter);
+		GLenum magFilter = MagFilterInOpenGL(texData.MagnificationFilter);
+
+		glTextureStorage2D(m_ID, texData.MipmapLevels, m_InternalFormat, m_Width, m_Height);
+
+		glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, minFilter);
+		glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, magFilter);
+		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, wrapMode);
+		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, wrapMode);
+		if (wrapMode == GL_CLAMP_TO_BORDER)
+		{
+			float borderColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			glTextureParameterfv(m_ID, GL_TEXTURE_BORDER_COLOR, borderColor);
+		}
+
+		if (data)
+			glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, m_Format, GetDataType(m_InternalFormat), data);
+	}
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& filepath)
 		: m_InternalFormat(0), m_Format(0)
 	{
@@ -51,6 +160,7 @@ namespace Saba {
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
+
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		glDeleteTextures(1, &m_ID);
@@ -66,6 +176,168 @@ namespace Saba {
 	void OpenGLTexture2D::Bind(uint32_t slot)
 	{
 		glBindTextureUnit(slot, m_ID);
+	}
+
+	GLenum OpenGLTexture2D::InternalFormatInOpenGL(Format format)
+	{
+		switch (format)
+		{
+			case Format::None:
+				return 0;
+			case Format::R8:
+				return GL_R8;
+			case Format::R16:
+				return GL_R16;
+			case Format::R16F:
+				return GL_R16F;
+			case Format::R32F:
+				return GL_R32F;
+			case Format::RG8:
+				return GL_RG8;
+			case Format::RG16:
+				return GL_RG16;
+			case Format::RG16F:
+				return GL_RG16F;
+			case Format::RG32F:
+				return GL_RG32F;
+			case Format::RGB8:
+				return GL_RGB8;
+			case Format::RGB16:
+				return GL_RGB16;
+			case Format::RGB16F:
+				return GL_RGB16F;
+			case Format::RGB32F:
+				return GL_RGB32F;
+			case Format::SRGB:
+				return GL_SRGB8;
+			case Format::RGBA8:
+				return GL_RGBA8;
+			case Format::RGBA16:
+				return GL_RGBA16;
+			case Format::RGBA16F:
+				return GL_RGBA16F;
+			case Format::RGBA32F:
+				return GL_RGBA32F;
+			case Format::SRGB_ALPHA:
+				return GL_SRGB8_ALPHA8;
+		}
+		SB_CORE_ASSERT(false, "Unknown format type!");
+		return 0;
+	}
+	GLenum OpenGLTexture2D::FormatInOpenGL(Format format)
+	{
+		switch (format)
+		{
+			case Format::None:
+				return 0;
+			case Format::R8:
+			case Format::R16:
+			case Format::R16F:
+			case Format::R32F:
+				return GL_RED;
+			case Format::RG8:
+			case Format::RG16:
+			case Format::RG16F:
+			case Format::RG32F:
+				return GL_RG;
+			case Format::RGB8:
+			case Format::RGB16:
+			case Format::RGB16F:
+			case Format::RGB32F:
+				return GL_RGB;
+			case Format::SRGB:
+			case Format::RGBA8:
+			case Format::RGBA16:
+			case Format::RGBA16F:
+			case Format::RGBA32F:
+			case Format::SRGB_ALPHA:
+				return GL_RGBA;
+		}
+		SB_CORE_ASSERT(false, "Unknown format type!");
+		return 0;
+	}
+	GLenum OpenGLTexture2D::MinFilterInOpenGL(Filter filter)
+	{
+		switch (filter)
+		{
+			case Filter::None:
+			case Filter::Linear:
+				return GL_LINEAR;
+			case Filter::Nearest:
+				return GL_NEAREST;
+			case Filter::Linear_MipLinear:
+				return GL_LINEAR_MIPMAP_LINEAR;
+			case Filter::Nearest_MipLinear:
+				return GL_NEAREST_MIPMAP_LINEAR;
+			case Filter::Linear_MipNearest:
+				return GL_LINEAR_MIPMAP_NEAREST;
+			case Filter::Nearest_MipNearest:
+				return GL_NEAREST_MIPMAP_NEAREST;
+		}
+		SB_CORE_ASSERT(false, "Unknown filter type!");
+		return 0;
+	}
+	GLenum OpenGLTexture2D::MagFilterInOpenGL(Filter filter)
+	{
+		switch (filter)
+		{
+			case Filter::None:
+			case Filter::Linear:
+			case Filter::Linear_MipLinear:
+			case Filter::Linear_MipNearest:
+				return GL_LINEAR;
+			case Filter::Nearest:
+			case Filter::Nearest_MipLinear:
+			case Filter::Nearest_MipNearest:
+				return GL_NEAREST;
+		}
+		SB_CORE_ASSERT(false, "Unknown filter type!");
+		return 0;
+	}
+	GLenum OpenGLTexture2D::WrapModeInOpenGL(WrapMode mode)
+	{
+		switch (mode)
+		{
+			case WrapMode::None:
+			case WrapMode::Repeat:
+				return GL_REPEAT;
+			case WrapMode::MirroredRepeat:
+				return GL_MIRRORED_REPEAT;
+			case WrapMode::ClampToEdge:
+				GL_CLAMP_TO_EDGE;
+			case WrapMode::ClampToBorder:
+				GL_CLAMP_TO_BORDER;
+		}
+		SB_CORE_ASSERT(false, "Unknown wrap mode");
+		return 0;
+	}
+	GLenum OpenGLTexture2D::GetDataType(GLenum format)
+	{
+		switch (format)
+		{
+			case GL_R8:
+			case GL_R16:
+			case GL_RG8:
+			case GL_RG16:
+			case GL_RGB8:
+			case GL_RGB16:
+			case GL_SRGB8:
+			case GL_RGBA8:
+			case GL_RGBA16:
+			case GL_SRGB8_ALPHA8:
+				return GL_UNSIGNED_BYTE;
+			case GL_R16F:
+			case GL_R32F:
+			case GL_RG16F:
+			case GL_RG32F:
+			case GL_RGB16F:
+			case GL_RGB32F:
+			case GL_RGBA16F:
+			case GL_RGBA32F:
+				return GL_FLOAT;
+			default:
+				return 0;
+		}
 	}
 
 }

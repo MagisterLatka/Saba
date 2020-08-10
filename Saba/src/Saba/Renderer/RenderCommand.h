@@ -1,37 +1,34 @@
 #pragma once
 
-#include "RendererAPI.h"
+#include "Saba/Core.h"
+#include "Saba/Renderer/RendererAPI.h"
 
 namespace Saba {
 
 	class RenderCommand
 	{
 	public:
-		inline static void Init()
+		static void Init()
 		{
 			s_API->Init();
 		}
-		inline static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+		static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 		{
 			s_API->SetViewport(x, y, width, height);
 		}
 
-		inline static void SetClearColor(const glm::vec4& color)
+		static void SetClearColor(glm::vec4 color)
 		{
 			s_API->SetClearColor(color);
 		}
-		inline static void Clear()
+		static void Clear()
 		{
 			s_API->Clear();
 		}
 		
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
+		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indicesCount = 0)
 		{
-			s_API->DrawIndexed(vertexArray);
-		}
-		inline static void DrawIndexed(uint32_t indicesCount)
-		{
-			s_API->DrawIndexed(indicesCount);
+			s_API->DrawIndexed(vertexArray, indicesCount);
 		}
 	private:
 		static Scope<RendererAPI> s_API;

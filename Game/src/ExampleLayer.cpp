@@ -3,7 +3,6 @@
 #include "ExampleLayer.h"
 
 #include <imgui/imgui.h>
-#include <GLFW\include\GLFW\glfw3.h>
 
 ExampleLayer::ExampleLayer()
 	: Saba::Layer("ExampleLayer"), m_CameraControler(16.0f / 9.0f), m_ParticleSystem(25000)
@@ -15,7 +14,10 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	Saba::TextureManager::Add2D("checkerboard", "assets/textures/checkerboard.png");
+	Saba::TextureData texData;
+	texData.Filepath = "assets/textures/checkerboard.png";
+	texData.MagnificationFilter = Saba::Filter::Nearest;
+	Saba::TextureManager::Add2D("checkerboard", texData);
 
 
 	Saba::Ref<Saba::Shader> shader2D = Saba::Shader::Create("assets/shaders/2D.glsl");
@@ -32,7 +34,7 @@ void ExampleLayer::OnAttach()
 
 	m_Particle.ColorBegin = glm::vec4(0.8f, 0.3f, 0.3f, 1.0f);
 	m_Particle.ColorEnd = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_Particle.Position = glm::vec2(0.0f, 0.0f);
+	m_Particle.Position = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_Particle.SizeBegin = 0.5f;
 	m_Particle.SizeEnd = 0.1f;
 	m_Particle.SizeVariation = 0.05f;
@@ -60,47 +62,48 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::ShaderManager::Get("2D")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
 	static float rotation = 0.0f;
 	rotation += (float)ts * 50.0f;
-	Saba::Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f }, { 10.0f, 10.0f }, rotation, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::TextureManager::Get2D("checkerboard"), 20.0f);
+	Saba::Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, rotation, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::TextureManager::Get2D("checkerboard"), 20.0f);
 
-	for (float y = 0.0f; y < 10.0; y += 0.1f)
+	for (float y = 0.0f; y < 10.0; y += m_QuadFrequency)
 	{
-		for (float x = 0.0f; x < 10.0f; x += 0.1f)
+		for (float x = 0.0f; x < 10.0f; x += m_QuadFrequency)
 		{
-			Saba::Renderer2D::DrawQuad({ x - 5.0f + 0.05f, y - 5.0f + 0.05f }, { 0.06f, 0.06f }, {x / 10.0f, y / 10.0f, 1.0f, 1.0f});
+			Saba::Renderer2D::DrawQuad({ x - 5.0f + m_QuadFrequency / 2.0f, y - 5.0f + m_QuadFrequency / 2.0f}, { m_QuadFrequency * 0.6f, m_QuadFrequency * 0.6f }, {x / 10.0f, y / 10.0f, 1.0f, 1.0f});
 		}
 	}
 	Saba::Renderer2D::Flush();
 
 	if (m_EnableParticles)
 	{
-		if (Saba::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+		if (Saba::Input::IsMouseButtonPressed(SB_MOUSE_BUTTON_LEFT))
 		{
 			auto [x, y] = Saba::Input::GetMousePos();
-			auto width = Saba::Application::Get()->GetWindow()->GetWidth();
-			auto height = Saba::Application::Get()->GetWindow()->GetHeight();
+			auto width = Saba::Application::Get().GetWindow().GetWidth();
+			auto height = Saba::Application::Get().GetWindow().GetHeight();
 
 			glm::vec2 bounds = { m_CameraControler.GetWidth(), m_CameraControler.GetHeight() };
 			glm::vec2 pos = m_CameraControler.GetCamera().GetPosition();
 			x = x / width * bounds.x - bounds.x * 0.5f;
 			y = bounds.y * 0.5f - y / height * bounds.y;
 
-			m_Particle.Position = { x + pos.x, y + pos.y };
-			for (int i = 0; i < 5; i++)
+			m_Particle.Position = { x + pos.x, y + pos.y, 0.1f };
+			for (int i = 0; i < 1000 * ts; i++)
 				m_ParticleSystem.Emit(m_Particle);
 		}
-
-		Saba::ShaderManager::Get("particle")->Bind();
-		Saba::ShaderManager::Get("particle")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
-		m_ParticleSystem.OnUpdate(ts);
-		m_ParticleSystem.OnRender();
 	}
+
+	Saba::ShaderManager::Get("particle")->Bind();
+	Saba::ShaderManager::Get("particle")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
+	m_ParticleSystem.OnUpdate(ts);
+	m_ParticleSystem.OnRender();
 }
 void ExampleLayer::OnImGuiRender()
 {
 	ImGui::Text("Framerate: %.1f", ImGui::GetIO().Framerate);
-	bool vsync = Saba::Application::Get()->GetWindow()->IsVSync();
+	bool vsync = Saba::Application::Get().GetWindow().IsVSync();
 	ImGui::Checkbox("Set VSync", &vsync);
-	Saba::Application::Get()->GetWindow()->SetVSync(vsync);
+	if (vsync != Saba::Application::Get().GetWindow().IsVSync())
+		Saba::Application::Get().GetWindow().SetVSync(vsync);
 
 	ImGui::Text("");
 
@@ -114,4 +117,8 @@ void ExampleLayer::OnImGuiRender()
 	ImGui::ColorEdit4("ColorBegin", &m_Particle.ColorBegin[0]);
 	ImGui::ColorEdit4("ColorEnd", &m_Particle.ColorEnd[0]);
 	ImGui::SliderFloat("LifeTime", &m_Particle.LifeTime, 0.1f, 10.0f);
+
+	ImGui::Text("");
+
+	ImGui::SliderFloat("Quad Frequency", &m_QuadFrequency, 0.01f, 1.0f, "%.2f", 1.0f);
 }

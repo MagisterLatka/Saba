@@ -1,38 +1,33 @@
 #include "pch.h"
-#include "OpenGLBuffer.h"
+#include "Platform/OpenGL/OpenGLBuffer.h"
 
-#include <glad\glad.h>
+#include <glad/glad.h>
 
 namespace Saba {
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(float* data, uint32_t size, BufferUsage usage)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, uint32_t size, BufferUsage usage)
 	{
 		glCreateBuffers(1, &m_ID);
-		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
-		glBufferData(GL_ARRAY_BUFFER, size, data, usage == Static ? GL_STATIC_DRAW : usage == Dynamic ? GL_DYNAMIC_DRAW : usage == Stream ? GL_STREAM_DRAW : 0);
+		glNamedBufferData(m_ID, size, data, usage == Static ? GL_STATIC_DRAW : usage == Dynamic ? GL_DYNAMIC_DRAW : usage == Stream ? GL_STREAM_DRAW : 0);
 	}
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
 		glDeleteBuffers(1, &m_ID);
 	}
 
-	void OpenGLVertexBuffer::Bind() const
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
-	}
-	void OpenGLVertexBuffer::Unbind() const
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
 	void OpenGLVertexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
 	{
-		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+		glNamedBufferSubData(m_ID, offset, size, data);
 	}
 
 	void OpenGLVertexBuffer::SetLayout(const BufferLayout& layout)
 	{
 		m_Layout = layout;
+	}
+
+	void OpenGLVertexBuffer::Bind() const
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_ID);
 	}
 
 
@@ -41,21 +36,21 @@ namespace Saba {
 		: m_Count(count)
 	{
 		glCreateBuffers(1, &m_ID);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), data, GL_STATIC_DRAW);
+		glNamedBufferData(m_ID, count * sizeof(uint32_t), data, GL_STATIC_DRAW);
 	}
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
 		glDeleteBuffers(1, &m_ID);
 	}
 
+	void OpenGLIndexBuffer::SetData(uint32_t* data, uint32_t count, uint32_t offset)
+	{
+		glNamedBufferSubData(m_ID, offset, count * sizeof(uint32_t), data);
+	}
+
 	void OpenGLIndexBuffer::Bind() const
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
-	}
-	void OpenGLIndexBuffer::Unbind() const
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
 }

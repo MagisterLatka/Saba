@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 namespace Saba {
 
@@ -12,13 +12,14 @@ namespace Saba {
 		void SetProjectionMat(float left, float right, float bottom, float top);
 		
 		void SetPosition(const glm::vec3& pos);
-		inline const glm::vec3& GetPosition() const { return m_Position; }
-		void SetRotation(float rotation);
-		inline float GetRotation() const { return m_Rotation; }
+		const glm::vec3& GetPosition() const { return m_Position; }
 
-		inline const glm::mat4& GetProjectionMat() const { return m_ProjectionMat; }
-		inline const glm::mat4& GetViewMat() const { return m_ViewMat; }
-		inline const glm::mat4& GetViewProjectionMat() const { return m_ViewProjMat; }
+		void SetRotation(float rotation);
+		float GetRotation() const { return m_Rotation; }
+
+		const glm::mat4& GetProjectionMat() const { return m_ProjectionMat; }
+		const glm::mat4& GetViewMat() const { return m_ViewMat; }
+		const glm::mat4& GetViewProjectionMat() const { return m_ViewProjMat; }
 	private:
 		void Recalculate();
 	private:

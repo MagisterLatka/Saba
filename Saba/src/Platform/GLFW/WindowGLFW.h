@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Saba\Window.h"
-#include "Saba\Renderer\GraphicsContext.h"
+#include "Saba/Core.h"
+#include "Saba/Window.h"
+#include "Saba/Renderer/GraphicsContext.h"
 
-#include <GLFW\glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Saba {
 
@@ -13,16 +14,16 @@ namespace Saba {
 		WindowGLFW(const WindowProps& props);
 		virtual ~WindowGLFW();
 
-		void OnUpdate() override;
+		virtual void OnUpdate() override;
 
-		inline unsigned int GetWidth() const override { return m_Data.width; }
-		inline unsigned int GetHeight() const override { return m_Data.height; }
+		virtual unsigned int GetWidth() const override { return m_Data.width; }
+		virtual unsigned int GetHeight() const override { return m_Data.height; }
 
-		inline void SetEventCallback(const EventCallbackFN& func) override;
-		void SetVSync(bool isVSync) override;
-		bool IsVSync() const override;
+		virtual void SetEventCallback(const EventCallbackFN& func) override;
+		virtual void SetVSync(bool isVSync) override;
+		virtual bool IsVSync() const override;
 
-		inline virtual void* GetNativeWindow() const { return m_Window; }
+		virtual void* GetNativeWindow() const override { return m_Window; }
 	private:
 		void Init(const WindowProps& props);
 		void Shutdown();

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Event.h"
+#include "Saba/Events/Event.h"
+#include "Saba/MouseCodes.h"
 
 namespace Saba {
 
@@ -10,8 +11,8 @@ namespace Saba {
 		MouseMovedEvent(float xpos, float ypos)
 			: m_XPos(xpos), m_YPos(ypos) {}
 
-		inline float GetXPos() const { return m_XPos; }
-		inline float GetYPos() const { return m_YPos; }
+		float GetXPos() const { return m_XPos; }
+		float GetYPos() const { return m_YPos; }
 
 		std::string ToString() const override
 		{
@@ -32,8 +33,8 @@ namespace Saba {
 		MouseScrolledEvent(float xoffset, float yoffset)
 			: m_XOffset(xoffset), m_YOffset(yoffset) {}
 
-		inline float GetXOffset() const { return m_XOffset; }
-		inline float GetYOffset() const { return m_YOffset; }
+		float GetXOffset() const { return m_XOffset; }
+		float GetYOffset() const { return m_YOffset; }
 
 		std::string ToString() const override
 		{
@@ -51,20 +52,20 @@ namespace Saba {
 	class MouseButtonEvent : public Event
 	{
 	public:
-		inline int GetButton() const { return m_Button; }
+		MouseCode GetButton() const { return m_Button; }
 
 		EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse | EventCategoryMouseButton)
 	protected:
-		MouseButtonEvent(int button)
+		MouseButtonEvent(MouseCode button)
 			: m_Button(button) {}
 	protected:
-		int m_Button;
+		MouseCode m_Button;
 	};
 
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(int button)
+		MouseButtonPressedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
@@ -80,7 +81,7 @@ namespace Saba {
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(int button)
+		MouseButtonReleasedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override

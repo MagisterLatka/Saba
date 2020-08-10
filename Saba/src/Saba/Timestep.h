@@ -10,8 +10,8 @@ namespace Saba {
 
 		inline operator double() { return m_Seconds; }
 
-		inline double GetSeconds() const { return m_Seconds; }
-		inline double GetMillliseconds() const { return m_Seconds * 1000.0; }
+		double GetSeconds() const { return m_Seconds; }
+		double GetMillliseconds() const { return m_Seconds * 1000.0; }
 	private:
 		double m_Seconds;
 	};

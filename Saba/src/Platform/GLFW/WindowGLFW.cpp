@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "WindowGLFW.h"
+#include "Platform/GLFW/WindowGLFW.h"
 
-#include "Saba\Events\KeyEvent.h"
-#include "Saba\Events\MouseEvent.h"
-#include "Saba\Events\WindowEvent.h"
+#include "Saba/Events/KeyEvent.h"
+#include "Saba/Events/MouseEvent.h"
+#include "Saba/Events/WindowEvent.h"
 
-#include <glad\glad.h>
+#include <glad/glad.h>
 
 namespace Saba {
 
@@ -27,17 +27,13 @@ namespace Saba {
 
 	void WindowGLFW::OnUpdate()
 	{
-		glfwPollEvents();
 		m_Context->SwapBuffers();
+		glfwPollEvents();
 	}
 
 	void WindowGLFW::SetVSync(bool isVSync)
 	{
-		if (isVSync)
-			glfwSwapInterval(1);
-		else
-			glfwSwapInterval(0);
-		
+		glfwSwapInterval(isVSync ? 1 : 0);
 		m_Data.vSync = isVSync;
 	}
 	bool WindowGLFW::IsVSync() const
@@ -63,7 +59,9 @@ namespace Saba {
 		}
 
 		m_Window = glfwCreateWindow(m_Data.width, m_Data.height, m_Data.title.c_str(), nullptr, nullptr);
+		SB_CORE_ASSERT(m_Window, "Could not create window!");
 		s_Windows++;
+		SB_CORE_INFO("Created window {0} ({1}, {2})", m_Data.title, m_Data.width, m_Data.height);
 
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
@@ -79,19 +77,19 @@ namespace Saba {
 			{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent e(key, 0);
+					KeyPressedEvent e(static_cast<KeyCode>(key), 0);
 					data.eventCallback(e);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent e(key);
+					KeyReleasedEvent e(static_cast<KeyCode>(key));
 					data.eventCallback(e);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent e(key, 1);
+					KeyPressedEvent e(static_cast<KeyCode>(key), 1);
 					data.eventCallback(e);
 					break; 
 				}
@@ -101,7 +99,7 @@ namespace Saba {
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-			KeyTypedEvent e(key);
+			KeyTypedEvent e(static_cast<KeyCode>(key));
 			data.eventCallback(e);
 		});
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
@@ -112,13 +110,13 @@ namespace Saba {
 			{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent e(button);
+					MouseButtonPressedEvent e(static_cast<MouseCode>(button));
 					data.eventCallback(e);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent e(button);
+					MouseButtonReleasedEvent e(static_cast<MouseCode>(button));
 					data.eventCallback(e);
 					break;
 				}
@@ -150,7 +148,6 @@ namespace Saba {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			data.width = xsize;
 			data.height = ysize;
-			glViewport(0, 0, xsize, ysize);
 
 			WindowResizeEvent e(xsize, ysize);
 			data.eventCallback(e);

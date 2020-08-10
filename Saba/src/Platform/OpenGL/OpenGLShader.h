@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Saba\Renderer\Shader.h"
-#include <glad\glad.h>
+#include "Saba/Renderer/Shader.h"
+#include <glad/glad.h>
 
 namespace Saba {
 

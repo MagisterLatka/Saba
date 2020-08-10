@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Saba/Core.h"
+
 namespace Saba {
 
 	enum class ShaderDataType
@@ -67,20 +69,20 @@ namespace Saba {
 	class BufferLayout
 	{
 	public:
-		BufferLayout() {}
+		BufferLayout() = default;
 		BufferLayout(const std::initializer_list<BufferElement>& elements)
 			: m_Elements(elements)
 		{
 			Calculate();
 		}
 
-		inline unsigned int GetStride() const { return m_Stride; }
-		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
+		unsigned int GetStride() const { return m_Stride; }
+		const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
-		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
-		std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
-		std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
+		std::vector<BufferElement>::iterator begin()				{ return m_Elements.begin(); }
+		std::vector<BufferElement>::iterator end()					{ return m_Elements.end(); }
+		std::vector<BufferElement>::const_iterator begin() const	{ return m_Elements.begin(); }
+		std::vector<BufferElement>::const_iterator end() const		{ return m_Elements.end(); }
 	private:
 		void Calculate()
 		{
@@ -106,15 +108,12 @@ namespace Saba {
 	public:
 		virtual ~VertexBuffer() = default;
 
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
-
-		virtual void SetData(void* data, uint32_t size, uint32_t offset) = 0;
+		virtual void SetData(void* data, uint32_t size, uint32_t offset = 0) = 0;
 
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		static Ref<VertexBuffer> Create(float* data, uint32_t size, BufferUsage usage = BufferUsage::Static);
+		static Ref<VertexBuffer> Create(void* data, uint32_t size, BufferUsage usage = BufferUsage::Static);
 	};
 
 	class IndexBuffer
@@ -122,8 +121,7 @@ namespace Saba {
 	public:
 		virtual ~IndexBuffer() = default;
 
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
+		virtual void SetData(uint32_t* data, uint32_t count, uint32_t offset = 0) = 0;
 
 		virtual uint32_t GetCount() const = 0;
 

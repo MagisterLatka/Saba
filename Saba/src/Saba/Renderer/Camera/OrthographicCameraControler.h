@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Saba\Renderer\Camera\OrthographicCamera.h"
-#include "Saba\Timestep.h"
-#include "Saba\Events\MouseEvent.h"
-#include "Saba\Events\WindowEvent.h"
+#include "Saba/Core.h"
+#include "Saba/Renderer/Camera/OrthographicCamera.h"
+#include "Saba/Timestep.h"
+#include "Saba/Events/MouseEvent.h"
+#include "Saba/Events/WindowEvent.h"
 
 namespace Saba {
 
@@ -13,17 +14,19 @@ namespace Saba {
 		OrthographicCameraControler(float aspectRatio, bool rotationEnabled = false);
 		~OrthographicCameraControler();
 
-		OrthographicCamera& GetCamera() { return m_Camera; }
-		const OrthographicCamera& GetCamera() const { return m_Camera; }
-
-		inline float GetWidth() const { return m_AspectRatio * 2.0f * m_Zoom; }
-		inline float GetHeight() const { return 2.0f * m_Zoom; }
-
-		void SetZoom(float zoom) { m_Zoom = zoom; }
-		inline float GetZoom() const { return m_Zoom; }
-
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
+
+		void Resize(float width, float height);
+
+		float GetWidth() const { return m_AspectRatio * 2.0f * m_Zoom; }
+		float GetHeight() const { return 2.0f * m_Zoom; }
+
+		void SetZoom(float zoom) { m_Zoom = zoom; }
+		float GetZoom() const { return m_Zoom; }
+
+		OrthographicCamera& GetCamera() { return m_Camera; }
+		const OrthographicCamera& GetCamera() const { return m_Camera; }
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);

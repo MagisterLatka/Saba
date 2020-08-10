@@ -77,12 +77,12 @@ project "Saba"
 	}
 	
 	filter "configurations:Debug"
-		defines "DEBUG"
+		defines "SB_DEBUG"
 		symbols "on"
 		runtime "Debug"
 
 	filter "configurations:Release"
-		defines "RELEASE"
+		defines "SB_RELEASE"
 		optimize "on"
 		runtime "Release"
 		inlining "auto"
@@ -127,12 +127,12 @@ project "Game"
 	}
 	
 	filter "configurations:Debug"
-		defines "DEBUG"
+		defines "SB_DEBUG"
 		symbols "on"
 		runtime "Debug"
 
 	filter "configurations:Release"
-		defines "RELEASE"
+		defines "SB_RELEASE"
 		optimize "on"
 		runtime "Release"
 		inlining "auto"

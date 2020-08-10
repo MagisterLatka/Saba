@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Window.h"
-#include "Events\WindowEvent.h"
-#include "Layers\LayerStack.h"
-#include "ImGui\ImGuiLayer.h"
+#include "Saba/Core.h"
+#include "Saba/Window.h"
+#include "Saba/Events/WindowEvent.h"
+#include "Saba/Layers/LayerStack.h"
+#include "Saba/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv);
 
@@ -12,30 +13,31 @@ namespace Saba {
 	class Application
 	{
 	public:
-		Application();
+		Application(const std::string& name = "Saba App");
 		virtual ~Application();
+
+		void Close();
+		Window& GetWindow() { return *m_Window; }
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		void Close();
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
-		inline const Ref<Window>& GetWindow() const { return m_Window; }
-
-		static Application* Get() { return s_Application; }
+		static Application& Get() { return *s_Application; }
 	private:
 		void Run();
 		void OnEvent(Event& event);
-		bool OnClose(WindowCloseEvent& event);
+		bool OnWindowClose(WindowCloseEvent& event);
 		bool OnWindowResize(WindowResizeEvent& event);
 	private:
+		Scope<Window> m_Window;
 		bool m_Running = true;
 		bool m_Minimized = false;
-		ImGuiLayer* m_ImGuiLayer;
+		long long m_LastFrameTime = 0;
 
 		Scope<LayerStack> m_LayerStack;
-		Ref<Window> m_Window;
-		long long m_LastFrameTime = 0;
+		ImGuiLayer* m_ImGuiLayer;
 
 		static Application* s_Application;
 		friend int ::main(int argc, char** argv);

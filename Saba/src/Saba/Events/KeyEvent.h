@@ -1,29 +1,30 @@
 #pragma once
 
-#include "Event.h"
+#include "Saba/Events/Event.h"
+#include "Saba/KeyCodes.h"
 
 namespace Saba {
 
 	class KeyEvent : public Event
 	{
 	public:
-		inline int GetKeyCode() const { return m_KeyCode; }
+		KeyCode GetKeyCode() const { return m_KeyCode; }
 
 		EVENT_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 	protected:
-		KeyEvent(int keycode)
+		KeyEvent(KeyCode keycode)
 			: m_KeyCode(keycode) {}
 	protected:
-		int m_KeyCode;
+		KeyCode m_KeyCode;
 	};
 
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(int keycode, int repeatedCount)
+		KeyPressedEvent(KeyCode keycode, int repeatedCount)
 			: KeyEvent(keycode), m_RepeatedCount(repeatedCount) {}
 
-		inline int GetRepeatedCount() const { return m_RepeatedCount; }
+		int GetRepeatedCount() const { return m_RepeatedCount; }
 
 		std::string ToString() const override
 		{
@@ -40,7 +41,7 @@ namespace Saba {
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(int keycode)
+		KeyReleasedEvent(KeyCode keycode)
 			: KeyEvent(keycode) {}
 
 		std::string ToString() const override
@@ -55,7 +56,7 @@ namespace Saba {
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(int keycode)
+		KeyTypedEvent(KeyCode keycode)
 			: KeyEvent(keycode) {}
 
 		std::string ToString() const override

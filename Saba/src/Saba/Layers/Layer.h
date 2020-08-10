@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Saba\Events\Event.h"
-#include "Saba\Timestep.h"
+#include "Saba/Events/Event.h"
+#include "Saba/Timestep.h"
 
 namespace Saba {
 
@@ -9,7 +9,7 @@ namespace Saba {
 	{
 	public:
 		Layer(const std::string& name);
-		~Layer() = default;
+		virtual ~Layer() = default;
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}

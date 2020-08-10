@@ -1,34 +1,37 @@
 #include "pch.h"
-#include "InputGLFW.h"
-#include "GLFW\glfw3.h"
+#include "Saba/Input.h"
+#include "Saba/Application.h"
+
+#include <GLFW/glfw3.h>
 
 namespace Saba {
 
-	bool InputGLFW::IsKeyPressedImpl(int key)
+	bool Input::IsKeyPressed(KeyCode key)
 	{
-		auto state = glfwGetKey(glfwGetCurrentContext(), key);
+		auto state = glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), static_cast<int>(key));
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
-	bool InputGLFW::IsMouseButtonPressedImpl(int button)
+
+	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
-		auto state = glfwGetMouseButton(glfwGetCurrentContext(), button);
+		auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), static_cast<int>(button));
 		return state == GLFW_PRESS;
 	}
-	std::pair<float, float> InputGLFW::GetMousePosImpl()
-	{
-		double xpos, ypos;
-		glfwGetCursorPos(glfwGetCurrentContext(), &xpos, &ypos);
-		return { (float)xpos, (float)ypos };
-	}
-	float InputGLFW::GetMouseXPosImpl()
-	{
-		auto [xpos, ypos] = GetMousePosImpl();
-		return xpos;
-	}
-	float InputGLFW::GetMouseYPosImpl()
-	{
-		auto [xpos, ypos] = GetMousePosImpl();
-		return ypos;
-	}
 
+	std::pair<float, float> Input::GetMousePos()
+	{
+		double x, y;
+		glfwGetCursorPos(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), &x, &y);
+		return { (float)x, (float)y };
+	}
+	float Input::GetMouseXPos()
+	{
+		auto [x, y] = GetMousePos();
+		return x;
+	}
+	float Input::GetMouseYPos()
+	{
+		auto [x, y] = GetMousePos();
+		return y;
+	}
 }

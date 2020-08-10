@@ -8,6 +8,7 @@ class Game : public Saba::Application
 {
 public:
 	Game()
+		:Application("Example")
 	{
 		PushLayer(new ExampleLayer);
 	}

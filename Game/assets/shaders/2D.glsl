@@ -2,9 +2,8 @@
 #version 330 core
 
 layout(location = 0) in vec3 i_Pos;
-layout(location = 1) in vec2 i_UV;
+layout(location = 1) in vec4 i_UV_TID_TillingFactor;
 layout(location = 2) in vec4 i_Color;
-layout(location = 3) in vec2 i_TID_TillingFactor;
 
 out DATA {
 	vec2 uv;
@@ -19,10 +18,10 @@ void main()
 {
 	gl_Position = u_ViewProjMat * vec4(i_Pos, 1.0f);
 
-	vs_out.uv = i_UV;
+	vs_out.uv = i_UV_TID_TillingFactor.xy;
 	vs_out.color = i_Color;
-	vs_out.tid = i_TID_TillingFactor.x;
-	vs_out.tillingFactor = i_TID_TillingFactor.y;
+	vs_out.tid = i_UV_TID_TillingFactor.z;
+	vs_out.tillingFactor = i_UV_TID_TillingFactor.w;
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glm\glm.hpp>
+#include "Saba/Core.h"
+#include <glm/glm.hpp>
 
 namespace Saba {
 

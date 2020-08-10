@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "Shader.h"
+#include "Saba/Renderer/Shader.h"
 
-#include "RendererAPI.h"
-#include "Platform\OpenGL\OpenGLShader.h"
+#include "Saba/Renderer/RendererAPI.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Saba {
 

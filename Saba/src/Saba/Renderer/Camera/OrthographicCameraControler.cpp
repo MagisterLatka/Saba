@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "OrthographicCameraControler.h"
-#include "Saba\Input.h"
-
-#include "GLFW\glfw3.h"
+#include "Saba/Input.h"
 
 namespace Saba {
 
@@ -17,23 +15,23 @@ namespace Saba {
 
 	void OrthographicCameraControler::OnUpdate(Timestep ts)
 	{
-		if (Input::IsKeyPressed(GLFW_KEY_D))
+		if (Input::IsKeyPressed(SB_KEY_D))
 		{
 			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
 			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
 		}
-		else if (Input::IsKeyPressed(GLFW_KEY_A))
+		else if (Input::IsKeyPressed(SB_KEY_A))
 		{
 			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
 			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
 		}
 
-		if (Input::IsKeyPressed(GLFW_KEY_W))
+		if (Input::IsKeyPressed(SB_KEY_W))
 		{
 			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
 			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
 		}
-		else if (Input::IsKeyPressed(GLFW_KEY_S))
+		else if (Input::IsKeyPressed(SB_KEY_S))
 		{
 			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
 			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraMovementSpeed * (float)ts;
@@ -41,9 +39,9 @@ namespace Saba {
 
 		if (m_RotationEnabled)
 		{
-			if (Input::IsKeyPressed(GLFW_KEY_Q))
+			if (Input::IsKeyPressed(SB_KEY_Q))
 				m_CameraRotation += m_CameraRotationSpeed * (float)ts;
-			else if (Input::IsKeyPressed(GLFW_KEY_E))
+			else if (Input::IsKeyPressed(SB_KEY_E))
 				m_CameraRotation -= m_CameraRotationSpeed * (float)ts;
 
 			if (m_CameraRotation > 180.0f)
@@ -63,6 +61,12 @@ namespace Saba {
 		Dispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseScrolledEvent>(SB_BIND_EVENT_FUNC(OrthographicCameraControler::OnMouseScrolled));
 		dispatcher.Dispatch<WindowResizeEvent>(SB_BIND_EVENT_FUNC(OrthographicCameraControler::OnWindowResized));
+	}
+
+	void OrthographicCameraControler::Resize(float width, float height)
+	{
+		m_AspectRatio = width / height;
+		m_Camera.SetProjectionMat(-m_AspectRatio * m_Zoom, m_AspectRatio * m_Zoom, -m_Zoom, m_Zoom);
 	}
 
 	bool OrthographicCameraControler::OnMouseScrolled(MouseScrolledEvent& e)

@@ -1,13 +1,13 @@
 #include "pch.h"
-#include "ImGuiLayer.h"
-#include "Saba\Application.h"
+#include "Saba/ImGui/ImGuiLayer.h"
+#include "Saba/Application.h"
 
-#include "imgui.h"
-#include "examples\imgui_impl_opengl3.h"
-#include "examples\imgui_impl_glfw.h"
+#include <imgui.h>
+#include <examples/imgui_impl_opengl3.h>
+#include <examples/imgui_impl_glfw.h>
 
-#include "glad\glad.h"
-#include "GLFW\glfw3.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace Saba {
 
@@ -34,7 +34,7 @@ namespace Saba {
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
+		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), true);
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 	void ImGuiLayer::OnDetach()
@@ -42,6 +42,16 @@ namespace Saba {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+	}
+
+	void ImGuiLayer::OnEvent(Event& e)
+	{
+		if (m_BlockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			e.p_Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+			e.p_Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
 	}
 
 	void ImGuiLayer::Begin()
@@ -53,7 +63,7 @@ namespace Saba {
 	void ImGuiLayer::End()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2((float)Application::Get()->GetWindow()->GetWidth(), (float)Application::Get()->GetWindow()->GetHeight());
+		io.DisplaySize = ImVec2((float)Application::Get().GetWindow().GetWidth(), (float)Application::Get().GetWindow().GetHeight());
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -63,7 +73,8 @@ namespace Saba {
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
+			if (backup_current_context != glfwGetCurrentContext())
+				glfwMakeContextCurrent(backup_current_context);
 		}
 	}
 

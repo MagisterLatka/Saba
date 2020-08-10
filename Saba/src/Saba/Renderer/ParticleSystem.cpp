@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "ParticleSystem.h"
-#include "Saba\Random.h"
-#include "Renderer.h"
+#include "Saba/Renderer/ParticleSystem.h"
+#include "Saba/Random.h"
+#include "Saba/Renderer/RenderCommand.h"
 
-#include <glm\gtc\constants.hpp>
+#include <glm/gtc/constants.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm\gtx\compatibility.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 namespace Saba {
 
@@ -51,7 +51,7 @@ namespace Saba {
 			}
 
 			particle.LifeCounter -= (float)ts;
-			particle.Position += particle.Velocity * (float)ts;
+			particle.Position += glm::vec3(particle.Velocity, -0.01f / particle.LifeTime) * (float)ts;
 			particle.Rotation += 0.01f * (float)ts;
 		}
 	}
@@ -105,11 +105,11 @@ namespace Saba {
 					continue;
 				}
 
-				constexpr glm::vec4 data[4] = {
-					{-0.5f, -0.5f, 0.0f, 1.0f},
-					{ 0.5f, -0.5f, 0.0f, 1.0f},
-					{ 0.5f,  0.5f, 0.0f, 1.0f},
-					{-0.5f,  0.5f, 0.0f, 1.0f}
+				static constexpr glm::vec3 data[4] = {
+					{-0.5f, -0.5f, 0.0f },
+					{ 0.5f, -0.5f, 0.0f },
+					{ 0.5f,  0.5f, 0.0f },
+					{-0.5f,  0.5f, 0.0f }
 				};
 
 				float life = particle.LifeCounter / particle.LifeTime;
@@ -118,21 +118,17 @@ namespace Saba {
 
 				float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
 
-				glm::mat4 transform = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), { particle.Position.x, particle.Position.y, 0.0f }),
-												 particle.Rotation, { 0.0f, 0.0f, 1.0f }), glm::vec3(size, size, 0.0f));
+				glm::mat3 rotate = glm::rotate(glm::mat4(1.0f), particle.Rotation, { 0.0f, 0.0f, 1.0f });
 
 				for (int j = 0; j < 4; j++)
 				{
-					at->pos = glm::vec3(transform * data[j]);
+					at->pos = (rotate * data[j]) * size + particle.Position;
 					at->color = color;
 					at++;
 				}
 			}
-			m_VAO->GetVertexBuffers()[0]->Bind();
-			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 28LL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));
-
-			m_VAO->Bind();
-			RenderCommand::DrawIndexed(m_VAO->GetIndexBuffer()->GetCount());
+			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 28ULL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));
+			RenderCommand::DrawIndexed(m_VAO);
 		}
 	}
 

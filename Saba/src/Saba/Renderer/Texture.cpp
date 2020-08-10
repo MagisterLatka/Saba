@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "Texture.h"
+#include "Saba/Renderer/Texture.h"
 
-#include "RendererAPI.h"
-#include "Platform\OpenGL\OpenGLTexture.h"
+#include "Saba/Renderer/RendererAPI.h"
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Saba {
 
@@ -30,4 +30,15 @@ namespace Saba {
 		return nullptr;
 	}
 
+	Saba::Ref<Saba::Texture2D> Texture2D::Create(const TextureData& data)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+			case RendererAPI::API::None:	SB_CORE_ASSERT(false, "None API is not supported"); return nullptr;
+			case RendererAPI::API::OpenGL:	return MakeRef<OpenGLTexture2D>(data);
+		}
+
+		SB_CORE_ASSERT(false, "Unknown API");
+		return nullptr;
+	}
 }

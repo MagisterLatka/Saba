@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Event.h"
+#include "Saba/Events/Event.h"
 
 namespace Saba {
 
@@ -10,8 +10,8 @@ namespace Saba {
 		WindowResizeEvent(int xsize, int ysize)
 			: m_XSize(xsize), m_YSize(ysize) {}
 
-		inline int GetXSize() const { return m_XSize; }
-		inline int GetYSize() const { return m_YSize; }
+		int GetXSize() const { return m_XSize; }
+		int GetYSize() const { return m_YSize; }
 
 		std::string ToString() const override
 		{

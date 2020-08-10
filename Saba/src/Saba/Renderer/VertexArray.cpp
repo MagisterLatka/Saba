@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "VertexArray.h"
+#include "Saba/Renderer/VertexArray.h"
 
-#include "RendererAPI.h"
-#include "Platform\OpenGL\OpenGLVertexArray.h"
+#include "Saba/Renderer/RendererAPI.h"
+#include "Platform/OpenGL/OpenGLVertexArray.h"
 
 namespace Saba {
 

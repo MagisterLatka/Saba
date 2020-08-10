@@ -1,13 +1,15 @@
 #pragma once
 
-#include "Saba\Timestep.h"
-#include "VertexArray.h"
+#include "Saba/Core.h"
+#include "Saba/Timestep.h"
+#include "Saba/Renderer/VertexArray.h"
+#include "Saba/Renderer/Shader.h"
 
 namespace Saba {
 
 	struct ParticleProps
 	{
-		glm::vec2 Position;
+		glm::vec3 Position;
 		glm::vec2 Velocity, VelocityVariation;
 		glm::vec4 ColorBegin, ColorEnd;
 		float SizeBegin, SizeEnd, SizeVariation;
@@ -29,7 +31,7 @@ namespace Saba {
 	private:
 		struct Particle
 		{
-			glm::vec2 Position;
+			glm::vec3 Position;
 			glm::vec2 Velocity;
 			glm::vec4 ColorBegin, ColorEnd;
 			float Rotation = 0.0f;
