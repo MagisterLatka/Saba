@@ -8,8 +8,8 @@
 
 namespace Saba {
 
-	constexpr uint32_t c_MaxQuadCount = 20000;
-	constexpr uint8_t c_MaxTextures = 32;
+	static constexpr uint32_t c_MaxQuadCount = 20000;
+	static constexpr uint8_t c_MaxTextures = 32;
 
 	struct VertexData
 	{
@@ -44,7 +44,7 @@ namespace Saba {
 		}
 
 		s_Data.vertexArray = VertexArray::Create();
-		Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), Dynamic);
+		Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, c_MaxQuadCount * 4 * sizeof(VertexData), BufferUsage::Dynamic);
 		vbo->SetLayout({
 			{"i_Pos", ShaderDataType::Float3},
 			{"i_UV_TexID_TillingFactor", ShaderDataType::Float4},

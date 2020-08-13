@@ -19,6 +19,9 @@ namespace Saba {
 		virtual unsigned int GetWidth() const override { return m_Data.width; }
 		virtual unsigned int GetHeight() const override { return m_Data.height; }
 
+		virtual int GetWindowPosX() const override { return m_Data.windowPosX; };
+		virtual int GetWindowPosY() const override { return m_Data.windowPosY; };
+
 		virtual void SetEventCallback(const EventCallbackFN& func) override;
 		virtual void SetVSync(bool isVSync) override;
 		virtual bool IsVSync() const override;
@@ -35,6 +38,7 @@ namespace Saba {
 		{
 			std::string title;
 			unsigned int width, height;
+			int windowPosX, windowPosY;
 			bool vSync;
 
 			EventCallbackFN eventCallback;

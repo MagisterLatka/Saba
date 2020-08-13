@@ -62,7 +62,7 @@ namespace Saba {
 			m_VAO = VertexArray::Create();
 			m_VAO->Bind();
 
-			Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, (uint32_t)m_Particles.size() * 4 * sizeof(VertexData), Dynamic);
+			Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, (uint32_t)m_Particles.size() * 4 * sizeof(VertexData), BufferUsage::Dynamic);
 			vbo->SetLayout({
 				{"position", ShaderDataType::Float3},
 				{"color", ShaderDataType::Float4}

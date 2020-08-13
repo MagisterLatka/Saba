@@ -21,6 +21,8 @@ namespace Saba {
 		virtual void SetClearColor(glm::vec4 color) = 0;
 		virtual void Clear() = 0;
 
+		virtual void EnableDepthTest(bool enable) = 0;
+
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indicesCount) = 0;
 
 		static API GetAPI() { return s_API; }

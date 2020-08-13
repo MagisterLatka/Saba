@@ -12,6 +12,10 @@ public:
 	virtual void OnUpdate(Saba::Timestep ts) override;
 	virtual void OnImGuiRender() override;
 private:
+	bool OnWindowResize(Saba::WindowResizeEvent& e);
+private:
+	Saba::Ref<Saba::Framebuffer> m_FBO;
+
 	Saba::OrthographicCameraControler m_CameraControler;
 
 	float m_QuadFrequency = 0.1f;

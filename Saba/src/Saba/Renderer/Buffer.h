@@ -98,7 +98,7 @@ namespace Saba {
 		uint32_t m_Stride = 0;
 	};
 
-	enum BufferUsage
+	enum class BufferUsage
 	{
 		None = 0, Static, Dynamic, Stream
 	};

@@ -76,7 +76,7 @@ namespace Saba {
 		m_Camera.SetProjectionMat(-m_AspectRatio * m_Zoom, m_AspectRatio* m_Zoom, -m_Zoom, m_Zoom);
 		return false;
 	}
-	bool OrthographicCameraControler::OnWindowResized(WindowResizeEvent& e) //TODO: Viewports resize
+	bool OrthographicCameraControler::OnWindowResized(WindowResizeEvent& e)
 	{
 		m_AspectRatio = (float)e.GetXSize() / (float)e.GetYSize();
 		m_Camera.SetProjectionMat(-m_AspectRatio * m_Zoom, m_AspectRatio* m_Zoom, -m_Zoom, m_Zoom);

@@ -136,3 +136,53 @@ project "Game"
 		optimize "on"
 		runtime "Release"
 		inlining "auto"
+
+project "Editor"
+	location "Editor"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+	
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+	files
+	{
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.h"
+	}
+	
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
+	}
+	
+	includedirs
+	{
+		"Saba/src",
+		"Saba/vendor",
+		"%{IncludeDirs.spdlog}",
+		"%{IncludeDirs.GLM}"
+	}
+	
+	links
+	{
+		"Saba"
+	}
+	
+	postbuildcommands
+	{
+		"{COPY} \"assets\" \"../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Editor/assets\""
+	}
+	
+	filter "configurations:Debug"
+		defines "SB_DEBUG"
+		symbols "on"
+		runtime "Debug"
+
+	filter "configurations:Release"
+		defines "SB_RELEASE"
+		optimize "on"
+		runtime "Release"
+		inlining "auto"

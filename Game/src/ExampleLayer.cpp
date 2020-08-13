@@ -31,6 +31,13 @@ void ExampleLayer::OnAttach()
 
 	Saba::ShaderManager::Add("particle", "assets/shaders/particle.glsl");
 
+	Saba::FramebufferSpec fbSpec;
+	fbSpec.Width = Saba::Application::Get().GetWindow().GetWidth();
+	fbSpec.Height = Saba::Application::Get().GetWindow().GetHeight();
+	fbSpec.Format = Saba::FramebufferFormat::RGBA8;
+	fbSpec.Attachments = static_cast<Saba::FramebufferAttachments>(Saba::FramebufferAttachments::ColorAttachment0 | Saba::FramebufferAttachments::DepthAttachment);
+	m_FBO = Saba::Framebuffer::Create(fbSpec);
+
 
 	m_Particle.ColorBegin = glm::vec4(0.8f, 0.3f, 0.3f, 1.0f);
 	m_Particle.ColorEnd = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -50,16 +57,22 @@ void ExampleLayer::OnDetach()
 void ExampleLayer::OnEvent(Saba::Event& event)
 {
 	m_CameraControler.OnEvent(event);
+	Saba::Dispatcher dispatcher(event);
+	dispatcher.Dispatch<Saba::WindowResizeEvent>(SB_BIND_EVENT_FUNC(ExampleLayer::OnWindowResize));
 }
 void ExampleLayer::OnUpdate(Saba::Timestep ts)
 {
 	m_CameraControler.OnUpdate(ts);
 
-	Saba::RenderCommand::Clear();
 	Saba::Renderer2D::ResetStats();
+	Saba::Ref<Saba::Shader> shader;
 
-	Saba::ShaderManager::Get("2D")->Bind();
-	Saba::ShaderManager::Get("2D")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
+	m_FBO->Bind();
+	Saba::RenderCommand::Clear();
+
+	shader = Saba::ShaderManager::Get("2D");
+	shader->Bind();
+	shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
 	static float rotation = 0.0f;
 	rotation += (float)ts * 50.0f;
 	Saba::Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, rotation, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::TextureManager::Get2D("checkerboard"), 20.0f);
@@ -92,10 +105,25 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 		}
 	}
 
-	Saba::ShaderManager::Get("particle")->Bind();
-	Saba::ShaderManager::Get("particle")->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
+	shader = Saba::ShaderManager::Get("particle");
+	shader->Bind();
+	shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
 	m_ParticleSystem.OnUpdate(ts);
 	m_ParticleSystem.OnRender();
+
+	m_FBO->Unbind();
+	Saba::RenderCommand::Clear();
+	Saba::RenderCommand::EnableDepthTest(false);
+
+	shader = Saba::ShaderManager::Get("2D");
+	shader->Bind();
+	static constexpr glm::mat4 identity(1.0f);
+	shader->SetUniformMat4("u_ViewProjMat", identity);
+
+	Saba::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 2.0f, 2.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::Texture2D::Create(m_FBO->GetAttachmentID(0)));
+	Saba::Renderer2D::Flush();
+
+	Saba::RenderCommand::EnableDepthTest();
 }
 void ExampleLayer::OnImGuiRender()
 {
@@ -120,5 +148,11 @@ void ExampleLayer::OnImGuiRender()
 
 	ImGui::Text("");
 
-	ImGui::SliderFloat("Quad Frequency", &m_QuadFrequency, 0.01f, 1.0f, "%.2f", 1.0f);
+	ImGui::SliderFloat("Quad Frequency", &m_QuadFrequency, 0.01f, 1.0f);
+}
+
+bool ExampleLayer::OnWindowResize(Saba::WindowResizeEvent& e)
+{
+	m_FBO->Resize(e.GetXSize(), e.GetYSize());
+	return false;
 }

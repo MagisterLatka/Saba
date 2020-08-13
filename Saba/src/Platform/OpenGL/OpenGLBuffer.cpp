@@ -8,7 +8,7 @@ namespace Saba {
 	OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, uint32_t size, BufferUsage usage)
 	{
 		glCreateBuffers(1, &m_ID);
-		glNamedBufferData(m_ID, size, data, usage == Static ? GL_STATIC_DRAW : usage == Dynamic ? GL_DYNAMIC_DRAW : usage == Stream ? GL_STREAM_DRAW : 0);
+		glNamedBufferData(m_ID, size, data, usage == BufferUsage::Static ? GL_STATIC_DRAW : usage == BufferUsage::Dynamic ? GL_DYNAMIC_DRAW : usage == BufferUsage::Stream ? GL_STREAM_DRAW : 0);
 	}
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{

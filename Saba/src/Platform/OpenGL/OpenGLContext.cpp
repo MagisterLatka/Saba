@@ -16,6 +16,9 @@ namespace Saba {
 		glfwMakeContextCurrent(m_WindowHandle);
 		int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		SB_CORE_ASSERT(success, "Failed to initialize GLAD!");
+
+		SB_CORE_INFO("OpenGL renderer: {0}", glGetString(GL_RENDERER));
+		SB_CORE_INFO("OpenGL version: {0}", glGetString(GL_VERSION));
 	}
 
 	void OpenGLContext::SwapBuffers()

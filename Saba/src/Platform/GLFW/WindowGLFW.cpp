@@ -68,6 +68,7 @@ namespace Saba {
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
+		glfwGetWindowPos(m_Window, &m_Data.windowPosX, &m_Data.windowPosY);
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
@@ -151,6 +152,13 @@ namespace Saba {
 
 			WindowResizeEvent e(xsize, ysize);
 			data.eventCallback(e);
+		});
+		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int xpos, int ypos)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+			data.windowPosX = xpos;
+			data.windowPosY = ypos;
 		});
 		glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int focused)
 		{

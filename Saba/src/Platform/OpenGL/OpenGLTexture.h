@@ -11,6 +11,7 @@ namespace Saba {
 		OpenGLTexture2D(const TextureData& texData);
 		OpenGLTexture2D(const std::string& filepath);
 		OpenGLTexture2D(uint32_t width, uint32_t height);
+		OpenGLTexture2D(void* id);
 		virtual ~OpenGLTexture2D();
 
 		virtual uint32_t GetWidth() const override { return m_Width; }
@@ -27,6 +28,7 @@ namespace Saba {
 		static GLenum WrapModeInOpenGL(WrapMode mode);
 		static GLenum GetDataType(GLenum format);
 	private:
+		bool m_WrapperOnly = false;
 		uint32_t m_ID;
 		uint32_t m_Width, m_Height;
 		GLenum m_InternalFormat, m_Format;

@@ -26,6 +26,9 @@ namespace Saba {
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
 
+		virtual int GetWindowPosX() const = 0;
+		virtual int GetWindowPosY() const = 0;
+
 		virtual void SetEventCallback(const EventCallbackFN& callback) = 0;
 		virtual void SetVSync(bool vsync) = 0;
 		virtual bool IsVSync() const = 0;

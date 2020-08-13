@@ -25,6 +25,11 @@ namespace Saba {
 		{
 			s_API->Clear();
 		}
+
+		static void EnableDepthTest(bool enable = true)
+		{
+			s_API->EnableDepthTest(enable);
+		}
 		
 		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indicesCount = 0)
 		{

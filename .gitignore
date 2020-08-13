@@ -1,4 +1,6 @@
 .vs/
+**/bin/
+!vendor/bin/premake/
 bin-int/
 
 *.ini

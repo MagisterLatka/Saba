@@ -5,6 +5,8 @@
 
 namespace Saba {
 
+	OpenGLTexture2D::OpenGLTexture2D(void* id)
+		: m_WrapperOnly(true), m_ID((uint32_t)(uint64_t)id) {}
 	OpenGLTexture2D::OpenGLTexture2D(const TextureData& texData)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
@@ -163,14 +165,18 @@ namespace Saba {
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
-		glDeleteTextures(1, &m_ID);
+		if (!m_WrapperOnly)
+			glDeleteTextures(1, &m_ID);
 	}
 
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
-		uint32_t bpp = m_Format == GL_RGBA ? 4 : 3;
-		SB_CORE_ASSERT((bpp * m_Width * m_Height == size), "Size must be the size of whole texture!");
-		glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, m_Format, GL_UNSIGNED_BYTE, data);
+		if (!m_WrapperOnly)
+		{
+			uint32_t bpp = m_Format == GL_RGBA ? 4 : 3;
+			SB_CORE_ASSERT((bpp * m_Width * m_Height == size), "Size must be the size of whole texture!");
+			glTextureSubImage2D(m_ID, 0, 0, 0, m_Width, m_Height, m_Format, GL_UNSIGNED_BYTE, data);
+		}
 	}
 
 	void OpenGLTexture2D::Bind(uint32_t slot)
@@ -339,5 +345,4 @@ namespace Saba {
 				return 0;
 		}
 	}
-
 }
