@@ -17,6 +17,7 @@ IncludeDirs["GLAD"] = "Saba/vendor/GLAD/include"
 IncludeDirs["ImGui"] = "Saba/vendor/ImGui"
 IncludeDirs["GLM"] = "Saba/vendor/glm"
 IncludeDirs["stbi"] = "Saba/vendor/stb_image"
+IncludeDirs["entt"] = "Saba/vendor/entt/include"
 
 group "Dep"
 	include "Saba/vendor/GLFW"
@@ -59,7 +60,8 @@ project "Saba"
 		"%{IncludeDirs.GLAD}",
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.GLM}",
-		"%{IncludeDirs.stbi}"
+		"%{IncludeDirs.stbi}",
+		"%{IncludeDirs.entt}"
 	}
 	
 	links
@@ -113,7 +115,8 @@ project "Game"
 		"Saba/src",
 		"Saba/vendor",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.GLM}"
+		"%{IncludeDirs.GLM}",
+		"%{IncludeDirs.entt}"
 	}
 	
 	links
@@ -163,7 +166,8 @@ project "Editor"
 		"Saba/src",
 		"Saba/vendor",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.GLM}"
+		"%{IncludeDirs.GLM}",
+		"%{IncludeDirs.entt}"
 	}
 	
 	links

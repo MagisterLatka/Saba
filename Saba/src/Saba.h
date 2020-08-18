@@ -15,6 +15,10 @@
 
 #include <Saba/Layers/Layer.h>
 
+#include <Saba/Scene/Scene.h>
+#include <Saba/Scene/Entity.h>
+#include <Saba/Scene/Components.h>
+
 #include <Saba/Renderer/AssetsManager.h>
 #include <Saba/Renderer/Buffer.h>
 #include <Saba/Renderer/Framebuffer.h>

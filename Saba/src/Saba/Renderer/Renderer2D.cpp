@@ -30,6 +30,13 @@ namespace Saba {
 		uint8_t texIndex = 1;
 
 		Renderer2D::Stats stats;
+
+		static constexpr glm::vec3 quadData[4] = {
+			{ -0.5f, -0.5f, 0.0f },
+			{  0.5f, -0.5f, 0.0f },
+			{  0.5f,  0.5f, 0.0f },
+			{ -0.5f,  0.5f, 0.0f }
+		};
 	};
 	static Renderer2DData s_Data;
 
@@ -136,19 +143,49 @@ namespace Saba {
 			}
 		}
 
-		static constexpr glm::vec3 data[4] = {
-			{ -0.5f, -0.5f, 0.0f },
-			{  0.5f, -0.5f, 0.0f },
-			{  0.5f,  0.5f, 0.0f },
-			{ -0.5f,  0.5f, 0.0f }
-		};
-
 		for (int i = 0; i < 4; i++)
 		{
-			s_Data.at->pos = data[i] * glm::vec3(size, 1.0f) + pos;
+			s_Data.at->pos = s_Data.quadData[i] * glm::vec3(size, 1.0f) + pos;
 			s_Data.at->uv_texID_TillingFactor.z = tid;
 			s_Data.at->uv_texID_TillingFactor.w = tillingFactor;
 			s_Data.at->color = color;
+			s_Data.at++;
+		}
+
+		s_Data.quadCount++;
+		s_Data.stats.quadCount++;
+	}
+
+	void Renderer2D::DrawQuad(glm::mat4 transform, glm::vec4 color, const Ref<Texture2D>& texture, float tillingFactor)
+	{
+		if (s_Data.quadCount >= c_MaxQuadCount || s_Data.texIndex > c_MaxTextures - 1)
+			Flush();
+
+		float tid = 0.0f;
+		if (texture)
+		{
+			for (uint8_t i = 1; i < s_Data.texIndex; i++)
+			{
+				if (s_Data.textures[i] == texture)
+				{
+					tid = (float)i;
+					break;
+				}
+			}
+			if (tid == 0.0f)
+			{
+				tid = (float)s_Data.texIndex;
+				s_Data.textures[s_Data.texIndex] = texture;
+				s_Data.texIndex++;
+			}
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			s_Data.at->pos = transform * glm::vec4(s_Data.quadData[i], 1.0f);
+			s_Data.at->color = color;
+			s_Data.at->uv_texID_TillingFactor.z = tid;
+			s_Data.at->uv_texID_TillingFactor.w = tillingFactor;
 			s_Data.at++;
 		}
 
@@ -183,18 +220,11 @@ namespace Saba {
 				s_Data.texIndex++;
 			}
 		}
-
-		static constexpr glm::vec3 data[4] = {
-			{ -0.5f, -0.5f, 0.0f },
-			{  0.5f, -0.5f, 0.0f },
-			{  0.5f,  0.5f, 0.0f },
-			{ -0.5f,  0.5f, 0.0f }
-		};
 		glm::mat3 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(angle), { 0.0f, 0.0f, 1.0f });
 
 		for (int i = 0; i < 4; i++)
 		{
-			s_Data.at->pos = (rotate * data[i]) * glm::vec3(size, 1.0f) + pos;
+			s_Data.at->pos = (rotate * s_Data.quadData[i]) * glm::vec3(size, 1.0f) + pos;
 			s_Data.at->color = color;
 			s_Data.at->uv_texID_TillingFactor.z = tid;
 			s_Data.at->uv_texID_TillingFactor.w = tillingFactor;

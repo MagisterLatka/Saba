@@ -21,10 +21,16 @@ namespace Saba {
 
 		OrthographicCameraControler m_CameraControler;
 
-		float m_QuadFrequency = 0.1f;
-
 		ParticleSystem m_ParticleSystem;
 		ParticleProps m_Particle;
 		bool m_EnableParticles = false;
+
+		Scene m_Scene;
+		Entity m_ColoredQuad;
+#if SB_DEBUG
+		static constexpr float m_QuadFrequency = 0.25f;
+#else
+		static constexpr float m_QuadFrequency = 0.1f;
+#endif
 	};
 }

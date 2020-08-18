@@ -51,6 +51,19 @@ namespace Saba {
 
 
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+
+
+		m_ColoredQuad = m_Scene.CreateEntity("Colored Quad");
+		m_ColoredQuad.AddComponent<SpriteComponent>(glm::vec3(3.0f, 0.0f, 0.3f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+		for (float y = 0.0f; y < 10.0f; y += m_QuadFrequency)
+		{
+			for (float x = 0.0f; x < 10.0f; x += m_QuadFrequency)
+			{
+				m_Scene.CreateEntity().AddComponent<SpriteComponent>(glm::vec2(x - 5.0f + m_QuadFrequency / 2.0f, y - 5.0f + m_QuadFrequency / 2.0f),
+																	 glm::vec2(m_QuadFrequency * 0.6f, m_QuadFrequency * 0.6f), glm::vec4(x / 10.0f, y / 10.0f, 1.0f, 1.0f));
+			}
+		}
 	}
 	void EditorLayer::OnDetach()
 	{}
@@ -78,17 +91,13 @@ namespace Saba {
 		shader = ShaderManager::Get("2D");
 		shader->Bind();
 		shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
+
 		static float rotation = 0.0f;
 		rotation += (float)ts * 50.0f;
 		Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, rotation, { 1.0f, 1.0f, 1.0f, 1.0f }, TextureManager::Get2D("checkerboard"), 20.0f);
 
-		for (float y = 0.0f; y < 10.0; y += m_QuadFrequency)
-		{
-			for (float x = 0.0f; x < 10.0f; x += m_QuadFrequency)
-			{
-				Renderer2D::DrawQuad({ x - 5.0f + m_QuadFrequency / 2.0f, y - 5.0f + m_QuadFrequency / 2.0f }, { m_QuadFrequency * 0.6f, m_QuadFrequency * 0.6f }, { x / 10.0f, y / 10.0f, 1.0f, 1.0f });
-			}
-		}
+		m_Scene.OnUpdate(ts);
+
 		Renderer2D::Flush();
 
 		if (m_EnableParticles)
@@ -96,8 +105,6 @@ namespace Saba {
 			if (Input::IsMouseButtonPressed(SB_MOUSE_BUTTON_LEFT))
 			{
 				auto [x, y] = Input::GetMousePos();
-				auto width = Application::Get().GetWindow().GetWidth();
-				auto height = Application::Get().GetWindow().GetHeight();
 
 				glm::vec2 bounds = { m_CameraControler.GetWidth(), m_CameraControler.GetHeight() };
 				glm::vec2 pos = m_CameraControler.GetCamera().GetPosition();
@@ -168,7 +175,7 @@ namespace Saba {
 
 			ImGui::Begin("Settings");
 
-				ImGui::Text("Framerate: %.1f (frame time: %.3f)", io.Framerate, 1.0f / io.Framerate);
+				ImGui::Text("Framerate: %.1f (frame time: %.3fms)", io.Framerate, 1000.0f / io.Framerate);
 				bool vsync = Application::Get().GetWindow().IsVSync();
 				ImGui::Checkbox("Set VSync", &vsync);
 				if (vsync != Application::Get().GetWindow().IsVSync())
@@ -183,15 +190,14 @@ namespace Saba {
 				ImGui::Separator();
 
 				ImGui::Checkbox("Enable Particles", &m_EnableParticles);
-				ImGui::ColorEdit4("ColorBegin", &m_Particle.ColorBegin[0]);
-				ImGui::ColorEdit4("ColorEnd", &m_Particle.ColorEnd[0]);
+				ImGui::ColorEdit3("ColorBegin", &m_Particle.ColorBegin[0]);
+				ImGui::ColorEdit3("ColorEnd", &m_Particle.ColorEnd[0]);
 				ImGui::SliderFloat("LifeTime", &m_Particle.LifeTime, 0.1f, 10.0f);
 
 				ImGui::Separator();
 
-				ImGui::SliderFloat("Quad Frequency", &m_QuadFrequency, 0.01f, 1.0f);
-				if (m_QuadFrequency < 0.01f) m_QuadFrequency = 0.01f;
-				if (m_QuadFrequency > 1.0f) m_QuadFrequency = 1.0f;
+				auto& color = m_ColoredQuad.GetComponent<SpriteComponent>().Color;
+				ImGui::ColorEdit3("Quad Color", &color[0]);
 
 			ImGui::End();
 

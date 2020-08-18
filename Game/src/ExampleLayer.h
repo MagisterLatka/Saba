@@ -18,9 +18,15 @@ private:
 
 	Saba::OrthographicCameraControler m_CameraControler;
 
-	float m_QuadFrequency = 0.1f;
-
 	Saba::ParticleSystem m_ParticleSystem;
 	Saba::ParticleProps m_Particle;
 	bool m_EnableParticles = false;
+
+	Saba::Scene m_Scene;
+
+#if SB_DEBUG
+	static constexpr float m_QuadFrequency = 0.25f;
+#else
+	static constexpr float m_QuadFrequency = 0.1f;
+#endif
 };
