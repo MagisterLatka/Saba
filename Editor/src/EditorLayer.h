@@ -19,14 +19,13 @@ namespace Saba {
 		glm::vec2 m_ViewportPos = { 0.0f, 0.0f };
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 
-		OrthographicCameraControler m_CameraControler;
-
 		ParticleSystem m_ParticleSystem;
 		ParticleProps m_Particle;
 		bool m_EnableParticles = false;
 
 		Scene m_Scene;
 		Entity m_ColoredQuad;
+		Entity m_Camera;
 #if SB_DEBUG
 		static constexpr float m_QuadFrequency = 0.25f;
 #else

@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Saba/Renderer/Shader.h"
 #include "Saba/Renderer/Texture.h"
+#include "Saba/Renderer/Camera.h"
 
 namespace Saba {
 
@@ -10,6 +12,7 @@ namespace Saba {
 		static void Init();
 		static void Shutdown();
 
+		static void BeginScene(Ref<Shader> shader, const Camera& camera, const glm::mat4& tranform = glm::mat4(1.0f));
 		static void Flush();
 
 		static void DrawQuad(glm::vec2 pos, glm::vec2 size, glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f);

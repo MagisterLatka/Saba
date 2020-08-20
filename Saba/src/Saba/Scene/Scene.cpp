@@ -15,16 +15,50 @@ namespace Saba {
 		return entity;
 	}
 
-	void Scene::OnUpdate(Timestep ts)
+	void Scene::OnUpdate(Timestep ts, Ref<Shader> shader)
 	{
-		auto group = m_Registry.group<TransformComponent, SpriteComponent>();
-		for (auto entity : group)
+		Camera* renderCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
+		{		
+			auto group = m_Registry.group<CameraComponent>(entt::get<TransformComponent>);
+			for (auto entity : group)
+			{
+				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+				if (camera.Primary)
+				{
+					renderCamera = &camera.Camera;
+					cameraTransform = &group.get<TransformComponent>(entity).Transform;
+				}
+			}
+		}
+
+		if (renderCamera)
 		{
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-			if (sprite.UseTransform)
-				Renderer2D::DrawQuad(transform, sprite.Color, sprite.Texture, sprite.TillingFactor);
-			else
-				Renderer2D::DrawQuad(sprite.Pos, sprite.Size, sprite.Color, sprite.Texture, sprite.TillingFactor);
+			Renderer2D::BeginScene(shader, *renderCamera, *cameraTransform);
+
+			auto group = m_Registry.group<TransformComponent, SpriteComponent>();
+			for (auto entity : group)
+			{
+				auto& [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+				if (sprite.UseTransform)
+					Renderer2D::DrawQuad(transform, sprite.Color, sprite.Texture, sprite.TillingFactor);
+				else
+					Renderer2D::DrawQuad(sprite.Pos, sprite.Size, sprite.Color, sprite.Texture, sprite.TillingFactor);
+			}
 		}
 	}
+
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
+
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			if (auto& camera = view.get<CameraComponent>(entity); !camera.FixedAspectRatio)
+				camera.Camera.SetViewportSize(width, height);
+		}
+	}
+
 }

@@ -87,6 +87,12 @@ namespace Saba {
 		s_Data.vertexArray.reset();
 	}
 
+	void Renderer2D::BeginScene(Ref<Shader> shader, const Camera& camera, const glm::mat4& tranform)
+	{
+		shader->Bind();
+		shader->SetUniformMat4("u_ViewProjMat", camera.GetProjection() * glm::inverse(tranform));
+	}
+
 	void Renderer2D::Flush()
 	{
 		if (s_Data.quadCount > 0)

@@ -4,6 +4,7 @@
 #include "Saba/Timestep.h"
 #include "Saba/Renderer/VertexArray.h"
 #include "Saba/Renderer/Shader.h"
+#include "Saba/Renderer/Camera.h"
 
 namespace Saba {
 
@@ -25,7 +26,7 @@ namespace Saba {
 		~ParticleSystem();
 
 		void OnUpdate(Timestep ts);
-		void OnRender();
+		void OnRender(Ref<Shader> shader, const Camera& camera, const glm::mat4& transform = glm::mat4(1.0f));
 
 		void Emit(ParticleProps& props);
 	private:

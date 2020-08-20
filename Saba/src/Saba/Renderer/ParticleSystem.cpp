@@ -55,10 +55,12 @@ namespace Saba {
 			particle.Rotation += 0.01f * (float)ts;
 		}
 	}
-	void ParticleSystem::OnRender()
+	void ParticleSystem::OnRender(Ref<Shader> shader, const Camera& camera, const glm::mat4& transform)
 	{
 		if (!m_VAO)
 		{
+			shader->Bind();
+
 			m_VAO = VertexArray::Create();
 			m_VAO->Bind();
 
@@ -128,6 +130,10 @@ namespace Saba {
 				}
 			}
 			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 28ULL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));
+
+			shader->Bind();
+			shader->SetUniformMat4("u_ViewProjMat", camera.GetProjection() * glm::inverse(transform));
+
 			RenderCommand::DrawIndexed(m_VAO);
 		}
 	}

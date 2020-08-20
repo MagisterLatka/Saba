@@ -3,11 +3,12 @@
 #include "EditorLayer.h"
 
 #include <imgui/imgui.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Saba {
 
 	EditorLayer::EditorLayer()
-		: Layer("EditorLayer"), m_CameraControler(16.0f / 9.0f), m_ParticleSystem(25000)
+		: Layer("EditorLayer"), m_ParticleSystem(25000)
 	{}
 	EditorLayer::~EditorLayer()
 	{}
@@ -64,39 +65,27 @@ namespace Saba {
 																	 glm::vec2(m_QuadFrequency * 0.6f, m_QuadFrequency * 0.6f), glm::vec4(x / 10.0f, y / 10.0f, 1.0f, 1.0f));
 			}
 		}
+
+		m_Camera = m_Scene.CreateEntity("Camera");
+		m_Camera.AddComponent<CameraComponent>().Camera.SetOrthographicSize(10.0f);
 	}
 	void EditorLayer::OnDetach()
 	{}
 	void EditorLayer::OnEvent(Event& event)
-	{
-		m_CameraControler.OnEvent(event);
-	}
+	{}
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
-		Ref<Shader> shader;
-
 		if (auto& spec = m_FBO->GetSpecification(); m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_FBO->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_CameraControler.Resize(m_ViewportSize.x, m_ViewportSize.y);
+			m_Scene.OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
-
-		if (m_ViewportFocused)
-			m_CameraControler.OnUpdate(ts);
 
 		Renderer2D::ResetStats();
 		m_FBO->Bind();
 		RenderCommand::Clear();
 
-		shader = ShaderManager::Get("2D");
-		shader->Bind();
-		shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
-
-		static float rotation = 0.0f;
-		rotation += (float)ts * 50.0f;
-		Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, rotation, { 1.0f, 1.0f, 1.0f, 1.0f }, TextureManager::Get2D("checkerboard"), 20.0f);
-
-		m_Scene.OnUpdate(ts);
+		m_Scene.OnUpdate(ts, ShaderManager::Get("2D"));
 
 		Renderer2D::Flush();
 
@@ -106,22 +95,19 @@ namespace Saba {
 			{
 				auto [x, y] = Input::GetMousePos();
 
-				glm::vec2 bounds = { m_CameraControler.GetWidth(), m_CameraControler.GetHeight() };
-				glm::vec2 pos = m_CameraControler.GetCamera().GetPosition();
+				glm::vec2 bounds = { m_Camera.GetComponent<CameraComponent>().Camera.GetWidth(), m_Camera.GetComponent<CameraComponent>().Camera.GetHeight() };
 				x = (x - m_ViewportPos.x) / m_ViewportSize.x * bounds.x - bounds.x * 0.5f;
 				y = bounds.y * 0.5f - (y - m_ViewportPos.y) / m_ViewportSize.y * bounds.y;
 
-				m_Particle.Position = { x + pos.x, y + pos.y, 0.1f };
+				m_Particle.Position = { x, y, 0.1f };
+				m_Particle.Position = m_Camera.GetComponent<TransformComponent>().Transform * glm::vec4(m_Particle.Position, 1.0f);
 				for (int i = 0; i < 1000 * ts; i++)
 					m_ParticleSystem.Emit(m_Particle);
 			}
 		}
-
-		shader = ShaderManager::Get("particle");
-		shader->Bind();
-		shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
+		
 		m_ParticleSystem.OnUpdate(ts);
-		m_ParticleSystem.OnRender();
+		m_ParticleSystem.OnRender(ShaderManager::Get("particle"), m_Camera.GetComponent<CameraComponent>().Camera, m_Camera.GetComponent<TransformComponent>());
 
 		m_FBO->Unbind();
 	}

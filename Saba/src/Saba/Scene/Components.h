@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Saba/Renderer/Texture.h"
+#include "Saba/Scene/SceneCamera.h"
 
 namespace Saba {
 
@@ -46,5 +47,15 @@ namespace Saba {
 			: UseTransform(false), Pos(pos), Size(size), Color(color), Texture(texture), TillingFactor(tillingFactor) {}
 		SpriteComponent(glm::vec4 color, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f)
 			: UseTransform(true), Color(color), Texture(texture), TillingFactor(tillingFactor) {}
+	};
+
+	struct CameraComponent
+	{
+		SceneCamera Camera;
+		bool Primary = true;
+		bool FixedAspectRatio = false;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
 	};
 }
