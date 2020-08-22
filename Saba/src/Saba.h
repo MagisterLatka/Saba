@@ -19,6 +19,7 @@
 #include <Saba/Scene/Entity.h>
 #include <Saba/Scene/Components.h>
 #include <Saba/Scene/SceneCamera.h>
+#include <Saba/Scene/ScriptableEntity.h>
 
 #include <Saba/Renderer/AssetsManager.h>
 #include <Saba/Renderer/Buffer.h>

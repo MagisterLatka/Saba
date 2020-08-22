@@ -68,11 +68,73 @@ namespace Saba {
 
 		m_Camera = m_Scene.CreateEntity("Camera");
 		m_Camera.AddComponent<CameraComponent>().Camera.SetOrthographicSize(10.0f);
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			virtual void OnEvent(Event& event) override
+			{
+				Dispatcher dispatcher(event);
+				dispatcher.Dispatch<MouseScrolledEvent>(SB_BIND_EVENT_FUNC(CameraController::OnScrollEvent));
+			}
+			virtual void OnUpdate(Timestep ts) override
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+
+				if (p_RotationEnabled)
+				{
+					float rotation = 0.0f;
+					if (Input::IsKeyPressed(KeyCode::Q))
+						rotation += m_CameraRotationSpeed * (float)ts;
+					if (Input::IsKeyPressed(KeyCode::E))
+						rotation -= m_CameraRotationSpeed * (float)ts;
+
+					if (rotation != 0.0f)
+					{
+						transform = glm::rotate(transform, glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
+					}
+				}
+
+				glm::vec2 translate(0.0f);
+				if (Input::IsKeyPressed(KeyCode::W))
+					translate.y += m_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(KeyCode::S))
+					translate.y -= m_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(KeyCode::A))
+					translate.x -= m_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(KeyCode::D))
+					translate.x += m_CameraMovementSpeed * (float)ts;
+				if (translate != glm::vec2(0.0f))
+				{
+					transform = glm::translate(transform, glm::vec3(translate, 0.0f));
+				}
+			}
+		private:
+			bool OnScrollEvent(MouseScrolledEvent& event)
+			{
+				m_Zoom -= event.GetYOffset() * 0.5f;
+				m_Zoom = glm::max(m_Zoom, 0.5f);
+				GetComponent<CameraComponent>().Camera.SetOrthographicSize(m_Zoom);
+				m_CameraMovementSpeed = m_Zoom * 3.0f;
+				return false;
+			}
+		public:
+			bool p_RotationEnabled = true;
+		private:
+			float m_Zoom = 10.0f;
+
+			float m_CameraMovementSpeed = 3.0f;
+			float m_CameraRotationSpeed = 90.0f;
+		};
+
+		m_Camera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 	}
 	void EditorLayer::OnDetach()
 	{}
 	void EditorLayer::OnEvent(Event& event)
-	{}
+	{
+		m_Scene.OnEvent(event);
+	}
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		if (auto& spec = m_FBO->GetSpecification(); m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))

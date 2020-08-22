@@ -16,13 +16,12 @@ private:
 private:
 	Saba::Ref<Saba::Framebuffer> m_FBO;
 
-	Saba::OrthographicCameraControler m_CameraControler;
-
 	Saba::ParticleSystem m_ParticleSystem;
 	Saba::ParticleProps m_Particle;
 	bool m_EnableParticles = false;
 
 	Saba::Scene m_Scene;
+	Saba::Entity m_Camera;
 
 #if SB_DEBUG
 	static constexpr float m_QuadFrequency = 0.25f;

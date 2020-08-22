@@ -2,6 +2,7 @@
 #include "Saba/Scene/Scene.h"
 #include "Saba/Scene/Entity.h"
 #include "Saba/Scene/Components.h"
+#include "Saba/Scene/ScriptableEntity.h"
 
 #include "Saba/Renderer/Renderer2D.h"
 
@@ -15,15 +16,37 @@ namespace Saba {
 		return entity;
 	}
 
+	void Scene::OnEvent(Event& event)
+	{
+		m_Registry.view<NativeScriptComponent>().each([&event](auto entity, auto& component)
+		{
+			component.Instance->OnEvent(event);
+		});
+	}
+
 	void Scene::OnUpdate(Timestep ts, Ref<Shader> shader)
 	{
+		{
+			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& component)
+			{
+				if (!component.Instance)
+				{
+					component.Instance = component.CreateScript();
+					component.Instance->m_Entity = Entity(entity, this);
+					component.Instance->OnCreate();
+				}
+
+				component.Instance->OnUpdate(ts);
+			});
+		}
+
 		Camera* renderCamera = nullptr;
 		glm::mat4* cameraTransform = nullptr;
 		{		
 			auto group = m_Registry.group<CameraComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
 			{
-				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+				auto [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
 				if (camera.Primary)
 				{
 					renderCamera = &camera.Camera;
@@ -39,7 +62,7 @@ namespace Saba {
 			auto group = m_Registry.group<TransformComponent, SpriteComponent>();
 			for (auto entity : group)
 			{
-				auto& [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 				if (sprite.UseTransform)
 					Renderer2D::DrawQuad(transform, sprite.Color, sprite.Texture, sprite.TillingFactor);
 				else

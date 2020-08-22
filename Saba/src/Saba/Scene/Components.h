@@ -2,6 +2,7 @@
 
 #include "Saba/Renderer/Texture.h"
 #include "Saba/Scene/SceneCamera.h"
+#include "Saba/Scene/ScriptableEntity.h"
 
 namespace Saba {
 
@@ -57,5 +58,20 @@ namespace Saba {
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
+	};
+
+	struct NativeScriptComponent
+	{
+		ScriptableEntity* Instance;
+
+		ScriptableEntity*(*CreateScript)() = nullptr;
+		void(*DestroyScript)(NativeScriptComponent*) = nullptr;
+
+		template<typename T>
+		void Bind()
+		{
+			CreateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestroyScript = [](NativeScriptComponent* component) { delete component->Instance; component->Instance = nullptr; };
+		}
 	};
 }

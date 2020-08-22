@@ -3,9 +3,10 @@
 #include "ExampleLayer.h"
 
 #include <imgui/imgui.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 ExampleLayer::ExampleLayer()
-	: Saba::Layer("ExampleLayer"), m_CameraControler(16.0f / 9.0f), m_ParticleSystem(25000)
+	: Saba::Layer("ExampleLayer"), m_ParticleSystem(25000)
 {
 }
 ExampleLayer::~ExampleLayer()
@@ -60,35 +61,89 @@ void ExampleLayer::OnAttach()
 																 glm::vec2(m_QuadFrequency * 0.6f, m_QuadFrequency * 0.6f), glm::vec4(x / 10.0f, y / 10.0f, 1.0f, 1.0f));
 		}
 	}
+
+	m_Camera = m_Scene.CreateEntity("Camera");
+	auto& camera = m_Camera.AddComponent<Saba::CameraComponent>().Camera;
+	camera.SetOrthographicSize(10.0f);
+	camera.SetViewportSize(Saba::Application::Get().GetWindow().GetWidth(), Saba::Application::Get().GetWindow().GetHeight());
+
+	class CameraController : public Saba::ScriptableEntity
+	{
+	public:
+		virtual void OnEvent(Saba::Event& event) override
+		{
+			Saba::Dispatcher dispatcher(event);
+			dispatcher.Dispatch<Saba::MouseScrolledEvent>(SB_BIND_EVENT_FUNC(CameraController::OnScrollEvent));
+		}
+		virtual void OnUpdate(Saba::Timestep ts) override
+		{
+			auto& transform = GetComponent<Saba::TransformComponent>().Transform;
+
+			if (p_RotationEnabled)
+			{
+				float rotation = 0.0f;
+				if (Saba::Input::IsKeyPressed(Saba::KeyCode::Q))
+					rotation += m_CameraRotationSpeed * (float)ts;
+				if (Saba::Input::IsKeyPressed(Saba::KeyCode::E))
+					rotation -= m_CameraRotationSpeed * (float)ts;
+
+				if (rotation != 0.0f)
+				{
+					transform = glm::rotate(transform, glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
+				}
+			}
+
+			glm::vec2 translate(0.0f);
+			if (Saba::Input::IsKeyPressed(Saba::KeyCode::W))
+				translate.y += m_CameraMovementSpeed * (float)ts;
+			if (Saba::Input::IsKeyPressed(Saba::KeyCode::S))
+				translate.y -= m_CameraMovementSpeed * (float)ts;
+			if (Saba::Input::IsKeyPressed(Saba::KeyCode::A))
+				translate.x -= m_CameraMovementSpeed * (float)ts;
+			if (Saba::Input::IsKeyPressed(Saba::KeyCode::D))
+				translate.x += m_CameraMovementSpeed * (float)ts;
+			if (translate != glm::vec2(0.0f))
+			{
+				transform = glm::translate(transform, glm::vec3(translate, 0.0f));
+			}
+		}
+	private:
+		bool OnScrollEvent(Saba::MouseScrolledEvent& event)
+		{
+			m_Zoom -= event.GetYOffset() * 0.5f;
+			m_Zoom = glm::max(m_Zoom, 0.5f);
+			GetComponent<Saba::CameraComponent>().Camera.SetOrthographicSize(m_Zoom);
+			m_CameraMovementSpeed = m_Zoom * 3.0f;
+			return false;
+		}
+	public:
+		bool p_RotationEnabled = true;
+	private:
+		float m_Zoom = 10.0f;
+
+		float m_CameraMovementSpeed = 3.0f;
+		float m_CameraRotationSpeed = 90.0f;
+	};
+
+	m_Camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
 }
 void ExampleLayer::OnDetach()
 {
 }
 void ExampleLayer::OnEvent(Saba::Event& event)
 {
-	m_CameraControler.OnEvent(event);
 	Saba::Dispatcher dispatcher(event);
 	dispatcher.Dispatch<Saba::WindowResizeEvent>(SB_BIND_EVENT_FUNC(ExampleLayer::OnWindowResize));
+	m_Scene.OnEvent(event);
 }
 void ExampleLayer::OnUpdate(Saba::Timestep ts)
 {
-	m_CameraControler.OnUpdate(ts);
-
 	Saba::Renderer2D::ResetStats();
-	Saba::Ref<Saba::Shader> shader;
 
 	m_FBO->Bind();
 	Saba::RenderCommand::Clear();
 
-	shader = Saba::ShaderManager::Get("2D");
-	shader->Bind();
-	shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
-
-	static float rotation = 0.0f;
-	rotation += (float)ts * 50.0f;
-	Saba::Renderer2D::DrawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, rotation, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::TextureManager::Get2D("checkerboard"), 20.0f);
-
-	m_Scene.OnUpdate(ts);
+	m_Scene.OnUpdate(ts, Saba::ShaderManager::Get("2D"));
 
 	Saba::Renderer2D::Flush();
 
@@ -100,31 +155,25 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 			auto width = Saba::Application::Get().GetWindow().GetWidth();
 			auto height = Saba::Application::Get().GetWindow().GetHeight();
 
-			glm::vec2 bounds = { m_CameraControler.GetWidth(), m_CameraControler.GetHeight() };
-			glm::vec2 pos = m_CameraControler.GetCamera().GetPosition();
+			glm::vec2 bounds = { m_Camera.GetComponent<Saba::CameraComponent>().Camera.GetWidth(), m_Camera.GetComponent<Saba::CameraComponent>().Camera.GetHeight() };
 			x = x / width * bounds.x - bounds.x * 0.5f;
 			y = bounds.y * 0.5f - y / height * bounds.y;
 
-			m_Particle.Position = { x + pos.x, y + pos.y, 0.1f };
+			m_Particle.Position = { x, y, 0.1f };
+			m_Particle.Position = m_Camera.GetComponent<Saba::TransformComponent>().Transform * glm::vec4(m_Particle.Position, 1.0f);
 			for (int i = 0; i < 1000 * ts; i++)
 				m_ParticleSystem.Emit(m_Particle);
 		}
 	}
 
-	shader = Saba::ShaderManager::Get("particle");
-	shader->Bind();
-	shader->SetUniformMat4("u_ViewProjMat", m_CameraControler.GetCamera().GetViewProjectionMat());
 	m_ParticleSystem.OnUpdate(ts);
-	m_ParticleSystem.OnRender();
+	m_ParticleSystem.OnRender(Saba::ShaderManager::Get("particle"), m_Camera.GetComponent<Saba::CameraComponent>().Camera, m_Camera.GetComponent<Saba::TransformComponent>());
 
 	m_FBO->Unbind();
 	Saba::RenderCommand::Clear();
 
-	shader = Saba::ShaderManager::Get("2D");
-	shader->Bind();
 	static constexpr glm::mat4 identity(1.0f);
-	shader->SetUniformMat4("u_ViewProjMat", identity);
-
+	Saba::Renderer2D::BeginScene(Saba::ShaderManager::Get("2D"), identity);
 	Saba::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 2.0f, 2.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::Texture2D::Create(m_FBO->GetAttachmentID(0)));
 	Saba::Renderer2D::Flush();
 }
@@ -152,5 +201,6 @@ void ExampleLayer::OnImGuiRender()
 bool ExampleLayer::OnWindowResize(Saba::WindowResizeEvent& e)
 {
 	m_FBO->Resize(e.GetXSize(), e.GetYSize());
+	m_Scene.OnViewportResize(e.GetXSize(), e.GetYSize());
 	return false;
 }

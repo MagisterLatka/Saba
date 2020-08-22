@@ -93,6 +93,12 @@ namespace Saba {
 		shader->SetUniformMat4("u_ViewProjMat", camera.GetProjection() * glm::inverse(tranform));
 	}
 
+	void Renderer2D::BeginScene(Ref<Shader> shader, const glm::mat4& viewProjectionMatrix)
+	{
+		shader->Bind();
+		shader->SetUniformMat4("u_ViewProjMat", viewProjectionMatrix);
+	}
+
 	void Renderer2D::Flush()
 	{
 		if (s_Data.quadCount > 0)

@@ -2,6 +2,7 @@
 
 #include "Saba/Timestep.h"
 #include "Saba/Renderer/Shader.h"
+#include "Saba/Events/Event.h"
 
 #include <entt.hpp>
 
@@ -17,6 +18,7 @@ namespace Saba {
 
 		Entity CreateEntity(const std::string& name = std::string());
 
+		void OnEvent(Event& event);
 		void OnUpdate(Timestep ts, Ref<Shader> shader);
 		void OnViewportResize(uint32_t width, uint32_t height);
 	private:
