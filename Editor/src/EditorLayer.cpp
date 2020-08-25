@@ -5,6 +5,8 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Scripts.h"
+
 namespace Saba {
 
 	EditorLayer::EditorLayer()
@@ -41,16 +43,6 @@ namespace Saba {
 		ShaderManager::Add("particle", "assets/shaders/particle.glsl");
 
 
-		m_Particle.ColorBegin = glm::vec4(0.8f, 0.3f, 0.3f, 1.0f);
-		m_Particle.ColorEnd = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		m_Particle.Position = glm::vec3(0.0f, 0.0f, 0.0f);
-		m_Particle.SizeBegin = 0.5f;
-		m_Particle.SizeEnd = 0.1f;
-		m_Particle.SizeVariation = 0.05f;
-		m_Particle.Velocity = glm::vec2(0.0f, 0.0f);
-		m_Particle.VelocityVariation = glm::vec2(3.0f, 3.0f);
-
-
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 
 
@@ -68,66 +60,10 @@ namespace Saba {
 
 		m_Camera = m_Scene.CreateEntity("Camera");
 		m_Camera.AddComponent<CameraComponent>().Camera.SetOrthographicSize(10.0f);
-
-		class CameraController : public ScriptableEntity
-		{
-		public:
-			virtual void OnEvent(Event& event) override
-			{
-				Dispatcher dispatcher(event);
-				dispatcher.Dispatch<MouseScrolledEvent>(SB_BIND_EVENT_FUNC(CameraController::OnScrollEvent));
-			}
-			virtual void OnUpdate(Timestep ts) override
-			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
-
-				if (p_RotationEnabled)
-				{
-					float rotation = 0.0f;
-					if (Input::IsKeyPressed(KeyCode::Q))
-						rotation += m_CameraRotationSpeed * (float)ts;
-					if (Input::IsKeyPressed(KeyCode::E))
-						rotation -= m_CameraRotationSpeed * (float)ts;
-
-					if (rotation != 0.0f)
-					{
-						transform = glm::rotate(transform, glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
-					}
-				}
-
-				glm::vec2 translate(0.0f);
-				if (Input::IsKeyPressed(KeyCode::W))
-					translate.y += m_CameraMovementSpeed * (float)ts;
-				if (Input::IsKeyPressed(KeyCode::S))
-					translate.y -= m_CameraMovementSpeed * (float)ts;
-				if (Input::IsKeyPressed(KeyCode::A))
-					translate.x -= m_CameraMovementSpeed * (float)ts;
-				if (Input::IsKeyPressed(KeyCode::D))
-					translate.x += m_CameraMovementSpeed * (float)ts;
-				if (translate != glm::vec2(0.0f))
-				{
-					transform = glm::translate(transform, glm::vec3(translate, 0.0f));
-				}
-			}
-		private:
-			bool OnScrollEvent(MouseScrolledEvent& event)
-			{
-				m_Zoom -= event.GetYOffset() * 0.5f;
-				m_Zoom = glm::max(m_Zoom, 0.5f);
-				GetComponent<CameraComponent>().Camera.SetOrthographicSize(m_Zoom);
-				m_CameraMovementSpeed = m_Zoom * 3.0f;
-				return false;
-			}
-		public:
-			bool p_RotationEnabled = true;
-		private:
-			float m_Zoom = 10.0f;
-
-			float m_CameraMovementSpeed = 3.0f;
-			float m_CameraRotationSpeed = 90.0f;
-		};
-
 		m_Camera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+		m_ParticleSystemController = m_Scene.CreateEntity("Particle system controller");
+		m_ParticleSystemController.AddComponent<NativeScriptComponent>().Bind<ParticleSystemController>();
 	}
 	void EditorLayer::OnDetach()
 	{}
@@ -150,28 +86,18 @@ namespace Saba {
 		m_Scene.OnUpdate(ts, ShaderManager::Get("2D"));
 
 		Renderer2D::Flush();
-
-		if (m_EnableParticles)
-		{
-			if (Input::IsMouseButtonPressed(SB_MOUSE_BUTTON_LEFT))
-			{
-				auto [x, y] = Input::GetMousePos();
-
-				glm::vec2 bounds = { m_Camera.GetComponent<CameraComponent>().Camera.GetWidth(), m_Camera.GetComponent<CameraComponent>().Camera.GetHeight() };
-				x = (x - m_ViewportPos.x) / m_ViewportSize.x * bounds.x - bounds.x * 0.5f;
-				y = bounds.y * 0.5f - (y - m_ViewportPos.y) / m_ViewportSize.y * bounds.y;
-
-				m_Particle.Position = { x, y, 0.1f };
-				m_Particle.Position = m_Camera.GetComponent<TransformComponent>().Transform * glm::vec4(m_Particle.Position, 1.0f);
-				for (int i = 0; i < 1000 * ts; i++)
-					m_ParticleSystem.Emit(m_Particle);
-			}
-		}
 		
 		m_ParticleSystem.OnUpdate(ts);
 		m_ParticleSystem.OnRender(ShaderManager::Get("particle"), m_Camera.GetComponent<CameraComponent>().Camera, m_Camera.GetComponent<TransformComponent>());
 
 		m_FBO->Unbind();
+
+		//temporary
+		if (auto particleSystemController = m_ParticleSystemController.GetComponent<NativeScriptComponent>().GetInstance<ParticleSystemController>(); !particleSystemController->p_ParticleSystem)
+		{
+			particleSystemController->p_ParticleSystem = &m_ParticleSystem;
+			particleSystemController->p_Camera = m_Camera;
+		}
 	}
 	void EditorLayer::OnImGuiRender()
 	{
@@ -237,10 +163,11 @@ namespace Saba {
 
 				ImGui::Separator();
 
-				ImGui::Checkbox("Enable Particles", &m_EnableParticles);
-				ImGui::ColorEdit3("ColorBegin", &m_Particle.ColorBegin[0]);
-				ImGui::ColorEdit3("ColorEnd", &m_Particle.ColorEnd[0]);
-				ImGui::SliderFloat("LifeTime", &m_Particle.LifeTime, 0.1f, 10.0f);
+				auto particleSystemController = m_ParticleSystemController.GetComponent<NativeScriptComponent>().GetInstance<ParticleSystemController>();
+				ImGui::Checkbox("Enable Particles", &particleSystemController->p_EnableParticles);
+				ImGui::ColorEdit3("ColorBegin", &particleSystemController->p_Particle.ColorBegin[0]);
+				ImGui::ColorEdit3("ColorEnd", &particleSystemController->p_Particle.ColorEnd[0]);
+				ImGui::SliderFloat("LifeTime", &particleSystemController->p_Particle.LifeTime, 0.1f, 10.0f);
 
 				ImGui::Separator();
 
@@ -260,6 +187,7 @@ namespace Saba {
 				m_ViewportSize = { viewportSize.x, viewportSize.y };
 				ImVec2 viewportPos = ImGui::GetWindowPos();
 				m_ViewportPos = { viewportPos.x - Application::Get().GetWindow().GetWindowPosX(), viewportPos.y - Application::Get().GetWindow().GetWindowPosY() };
+				m_Scene.SetViewportPos(m_ViewportPos);
 
 				ImGui::Image(m_FBO->GetAttachmentID(0), viewportSize, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 

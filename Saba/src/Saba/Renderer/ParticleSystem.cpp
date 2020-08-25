@@ -11,7 +11,7 @@ namespace Saba {
 
 	struct VertexData
 	{
-		glm::vec3 pos;
+		glm::vec4 pos;
 		glm::vec4 color;
 	};
 
@@ -66,7 +66,7 @@ namespace Saba {
 
 			Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, (uint32_t)m_Particles.size() * 4 * sizeof(VertexData), BufferUsage::Dynamic);
 			vbo->SetLayout({
-				{"position", ShaderDataType::Float3},
+				{"position", ShaderDataType::Float4},
 				{"color", ShaderDataType::Float4}
 			});
 			m_VAO->AddVertexBuffer(vbo);
@@ -101,7 +101,7 @@ namespace Saba {
 				{
 					for (int j = 0; j < 4; j++)
 					{
-						at->color.a = 0.0f;
+						at->pos.w = 0.0f;
 						at++;
 					}
 					continue;
@@ -114,7 +114,7 @@ namespace Saba {
 					{-0.5f,  0.5f, 0.0f }
 				};
 
-				float life = particle.LifeCounter / particle.LifeTime;
+				float life = glm::clamp(particle.LifeCounter / particle.LifeTime, 0.0f, 1.0f);
 				glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
 				color.a *= life;
 
@@ -124,12 +124,12 @@ namespace Saba {
 
 				for (int j = 0; j < 4; j++)
 				{
-					at->pos = (rotate * data[j]) * size + particle.Position;
+					at->pos = glm::vec4((rotate * data[j]) * size + particle.Position, 1.0f);
 					at->color = color;
 					at++;
 				}
 			}
-			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 28ULL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));
+			m_VAO->GetVertexBuffers()[0]->SetData(m_Buffer + m_FirstActive * 32ULL, (m_LastActive - m_FirstActive + 1) * 4 * sizeof(VertexData), m_FirstActive * 4 * sizeof(VertexData));
 
 			shader->Bind();
 			shader->SetUniformMat4("u_ViewProjMat", camera.GetProjection() * glm::inverse(transform));

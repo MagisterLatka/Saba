@@ -6,6 +6,7 @@ namespace Saba {
 
 	class Entity
 	{
+		friend class ScriptableEntity;
 	public:
 		Entity() = default;
 		Entity(entt::entity id, Scene* scene);

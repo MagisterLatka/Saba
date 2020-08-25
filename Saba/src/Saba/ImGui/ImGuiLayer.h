@@ -18,6 +18,7 @@ namespace Saba {
 		void End();
 
 		void BlockEvent(bool block) { m_BlockEvents = block; }
+		bool IsBlockingEvents() const { return m_BlockEvents; }
 	private:
 		bool m_BlockEvents = true;
 	};

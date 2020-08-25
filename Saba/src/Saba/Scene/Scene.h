@@ -21,8 +21,12 @@ namespace Saba {
 		void OnEvent(Event& event);
 		void OnUpdate(Timestep ts, Ref<Shader> shader);
 		void OnViewportResize(uint32_t width, uint32_t height);
+		glm::uvec2 GetViewportSize() const { return m_ViewportSize; }
+		void SetViewportPos(glm::uvec2 pos) { m_ViewportPos = pos; }
+		glm::uvec2 GetViewportPos() const { return m_ViewportPos; }
 	private:
 		entt::registry m_Registry;
-		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+		glm::uvec2 m_ViewportSize;
+		glm::uvec2 m_ViewportPos;
 	};
 }

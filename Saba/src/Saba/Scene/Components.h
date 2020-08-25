@@ -73,5 +73,10 @@ namespace Saba {
 			CreateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
 			DestroyScript = [](NativeScriptComponent* component) { delete component->Instance; component->Instance = nullptr; };
 		}
+		template<typename T>
+		T* GetInstance()
+		{
+			return dynamic_cast<T*>(Instance);
+		}
 	};
 }
