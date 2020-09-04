@@ -16,6 +16,27 @@ namespace Saba {
 		return entity;
 	}
 
+	void Scene::OnStart()
+	{
+		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& component)
+		{
+			if (!component.Instance)
+			{
+				component.Instance = component.CreateScript();
+				component.Instance->m_Entity = Entity(entity, this);
+				component.Instance->OnCreate();
+			}
+		});
+	}
+	void Scene::OnEnd()
+	{
+		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& component)
+		{
+			component.Instance->OnDestroy();
+			component.DestroyScript(&component);
+		});
+	}
+
 	void Scene::OnEvent(Event& event)
 	{
 		m_Registry.view<NativeScriptComponent>().each([&event](auto entity, auto& component)
@@ -24,18 +45,11 @@ namespace Saba {
 		});
 	}
 
-	void Scene::OnUpdate(Timestep ts, Ref<Shader> shader)
+	void Scene::OnUpdate(Timestep ts)
 	{
 		{
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& component)
 			{
-				if (!component.Instance)
-				{
-					component.Instance = component.CreateScript();
-					component.Instance->m_Entity = Entity(entity, this);
-					component.Instance->OnCreate();
-				}
-
 				component.Instance->OnUpdate(ts);
 			});
 		}
@@ -57,7 +71,7 @@ namespace Saba {
 
 		if (renderCamera)
 		{
-			Renderer2D::BeginScene(shader, *renderCamera, *cameraTransform);
+			Renderer2D::BeginScene(*renderCamera, *cameraTransform);
 
 			auto group = m_Registry.group<TransformComponent, SpriteComponent>();
 			for (auto entity : group)

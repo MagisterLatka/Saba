@@ -9,6 +9,8 @@ namespace Saba {
 	{
 		if (type == "vertex")
 			return GL_VERTEX_SHADER;
+		else if (type == "geometry")
+			return GL_GEOMETRY_SHADER;
 		else if (type == "fragment" || type == "pixel")
 			return GL_FRAGMENT_SHADER;
 
@@ -27,9 +29,40 @@ namespace Saba {
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
 		Compile(sources);
 	}
+	OpenGLShader::OpenGLShader(const std::string& vertexSrc, const std::string& geometrySrc, const std::string& fragmentSrc)
+	{
+		std::unordered_map<GLenum, std::string> sources;
+		sources[GL_VERTEX_SHADER] = vertexSrc;
+		sources[GL_GEOMETRY_SHADER] = geometrySrc;
+		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
+		Compile(sources);
+	}
 	OpenGLShader::~OpenGLShader()
 	{
 		glDeleteProgram(m_ID);
+	}
+
+	void OpenGLShader::Recompile(const std::string& filepath)
+	{
+		glDeleteProgram(m_ID);
+		Compile(PreProcess(Read(filepath)));
+	}
+	void OpenGLShader::Recompile(const std::string& vertexSrc, const std::string& fragmentSrc)
+	{
+		glDeleteProgram(m_ID);
+		std::unordered_map<GLenum, std::string> sources;
+		sources[GL_VERTEX_SHADER] = vertexSrc;
+		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
+		Compile(sources);
+	}
+	void OpenGLShader::Recompile(const std::string& vertexSrc, const std::string& geometrySrc, const std::string& fragmentSrc)
+	{
+		glDeleteProgram(m_ID);
+		std::unordered_map<GLenum, std::string> sources;
+		sources[GL_VERTEX_SHADER] = vertexSrc;
+		sources[GL_GEOMETRY_SHADER] = geometrySrc;
+		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
+		Compile(sources);
 	}
 
 	void OpenGLShader::Bind() const
@@ -166,7 +199,7 @@ namespace Saba {
 				char* message = (char*)malloc(lenght);
 				glGetShaderInfoLog(shader, lenght, &lenght, message);
 				glDeleteShader(shader);
-				SB_CORE_FATAL("Failed to compile shader");
+				SB_CORE_FATAL("Failed to compile {0} shader (ID: {1})", type, m_ID);
 				SB_CORE_ASSERT(false, "{0}", message);
 				free(message);
 			}

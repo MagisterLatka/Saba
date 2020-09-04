@@ -9,13 +9,13 @@ namespace Saba {
 	bool Input::IsKeyPressed(KeyCode key)
 	{
 		auto state = glfwGetKey(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), static_cast<int>(key));
-		return (state == GLFW_PRESS || state == GLFW_REPEAT) && !Application::Get().GetImGuiLayer()->IsBlockingEvents();
+		return (state == GLFW_PRESS || state == GLFW_REPEAT);
 	}
 
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), static_cast<int>(button));
-		return (state == GLFW_PRESS) && !Application::Get().GetImGuiLayer()->IsBlockingEvents();
+		return (state == GLFW_PRESS);
 	}
 
 	std::pair<float, float> Input::GetMousePos()

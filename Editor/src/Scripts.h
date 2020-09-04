@@ -12,34 +12,37 @@ namespace Saba {
 		}
 		virtual void OnUpdate(Timestep ts) override
 		{
-			auto& transform = GetComponent<TransformComponent>().Transform;
-
-			if (p_RotationEnabled)
+			if (GetScene()->IsViewportFocused())
 			{
-				float rotation = 0.0f;
-				if (Input::IsKeyPressed(KeyCode::Q))
-					rotation += m_CameraRotationSpeed * (float)ts;
-				if (Input::IsKeyPressed(KeyCode::E))
-					rotation -= m_CameraRotationSpeed * (float)ts;
+				auto& transform = GetComponent<TransformComponent>().Transform;
 
-				if (rotation != 0.0f)
+				if (p_RotationEnabled)
 				{
-					transform = glm::rotate(transform, glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
-				}
-			}
+					float rotation = 0.0f;
+					if (Input::IsKeyPressed(KeyCode::Q))
+						rotation += m_CameraRotationSpeed * (float)ts;
+					if (Input::IsKeyPressed(KeyCode::E))
+						rotation -= m_CameraRotationSpeed * (float)ts;
 
-			glm::vec2 translate(0.0f);
-			if (Input::IsKeyPressed(KeyCode::W))
-				translate.y += m_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(KeyCode::S))
-				translate.y -= m_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(KeyCode::A))
-				translate.x -= m_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(KeyCode::D))
-				translate.x += m_CameraMovementSpeed * (float)ts;
-			if (translate != glm::vec2(0.0f))
-			{
-				transform = glm::translate(transform, glm::vec3(translate, 0.0f));
+					if (rotation != 0.0f)
+					{
+						transform = glm::rotate(transform, glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
+					}
+				}
+
+				glm::vec2 translate(0.0f);
+				if (Input::IsKeyPressed(KeyCode::W))
+					translate.y += m_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(KeyCode::S))
+					translate.y -= m_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(KeyCode::A))
+					translate.x -= m_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(KeyCode::D))
+					translate.x += m_CameraMovementSpeed * (float)ts;
+				if (translate != glm::vec2(0.0f))
+				{
+					transform = glm::translate(transform, glm::vec3(translate, 0.0f));
+				}
 			}
 		}
 	private:
@@ -82,7 +85,7 @@ namespace Saba {
 
 			if (p_EnableParticles)
 			{
-				if (Input::IsMouseButtonPressed(MouseCode::Button0))
+				if (Input::IsMouseButtonPressed(MouseCode::Button0) && GetScene()->IsViewportHovered())
 				{
 					auto [x, y] = Input::GetMousePos();
 					auto& camera = p_Camera.GetComponent<CameraComponent>().Camera;

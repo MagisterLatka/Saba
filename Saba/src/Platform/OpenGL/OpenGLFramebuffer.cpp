@@ -68,36 +68,34 @@ namespace Saba {
 
 		for (int i = 0; i < m_ColorAttachments.size(); i++)
 		{
-			if (static_cast<uint32_t>(m_Spec.Attachments) & BIT(i))
+			if (m_Spec.Attachments & BIT(i))
 			{
 				if (m_Spec.Samples == 1)
 				{
 					glCreateTextures(GL_TEXTURE_2D, 1, &m_ColorAttachments[i]);
 					glTextureStorage2D(m_ColorAttachments[i], 1, InternalFormatInOpenGL(m_Spec.Format), m_Spec.Width, m_Spec.Height);
-					glNamedFramebufferTexture(m_ID, GL_COLOR_ATTACHMENT0 + i, m_ColorAttachments[i], 0);
 				}
 				else
 				{
 					glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, &m_ColorAttachments[i]);
 					glTextureStorage2DMultisample(m_ColorAttachments[i], m_Spec.Samples, InternalFormatInOpenGL(m_Spec.Format), m_Spec.Width, m_Spec.Height, GL_TRUE);
-					glNamedFramebufferTexture(m_ID, GL_COLOR_ATTACHMENT0 + i, m_ColorAttachments[i], 0);
 				}
+				glNamedFramebufferTexture(m_ID, GL_COLOR_ATTACHMENT0 + i, m_ColorAttachments[i], 0);
 			}
 		}
-		if (static_cast<uint32_t>(m_Spec.Attachments) & static_cast<uint32_t>(FramebufferAttachments::DepthAttachment))
+		if (m_Spec.Attachments & FramebufferAttachments::DepthAttachment)
 		{
 			if (m_Spec.Samples == 1)
 			{
 				glCreateTextures(GL_TEXTURE_2D, 1, &m_DepthAttachment);
 				glTextureStorage2D(m_DepthAttachment, 1, GL_DEPTH_COMPONENT16, m_Spec.Width, m_Spec.Height);
-				glNamedFramebufferTexture(m_ID, GL_DEPTH_ATTACHMENT, m_DepthAttachment, 0);
 			}
 			else
 			{
 				glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, &m_DepthAttachment);
 				glTextureStorage2DMultisample(m_DepthAttachment, m_Spec.Samples, GL_DEPTH_COMPONENT16, m_Spec.Width, m_Spec.Height, GL_TRUE);
-				glNamedFramebufferTexture(m_ID, GL_DEPTH_ATTACHMENT, m_DepthAttachment, 0);
 			}
+			glNamedFramebufferTexture(m_ID, GL_DEPTH_ATTACHMENT, m_DepthAttachment, 0);
 		}
 
 		SB_CORE_ASSERT(glCheckNamedFramebufferStatus(m_ID, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");

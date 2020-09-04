@@ -69,6 +69,8 @@ namespace Saba {
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 		glfwGetWindowPos(m_Window, &m_Data.windowPosX, &m_Data.windowPosY);
+		if (glfwRawMouseMotionSupported())
+			glfwSetInputMode(m_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{

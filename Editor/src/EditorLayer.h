@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Panels/HierarchyPanel.h"
+
 namespace Saba {
 
 	class EditorLayer : public Layer
@@ -21,10 +23,12 @@ namespace Saba {
 
 		ParticleSystem m_ParticleSystem;
 
-		Scene m_Scene;
+		Ref<Scene> m_Scene;
 		Entity m_ColoredQuad;
 		Entity m_Camera;
 		Entity m_ParticleSystemController;
+
+		SceneHierarchyPanel m_HierarchyPanel;
 #if SB_DEBUG
 		static constexpr float m_QuadFrequency = 0.25f;
 #else

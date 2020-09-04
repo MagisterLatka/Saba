@@ -39,11 +39,11 @@ namespace Saba {
 
 		switch (severity)
 		{
-			case GL_DEBUG_SEVERITY_HIGH:         SB_CORE_FATAL("({0}): {1}", Source, message); break;
-			case GL_DEBUG_SEVERITY_MEDIUM:       SB_CORE_ERROR("({0}): {1}", Source, message); break;
-			case GL_DEBUG_SEVERITY_LOW:           SB_CORE_WARN("({0}): {1}", Source, message); break;
-			case GL_DEBUG_SEVERITY_NOTIFICATION: SB_CORE_TRACE("({0}): {1}", Source, message); break;
-			default:                             SB_CORE_ASSERT(false, "Unknown severity level!"); break;
+			case GL_DEBUG_SEVERITY_HIGH:			SB_CORE_FATAL("({0}): {1}", Source, message);		break;
+			case GL_DEBUG_SEVERITY_MEDIUM:			SB_CORE_ERROR("({0}): {1}", Source, message);		break;
+			case GL_DEBUG_SEVERITY_LOW:				SB_CORE_WARN("({0}): {1}", Source, message);		break;
+			case GL_DEBUG_SEVERITY_NOTIFICATION:	SB_CORE_TRACE("({0}): {1}", Source, message);		break;
+			default:								SB_CORE_ASSERT(false, "Unknown severity level!");	break;
 		}		
 		SB_BREAK();
 	}
@@ -55,7 +55,7 @@ namespace Saba {
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 #endif
 
 		glEnable(GL_BLEND);

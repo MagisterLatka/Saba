@@ -20,6 +20,9 @@ namespace Saba {
 
 	struct Renderer2DData
 	{
+		Ref<Shader> defaultShader;
+		Ref<Shader> activeShader;
+
 		Ref<VertexArray> vertexArray;
 		uint32_t quadCount = 0;
 
@@ -42,6 +45,59 @@ namespace Saba {
 
 	void Renderer2D::Init()
 	{
+		std::string vertexSrc = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 i_Pos;
+			layout(location = 1) in vec4 i_UV_TID_TillingFactor;
+			layout(location = 2) in vec4 i_Color;
+
+			out DATA {
+				vec2 uv;
+				vec4 color;
+				float tid;
+				float tillingFactor;
+			} vs_out;
+
+			uniform mat4 u_ViewProjMat;
+
+			void main()
+			{
+				gl_Position = u_ViewProjMat * vec4(i_Pos, 1.0f);
+
+				vs_out.uv = i_UV_TID_TillingFactor.xy;
+				vs_out.color = i_Color;
+				vs_out.tid = i_UV_TID_TillingFactor.z;
+				vs_out.tillingFactor = i_UV_TID_TillingFactor.w;
+			}
+		)";
+		std::string fragmentSrc = R"(
+			#version 330 core
+
+			out vec4 o_Color;
+
+			in DATA {
+				vec2 uv;
+				vec4 color;
+				float tid;
+				float tillingFactor;
+			} fs_in;
+
+			uniform sampler2D u_Textures[32];
+
+			void main()
+			{
+				o_Color = texture(u_Textures[int(fs_in.tid)], fs_in.uv * fs_in.tillingFactor) * fs_in.color;
+			}
+		)";
+		s_Data.defaultShader = Shader::Create(vertexSrc, fragmentSrc);
+		s_Data.defaultShader->Bind();
+		static int texIDs[] = {
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+		};
+		s_Data.defaultShader->SetUniformInt1v("u_Textures", texIDs, 32);
+		s_Data.activeShader = s_Data.defaultShader;
+
 		for (uint32_t i = 0; i < c_MaxQuadCount * 4; i += 4)
 		{
 			s_Data.buffer[i + 0].uv_texID_TillingFactor = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -87,16 +143,24 @@ namespace Saba {
 		s_Data.vertexArray.reset();
 	}
 
-	void Renderer2D::BeginScene(Ref<Shader> shader, const Camera& camera, const glm::mat4& tranform)
+	void Renderer2D::SetShader(Ref<Shader> shader)
 	{
-		shader->Bind();
-		shader->SetUniformMat4("u_ViewProjMat", camera.GetProjection() * glm::inverse(tranform));
+		if (shader)
+			s_Data.activeShader = shader;
+		else
+			s_Data.activeShader = s_Data.defaultShader;
 	}
 
-	void Renderer2D::BeginScene(Ref<Shader> shader, const glm::mat4& viewProjectionMatrix)
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& tranform)
 	{
-		shader->Bind();
-		shader->SetUniformMat4("u_ViewProjMat", viewProjectionMatrix);
+		s_Data.activeShader->Bind();
+		s_Data.activeShader->SetUniformMat4("u_ViewProjMat", camera.GetProjection() * glm::inverse(tranform));
+	}
+
+	void Renderer2D::BeginScene(const glm::mat4& viewProjectionMatrix)
+	{
+		s_Data.activeShader->Bind();
+		s_Data.activeShader->SetUniformMat4("u_ViewProjMat", viewProjectionMatrix);
 	}
 
 	void Renderer2D::Flush()

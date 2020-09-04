@@ -28,6 +28,7 @@ void ExampleLayer::OnAttach()
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 	};
 	shader2D->SetUniformInt1v("u_Textures", texIDs, 32);
+	Saba::Renderer2D::SetShader(shader2D);
 
 
 	Saba::ShaderManager::Add("particle", "assets/shaders/particle.glsl");
@@ -126,9 +127,12 @@ void ExampleLayer::OnAttach()
 	};
 
 	m_Camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
+
+	m_Scene.OnStart();
 }
 void ExampleLayer::OnDetach()
 {
+	m_Scene.OnEnd();
 }
 void ExampleLayer::OnEvent(Saba::Event& event)
 {
@@ -143,7 +147,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	m_FBO->Bind();
 	Saba::RenderCommand::Clear();
 
-	m_Scene.OnUpdate(ts, Saba::ShaderManager::Get("2D"));
+	m_Scene.OnUpdate(ts);
 
 	Saba::Renderer2D::Flush();
 
@@ -173,7 +177,7 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	Saba::RenderCommand::Clear();
 
 	static constexpr glm::mat4 identity(1.0f);
-	Saba::Renderer2D::BeginScene(Saba::ShaderManager::Get("2D"), identity);
+	Saba::Renderer2D::BeginScene(identity);
 	Saba::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 2.0f, 2.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, Saba::Texture2D::Create(m_FBO->GetAttachmentID(0)));
 	Saba::Renderer2D::Flush();
 }
