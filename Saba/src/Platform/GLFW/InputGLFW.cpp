@@ -18,7 +18,7 @@ namespace Saba {
 		return (state == GLFW_PRESS);
 	}
 
-	std::pair<float, float> Input::GetMousePos()
+	glm::vec2 Input::GetMousePos()
 	{
 		double x, y;
 		glfwGetCursorPos(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), &x, &y);
@@ -26,12 +26,10 @@ namespace Saba {
 	}
 	float Input::GetMouseXPos()
 	{
-		auto [x, y] = GetMousePos();
-		return x;
+		return GetMousePos().x;
 	}
 	float Input::GetMouseYPos()
 	{
-		auto [x, y] = GetMousePos();
-		return y;
+		return GetMousePos().y;
 	}
 }

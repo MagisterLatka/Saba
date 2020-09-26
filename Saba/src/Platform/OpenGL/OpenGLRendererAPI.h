@@ -15,6 +15,7 @@ namespace Saba {
 
 		virtual void EnableDepthTest(bool enable) override;
 
+		virtual void DrawVertices(const Ref<VertexArray>& vertexArray, uint32_t verticesCount) override;
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indicesCount) override;
 	};
 

@@ -21,6 +21,9 @@ namespace Saba {
 	struct TransformComponent
 	{
 		glm::mat4 Transform = glm::mat4(1.0f);
+		glm::vec3 Pos = glm::vec3(0.0f);
+		glm::vec3 Scale = glm::vec3(1.0f);
+		glm::vec3 EulerAngles = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
@@ -56,13 +59,17 @@ namespace Saba {
 		bool Primary = true;
 		bool FixedAspectRatio = false;
 
-		CameraComponent() = default;
+		CameraComponent() = delete;
 		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(SceneCamera camera)
+			: Camera(camera) {}
+		CameraComponent(SceneCamera::Type type)
+			: Camera(type) {}
 	};
 
 	struct NativeScriptComponent
 	{
-		ScriptableEntity* Instance;
+		ScriptableEntity* Instance = nullptr;
 
 		ScriptableEntity*(*CreateScript)() = nullptr;
 		void(*DestroyScript)(NativeScriptComponent*) = nullptr;

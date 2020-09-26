@@ -22,8 +22,10 @@ namespace Saba {
 			if (attachment != 0)
 				glDeleteTextures(1, &attachment);
 		}
-		if (m_DepthAttachment != 0)
+		if (m_Spec.Attachments & FramebufferAttachments::DepthAttachment)
 			glDeleteTextures(1, &m_DepthAttachment);
+		else
+			glDeleteRenderbuffers(1, &m_DepthAttachment);
 	}
 
 	void OpenGLFramebuffer::Bind() const
@@ -60,8 +62,10 @@ namespace Saba {
 				if (attachment != 0)
 					glDeleteTextures(1, &attachment);
 			}
-			if (m_DepthAttachment != 0)
+			if (m_Spec.Attachments & FramebufferAttachments::DepthAttachment)
 				glDeleteTextures(1, &m_DepthAttachment);
+			else
+				glDeleteRenderbuffers(1, &m_DepthAttachment);
 		}
 
 		glCreateFramebuffers(1, &m_ID);
@@ -96,6 +100,19 @@ namespace Saba {
 				glTextureStorage2DMultisample(m_DepthAttachment, m_Spec.Samples, GL_DEPTH_COMPONENT16, m_Spec.Width, m_Spec.Height, GL_TRUE);
 			}
 			glNamedFramebufferTexture(m_ID, GL_DEPTH_ATTACHMENT, m_DepthAttachment, 0);
+		}
+		else
+		{
+			glCreateRenderbuffers(1, &m_DepthAttachment);
+			if (m_Spec.Samples == 1)
+			{
+				glNamedRenderbufferStorage(m_DepthAttachment, GL_DEPTH_COMPONENT16, m_Spec.Width, m_Spec.Height);
+			}
+			else
+			{
+				glNamedRenderbufferStorageMultisample(m_DepthAttachment, m_Spec.Samples, GL_DEPTH_COMPONENT16, m_Spec.Width, m_Spec.Height);
+			}
+			glNamedFramebufferRenderbuffer(m_ID, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthAttachment);
 		}
 
 		SB_CORE_ASSERT(glCheckNamedFramebufferStatus(m_ID, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");

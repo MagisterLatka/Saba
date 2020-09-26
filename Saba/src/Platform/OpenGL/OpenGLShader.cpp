@@ -199,7 +199,7 @@ namespace Saba {
 				char* message = (char*)malloc(lenght);
 				glGetShaderInfoLog(shader, lenght, &lenght, message);
 				glDeleteShader(shader);
-				SB_CORE_FATAL("Failed to compile {0} shader (ID: {1})", type, m_ID);
+				SB_CORE_FATAL("Failed to compile {0} shader (ID: {1})", type == GL_VERTEX_SHADER ? "vertex" : type == GL_GEOMETRY_SHADER ? "geometry" : type == GL_FRAGMENT_SHADER ? "fragment" : "", m_ID);
 				SB_CORE_ASSERT(false, "{0}", message);
 				free(message);
 			}

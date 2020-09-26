@@ -19,6 +19,8 @@ namespace Saba {
 
 		void BlockEvent(bool block) { m_BlockEvents = block; }
 		bool IsBlockingEvents() const { return m_BlockEvents; }
+
+		void EnableMouseEvents(bool enable = true);
 	private:
 		bool m_BlockEvents = true;
 	};

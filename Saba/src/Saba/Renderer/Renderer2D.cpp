@@ -141,6 +141,7 @@ namespace Saba {
 	{
 		delete[] s_Data.buffer;
 		s_Data.vertexArray.reset();
+		s_Data.defaultShader.reset();
 	}
 
 	void Renderer2D::SetShader(Ref<Shader> shader)

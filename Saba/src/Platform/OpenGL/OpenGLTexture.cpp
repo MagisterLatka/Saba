@@ -74,26 +74,35 @@ namespace Saba {
 				case Format::R16F:
 				case Format::R32F:
 					SB_CORE_ASSERT(channels == 1, "Format does not match texture format!");
+					m_InternalFormat = InternalFormatInOpenGL(texData.TexFormat);
+					m_Format = FormatInOpenGL(texData.TexFormat);
+					break;
 				case Format::RG8:
 				case Format::RG16:
 				case Format::RG16F:
 				case Format::RG32F:
 					SB_CORE_ASSERT(channels == 2, "Format does not match texture format!");
+					m_InternalFormat = InternalFormatInOpenGL(texData.TexFormat);
+					m_Format = FormatInOpenGL(texData.TexFormat);
+					break;
 				case Format::RGB8:
 				case Format::RGB16:
 				case Format::RGB16F:
 				case Format::RGB32F:
 				case Format::SRGB:
 					SB_CORE_ASSERT(channels == 3, "Format does not match texture format!");
+					m_InternalFormat = InternalFormatInOpenGL(texData.TexFormat);
+					m_Format = FormatInOpenGL(texData.TexFormat);
+					break;
 				case Format::RGBA8:
 				case Format::RGBA16:
 				case Format::RGBA16F:
 				case Format::RGBA32F:
 				case Format::SRGB_ALPHA:
 					SB_CORE_ASSERT(channels == 4, "Format does not match texture format!");
-					
 					m_InternalFormat = InternalFormatInOpenGL(texData.TexFormat);
 					m_Format = FormatInOpenGL(texData.TexFormat);
+					break;
 			}
 		}
 
@@ -250,8 +259,8 @@ namespace Saba {
 			case Format::RGB16:
 			case Format::RGB16F:
 			case Format::RGB32F:
-				return GL_RGB;
 			case Format::SRGB:
+				return GL_RGB;
 			case Format::RGBA8:
 			case Format::RGBA16:
 			case Format::RGBA16F:

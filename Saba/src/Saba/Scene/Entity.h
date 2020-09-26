@@ -37,6 +37,7 @@ namespace Saba {
 		operator uint32_t() const { return (uint32_t)m_ID; }
 
 		bool operator==(const Entity& other) const { return m_ID == other.m_ID && m_Scene == other.m_Scene; }
+		bool operator!=(const Entity& other) const { return !(*this == other); }
 	private:
 		entt::entity m_ID = entt::null;
 		Scene* m_Scene = nullptr;

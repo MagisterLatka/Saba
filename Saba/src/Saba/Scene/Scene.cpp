@@ -6,6 +6,9 @@
 
 #include "Saba/Renderer/Renderer2D.h"
 
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 namespace Saba {
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -47,41 +50,56 @@ namespace Saba {
 
 	void Scene::OnUpdate(Timestep ts)
 	{
+		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& component)
 		{
-			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& component)
-			{
-				component.Instance->OnUpdate(ts);
-			});
-		}
+			component.Instance->OnUpdate(ts);
+		});
+		m_Registry.view<TransformComponent>().each([](auto entity, auto& component)
+		{
+			component.Transform = glm::translate(glm::mat4(1.0f), component.Pos) * glm::scale(glm::toMat4(glm::quat(component.EulerAngles)), component.Scale);
+			component.EulerAngles.x = glm::clamp(component.EulerAngles.x, -glm::half_pi<float>(), glm::half_pi<float>());
+			component.EulerAngles.y = glm::mod(component.EulerAngles.y + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+			component.EulerAngles.z = glm::mod(component.EulerAngles.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+		});
 
-		Camera* renderCamera = nullptr;
-		glm::mat4* cameraTransform = nullptr;
+		Camera* renderCamera2D = nullptr;
+		Camera* renderCamera3D = nullptr;
+		glm::mat4* cameraTransform2D = nullptr;
+		glm::mat4* cameraTransform3D = nullptr;
 		{		
-			auto group = m_Registry.group<CameraComponent>(entt::get<TransformComponent>);
-			for (auto entity : group)
+			auto cameras = m_Registry.group<CameraComponent>(entt::get<TransformComponent>);
+			for (auto entity : cameras)
 			{
-				auto [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+				auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
 				if (camera.Primary)
 				{
-					renderCamera = &camera.Camera;
-					cameraTransform = &group.get<TransformComponent>(entity).Transform;
+					if (camera.Camera.GetType() == SceneCamera::Type::Orthographic)
+					{
+						renderCamera2D = &camera.Camera;
+						cameraTransform2D = &cameras.get<TransformComponent>(entity).Transform;
+					}
+					else
+					{
+						renderCamera3D = &camera.Camera;
+						cameraTransform3D = &cameras.get<TransformComponent>(entity).Transform;
+					}
 				}
 			}
 		}
 
-		if (renderCamera)
+		if (renderCamera2D)
 		{
-			Renderer2D::BeginScene(*renderCamera, *cameraTransform);
-
-			auto group = m_Registry.group<TransformComponent, SpriteComponent>();
-			for (auto entity : group)
+			Renderer2D::BeginScene(*renderCamera2D, *cameraTransform2D);
+			auto sprites = m_Registry.group<SpriteComponent>(entt::get<TransformComponent>);
+			for (auto entity : sprites)
 			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+				auto [transform, sprite] = sprites.get<TransformComponent, SpriteComponent>(entity);
 				if (sprite.UseTransform)
 					Renderer2D::DrawQuad(transform, sprite.Color, sprite.Texture, sprite.TillingFactor);
 				else
 					Renderer2D::DrawQuad(sprite.Pos, sprite.Size, sprite.Color, sprite.Texture, sprite.TillingFactor);
 			}
+			Renderer2D::Flush();
 		}
 	}
 

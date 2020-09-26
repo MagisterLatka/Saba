@@ -5,16 +5,11 @@
 
 namespace Saba {
 
-	SceneCamera::SceneCamera()
+	SceneCamera::SceneCamera(Type type)
+		: m_Type(type)
 	{
-		Recalculate();
-	}
-
-	void SceneCamera::SetOrthographic(float size, float nearClip, float farClip)
-	{
-		m_OrthographicSize = size;
-		m_NearClip = nearClip;
-		m_FarClip = farClip;
+		if (type == Type::Orthographic) m_Fov = 10.0f;
+		else if (type == Type::Perspective) m_Fov = glm::quarter_pi<float>();
 		Recalculate();
 	}
 
@@ -24,8 +19,30 @@ namespace Saba {
 		Recalculate();
 	}
 
+	void SceneCamera::SetOrthographic(float size, float nearClip, float farClip)
+	{
+		SB_CORE_ASSERT(m_Type == Type::Orthographic, "Camera is not orthographic");
+		m_Fov = size;
+		m_NearClip = nearClip;
+		m_FarClip = farClip;
+		Recalculate();
+	}
+
+	void SceneCamera::SetPerspective(float fov, float nearClip, float farClip)
+	{
+		SB_CORE_ASSERT(m_Type == Type::Perspective, "Camera is not perspective");
+		m_Fov = fov;
+		m_NearClip = nearClip;
+		m_FarClip = farClip;
+		Recalculate();
+	}
+
+
 	void SceneCamera::Recalculate()
 	{
-		m_ProjectionMat = glm::ortho(-m_OrthographicSize * m_AspectRatio * 0.5f, m_OrthographicSize * m_AspectRatio * 0.5f, -m_OrthographicSize * 0.5f, m_OrthographicSize * 0.5f, m_NearClip, m_FarClip);
+		if (m_Type == Type::Orthographic)
+			m_ProjectionMat = glm::ortho(-m_Fov * m_AspectRatio * 0.5f, m_Fov * m_AspectRatio * 0.5f, -m_Fov * 0.5f, m_Fov * 0.5f, m_NearClip, m_FarClip);
+		else
+			m_ProjectionMat = glm::perspective(m_Fov, m_AspectRatio, m_NearClip, m_FarClip);
 	}
 }

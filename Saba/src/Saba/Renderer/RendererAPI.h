@@ -23,6 +23,7 @@ namespace Saba {
 
 		virtual void EnableDepthTest(bool enable) = 0;
 
+		virtual void DrawVertices(const Ref<VertexArray>& vertexArray, uint32_t verticesCount) = 0;
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indicesCount) = 0;
 
 		static API GetAPI() { return s_API; }

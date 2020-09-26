@@ -83,6 +83,11 @@ namespace Saba {
 		glDepthMask(enable ? GL_TRUE : GL_FALSE);
 	}
 
+	void OpenGLRendererAPI::DrawVertices(const Ref<VertexArray>& vertexArray, uint32_t verticesCount)
+	{
+		vertexArray->Bind();
+		glDrawArrays(GL_TRIANGLES, 0, verticesCount);
+	}
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indicesCount)
 	{
 		vertexArray->Bind();

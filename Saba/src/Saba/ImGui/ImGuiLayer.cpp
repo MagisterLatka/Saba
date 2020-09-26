@@ -46,9 +46,9 @@ namespace Saba {
 
 	void ImGuiLayer::OnEvent(Event& e)
 	{
-		if (m_BlockEvents)
+		ImGuiIO& io = ImGui::GetIO();
+		if (m_BlockEvents && !(io.ConfigFlags & ImGuiConfigFlags_NoMouse))
 		{
-			ImGuiIO& io = ImGui::GetIO();
 			e.p_Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
 			e.p_Handled |= e.IsInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
 		}
@@ -76,6 +76,15 @@ namespace Saba {
 			if (backup_current_context != glfwGetCurrentContext())
 				glfwMakeContextCurrent(backup_current_context);
 		}
+	}
+
+	void ImGuiLayer::EnableMouseEvents(bool enable)
+	{
+		static constexpr int all = 0xffffffff;
+		if (enable)
+			ImGui::GetIO().ConfigFlags &= all - ImGuiConfigFlags_NoMouse;
+		else
+			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 	}
 
 }

@@ -2,35 +2,30 @@
 
 namespace Saba {
 
-	class CameraController : public ScriptableEntity
+	class OrthographicCameraController : public ScriptableEntity
 	{
 	public:
 		virtual void OnEvent(Event& event) override
 		{
 			Dispatcher dispatcher(event);
-			dispatcher.Dispatch<MouseScrolledEvent>(SB_BIND_EVENT_FUNC(CameraController::OnScrollEvent));
+			dispatcher.Dispatch<MouseScrolledEvent>(SB_BIND_EVENT_FUNC(OrthographicCameraController::OnScrollEvent));
 		}
 		virtual void OnUpdate(Timestep ts) override
 		{
 			if (GetScene()->IsViewportFocused())
 			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
+				auto& tc = GetComponent<TransformComponent>();
 
 				if (p_RotationEnabled)
 				{
-					float rotation = 0.0f;
+					float& rotation = tc.EulerAngles.z;
 					if (Input::IsKeyPressed(KeyCode::Q))
 						rotation += m_CameraRotationSpeed * (float)ts;
 					if (Input::IsKeyPressed(KeyCode::E))
 						rotation -= m_CameraRotationSpeed * (float)ts;
-
-					if (rotation != 0.0f)
-					{
-						transform = glm::rotate(transform, glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
-					}
 				}
 
-				glm::vec2 translate(0.0f);
+				glm::vec3& translate = tc.Pos;
 				if (Input::IsKeyPressed(KeyCode::W))
 					translate.y += m_CameraMovementSpeed * (float)ts;
 				if (Input::IsKeyPressed(KeyCode::S))
@@ -39,28 +34,24 @@ namespace Saba {
 					translate.x -= m_CameraMovementSpeed * (float)ts;
 				if (Input::IsKeyPressed(KeyCode::D))
 					translate.x += m_CameraMovementSpeed * (float)ts;
-				if (translate != glm::vec2(0.0f))
-				{
-					transform = glm::translate(transform, glm::vec3(translate, 0.0f));
-				}
 			}
 		}
 	private:
 		bool OnScrollEvent(MouseScrolledEvent& event)
 		{
-			m_Zoom -= event.GetYOffset() * 0.5f;
-			m_Zoom = glm::max(m_Zoom, 0.5f);
-			GetComponent<CameraComponent>().Camera.SetOrthographicSize(m_Zoom);
-			m_CameraMovementSpeed = m_Zoom * 0.5f;
+			auto& camera = GetComponent<CameraComponent>().Camera;
+			float zoom = camera.GetOrthographicSize();
+			zoom -= event.GetYOffset() * 0.5f;
+			zoom = glm::max(zoom, 0.5f);
+			GetComponent<CameraComponent>().Camera.SetOrthographicSize(zoom);
+			m_CameraMovementSpeed = zoom * 0.5f;
 			return false;
 		}
 	public:
 		bool p_RotationEnabled = true;
 	private:
-		float m_Zoom = 10.0f;
-
-		float m_CameraMovementSpeed = 5.0f;
-		float m_CameraRotationSpeed = 90.0f;
+		float m_CameraMovementSpeed = 10.0f;
+		float m_CameraRotationSpeed = glm::half_pi<float>();
 	};
 
 	class ParticleSystemController : public ScriptableEntity
@@ -87,16 +78,16 @@ namespace Saba {
 			{
 				if (Input::IsMouseButtonPressed(MouseCode::Button0) && GetScene()->IsViewportHovered())
 				{
-					auto [x, y] = Input::GetMousePos();
+					glm::vec2 pos = Input::GetMousePos();
 					auto& camera = p_Camera.GetComponent<CameraComponent>().Camera;
 					auto viewportPos = GetScene()->GetViewportPos();
 					auto viewportSize = GetScene()->GetViewportSize();
 
 					glm::vec2 bounds = { camera.GetWidth(), camera.GetHeight() };
-					x = (x - viewportPos.x) / viewportSize.x * bounds.x - bounds.x * 0.5f;
-					y = bounds.y * 0.5f - (y - viewportPos.y) / viewportSize.y * bounds.y;
+					pos.x = (pos.x - viewportPos.x) / viewportSize.x * bounds.x - bounds.x * 0.5f;
+					pos.y = bounds.y * 0.5f - (pos.y - viewportPos.y) / viewportSize.y * bounds.y;
 
-					p_Particle.Position = { x, y, 0.1f };
+					p_Particle.Position = { pos.x, pos.y, 0.1f };
 					p_Particle.Position = p_Camera.GetComponent<TransformComponent>().Transform * glm::vec4(p_Particle.Position, 1.0f);
 					for (int i = 0; i < 1000 * ts; i++)
 						p_ParticleSystem->Emit(p_Particle);

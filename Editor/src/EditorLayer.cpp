@@ -52,8 +52,8 @@ namespace Saba {
 		m_ColoredQuad.AddComponent<SpriteComponent>(glm::vec3(3.0f, 0.0f, 0.3f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 		m_Camera = m_Scene->CreateEntity("Camera");
-		m_Camera.AddComponent<CameraComponent>().Camera.SetOrthographicSize(10.0f);
-		m_Camera.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		m_Camera.AddComponent<CameraComponent>(SceneCamera::Type::Orthographic).Camera.SetOrthographicSize(10.0f);
+		m_Camera.AddComponent<NativeScriptComponent>().Bind<OrthographicCameraController>();
 
 		m_ParticleSystemController = m_Scene->CreateEntity("Particle system controller");
 		m_ParticleSystemController.AddComponent<NativeScriptComponent>().Bind<ParticleSystemController>();
