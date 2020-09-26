@@ -24,7 +24,7 @@ private:
 	Saba::Entity m_Camera;
 
 #if SB_DEBUG
-	static constexpr float m_QuadFrequency = 0.25f;
+	static constexpr float m_QuadFrequency = 0.5f;
 #else
 	static constexpr float m_QuadFrequency = 0.1f;
 #endif

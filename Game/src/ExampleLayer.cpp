@@ -64,7 +64,7 @@ void ExampleLayer::OnAttach()
 	}
 
 	m_Camera = m_Scene.CreateEntity("Camera");
-	auto& camera = m_Camera.AddComponent<Saba::CameraComponent>().Camera;
+	auto& camera = m_Camera.AddComponent<Saba::CameraComponent>(Saba::SceneCamera::Type::Orthographic).Camera;
 	camera.SetOrthographicSize(10.0f);
 	camera.SetViewportSize(Saba::Application::Get().GetWindow().GetWidth(), Saba::Application::Get().GetWindow().GetHeight());
 
@@ -78,23 +78,18 @@ void ExampleLayer::OnAttach()
 		}
 		virtual void OnUpdate(Saba::Timestep ts) override
 		{
-			auto& transform = GetComponent<Saba::TransformComponent>().Transform;
+			auto& tc = GetComponent<Saba::TransformComponent>();
 
 			if (p_RotationEnabled)
 			{
-				float rotation = 0.0f;
+				float& rotation = tc.EulerAngles.z;
 				if (Saba::Input::IsKeyPressed(Saba::KeyCode::Q))
 					rotation += m_CameraRotationSpeed * (float)ts;
 				if (Saba::Input::IsKeyPressed(Saba::KeyCode::E))
 					rotation -= m_CameraRotationSpeed * (float)ts;
-
-				if (rotation != 0.0f)
-				{
-					transform = glm::rotate(transform, glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
-				}
 			}
 
-			glm::vec2 translate(0.0f);
+			glm::vec3& translate = tc.Pos;
 			if (Saba::Input::IsKeyPressed(Saba::KeyCode::W))
 				translate.y += m_CameraMovementSpeed * (float)ts;
 			if (Saba::Input::IsKeyPressed(Saba::KeyCode::S))
@@ -103,27 +98,23 @@ void ExampleLayer::OnAttach()
 				translate.x -= m_CameraMovementSpeed * (float)ts;
 			if (Saba::Input::IsKeyPressed(Saba::KeyCode::D))
 				translate.x += m_CameraMovementSpeed * (float)ts;
-			if (translate != glm::vec2(0.0f))
-			{
-				transform = glm::translate(transform, glm::vec3(translate, 0.0f));
-			}
 		}
 	private:
 		bool OnScrollEvent(Saba::MouseScrolledEvent& event)
 		{
-			m_Zoom -= event.GetYOffset() * 0.5f;
-			m_Zoom = glm::max(m_Zoom, 0.5f);
-			GetComponent<Saba::CameraComponent>().Camera.SetOrthographicSize(m_Zoom);
-			m_CameraMovementSpeed = m_Zoom * 3.0f;
+			auto& camera = GetComponent<Saba::CameraComponent>().Camera;
+			float zoom = camera.GetOrthographicSize();
+			zoom -= event.GetYOffset() * 0.5f;
+			zoom = glm::max(zoom, 0.5f);
+			GetComponent<Saba::CameraComponent>().Camera.SetOrthographicSize(zoom);
+			m_CameraMovementSpeed = zoom * 0.5f;
 			return false;
 		}
 	public:
 		bool p_RotationEnabled = true;
 	private:
-		float m_Zoom = 10.0f;
-
-		float m_CameraMovementSpeed = 3.0f;
-		float m_CameraRotationSpeed = 90.0f;
+		float m_CameraMovementSpeed = 5.0f;
+		float m_CameraRotationSpeed = glm::half_pi<float>();
 	};
 
 	m_Camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
@@ -155,15 +146,15 @@ void ExampleLayer::OnUpdate(Saba::Timestep ts)
 	{
 		if (Saba::Input::IsMouseButtonPressed(SB_MOUSE_BUTTON_LEFT))
 		{
-			auto [x, y] = Saba::Input::GetMousePos();
+			glm::vec2 pos = Saba::Input::GetMousePos();
 			auto width = Saba::Application::Get().GetWindow().GetWidth();
 			auto height = Saba::Application::Get().GetWindow().GetHeight();
 
 			glm::vec2 bounds = { m_Camera.GetComponent<Saba::CameraComponent>().Camera.GetWidth(), m_Camera.GetComponent<Saba::CameraComponent>().Camera.GetHeight() };
-			x = x / width * bounds.x - bounds.x * 0.5f;
-			y = bounds.y * 0.5f - y / height * bounds.y;
+			pos.x = pos.x / width * bounds.x - bounds.x * 0.5f;
+			pos.y = bounds.y * 0.5f - pos.y / height * bounds.y;
 
-			m_Particle.Position = { x, y, 0.1f };
+			m_Particle.Position = { pos.x, pos.y, 0.1f };
 			m_Particle.Position = m_Camera.GetComponent<Saba::TransformComponent>().Transform * glm::vec4(m_Particle.Position, 1.0f);
 			for (int i = 0; i < 1000 * ts; i++)
 				m_ParticleSystem.Emit(m_Particle);
