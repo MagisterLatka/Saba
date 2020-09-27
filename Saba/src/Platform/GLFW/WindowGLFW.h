@@ -26,6 +26,9 @@ namespace Saba {
 		virtual void SetVSync(bool isVSync) override;
 		virtual bool IsVSync() const override;
 
+		virtual void EnableCursor(bool enable = true) override;
+		virtual bool IsCursorEnabled() const override;
+
 		virtual void* GetNativeWindow() const override { return m_Window; }
 	private:
 		void Init(const WindowProps& props);

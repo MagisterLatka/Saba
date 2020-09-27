@@ -16,6 +16,8 @@ namespace Saba {
 		virtual void OnUpdate(Saba::Timestep ts) override;
 		virtual void OnImGuiRender() override;
 	private:
+		bool OnKeyPress(KeyPressedEvent& e);
+	private:
 		Ref<Framebuffer> m_FBO;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportPos = { 0.0f, 0.0f };

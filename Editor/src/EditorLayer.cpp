@@ -7,6 +7,22 @@
 
 #include "Scripts.h"
 
+namespace ImGui {
+
+	static void HelpMarker(const char* desc) //From imgui_demo.cpp
+	{
+		ImGui::TextDisabled("(?)");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+}
+
 namespace Saba {
 
 	EditorLayer::EditorLayer()
@@ -35,17 +51,6 @@ namespace Saba {
 
 
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-
-
-		m_Scene = MakeRef<Scene>();
-
-		m_Scene->CreateEntity("Colored Quad").AddComponent<SpriteComponent>(glm::vec3(3.0f, 0.0f, 0.3f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-
-		m_Camera = m_Scene->CreateEntity("Camera");
-		m_Camera.AddComponent<CameraComponent>(SceneCamera::Type::Orthographic).Camera.SetOrthographicSize(10.0f);
-		m_Camera.AddComponent<NativeScriptComponent>().Bind<OrthographicCameraController>();
-
-		m_HierarchyPanel.SetScene(m_Scene);
 
 
 		float vertices[] = {
@@ -90,6 +95,14 @@ namespace Saba {
 		m_Mesh = MakeRef<Mesh>(vertices, 24, Mesh::MeshType(Mesh::MeshType::Position | Mesh::MeshType::Color), indices, 36);
 
 
+		m_Scene = MakeRef<Scene>();
+
+		m_Camera = m_Scene->CreateEntity("Camera");
+		m_Camera.AddComponent<CameraComponent>(SceneCamera::Type::Perspective).Camera.SetPerspective(glm::half_pi<float>(), 0.1f, 10.0f);
+		m_Camera.AddComponent<NativeScriptComponent>().Bind<PerspectiveCameraController>();
+
+		m_HierarchyPanel.SetScene(m_Scene);
+
 		m_Scene->OnStart();
 	}
 	void EditorLayer::OnDetach()
@@ -98,7 +111,28 @@ namespace Saba {
 	}
 	void EditorLayer::OnEvent(Event& event)
 	{
+		Dispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(SB_BIND_EVENT_FUNC(EditorLayer::OnKeyPress));
 		m_Scene->OnEvent(event);
+	}
+	bool EditorLayer::OnKeyPress(KeyPressedEvent& e)
+	{
+		if (e.GetKeyCode() == Key::I)
+		{
+			if (m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations)
+			{
+				m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations = false;
+				Application::Get().GetWindow().EnableCursor();
+				Application::Get().GetImGuiLayer()->EnableMouseEvents();
+			}
+			else
+			{
+				m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations = true;
+				Application::Get().GetWindow().EnableCursor(false);
+				Application::Get().GetImGuiLayer()->EnableMouseEvents(false);
+			}
+		}
+		return false;
 	}
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
@@ -109,6 +143,7 @@ namespace Saba {
 		}
 
 		Renderer2D::ResetStats();
+		Renderer3D::ResetStats();
 
 		m_FBO->Bind();
 		RenderCommand::Clear();
@@ -181,6 +216,19 @@ namespace Saba {
 				ImGui::Text("Renderer2D stats:");
 				ImGui::Text("\tQuads: %d", Renderer2D::GetStats().quadCount);
 				ImGui::Text("\tDraw calls: %d", Renderer2D::GetStats().drawCalls);
+
+				ImGui::Separator();
+
+				ImGui::Text("Renderer3D stats:");
+				ImGui::Text("\tVertices: %d", Renderer3D::GetStats().verticesCount);
+				ImGui::Text("\tIndices: %d", Renderer3D::GetStats().indicesCount);
+				ImGui::Text("\tDraw calls: %d", Renderer3D::GetStats().drawCalls);
+
+				ImGui::Separator();
+
+				bool enable = m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations;
+				ImGui::Checkbox("Camera rotations enabled", &enable);
+				ImGui::SameLine(); ImGui::HelpMarker("Press I key to enable camera rotations");
 
 			ImGui::End();
 

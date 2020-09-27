@@ -69,25 +69,36 @@ namespace Saba {
 				ImGui::DragFloat3("###0", glm::value_ptr(tc.Pos), 0.1f);
 				ImGui::PopItemWidth();
 
-				if (entity.HasComponent<CameraComponent>() && entity.HasComponent<NativeScriptComponent>())
+				if (entity.HasComponent<CameraComponent>())
 				{
-					auto ea = tc.EulerAngles;
-					ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+					if (entity.HasComponent<NativeScriptComponent>())
+					{
+						auto ea = tc.EulerAngles;
+						ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+						ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
+						ImGui::DragFloat3("###1", glm::value_ptr(ea), 0.0f);
+						ImGui::PopItemWidth();
+					}
+					else
+					{
+						ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+						ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
+						ImGui::DragFloat3("###1", glm::value_ptr(tc.EulerAngles), 0.01f);
+						ImGui::PopItemWidth();
+					}
+					auto scale = tc.Scale;
+					ImGui::TextUnformatted("Scale            "); ImGui::SameLine();
 					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat3("###1", glm::value_ptr(ea), 0.0f);
+					ImGui::DragFloat3("###2", glm::value_ptr(scale), 0.0f);
 					ImGui::PopItemWidth();
 				}
 				else
 				{
-					ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+					ImGui::TextUnformatted("Scale            "); ImGui::SameLine();
 					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat3("###1", glm::value_ptr(tc.EulerAngles), 0.01f);
+					ImGui::DragFloat3("###2", glm::value_ptr(tc.Scale), 0.1f, 0.01f, 10.0f);
 					ImGui::PopItemWidth();
 				}
-				ImGui::TextUnformatted("Scale            "); ImGui::SameLine();
-				ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-				ImGui::DragFloat3("###2", glm::value_ptr(tc.Scale), 0.1f, 0.01f, 10.0f);
-				ImGui::PopItemWidth();
 
 				ImGui::TreePop();
 			}

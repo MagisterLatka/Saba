@@ -40,6 +40,14 @@ namespace Saba {
 	{
 		return m_Data.vSync;
 	}
+	void WindowGLFW::EnableCursor(bool enable)
+	{
+		glfwSetInputMode(m_Window, GLFW_CURSOR, enable ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	}
+	bool WindowGLFW::IsCursorEnabled() const
+	{
+		return glfwGetInputMode(m_Window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
+	}
 	void WindowGLFW::SetEventCallback(const EventCallbackFN& func)
 	{
 		m_Data.eventCallback = func;

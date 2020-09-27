@@ -25,7 +25,7 @@ namespace Saba {
 		float GetHeight() const { return m_Fov; }
 
 		void SetPerspective(float fov, float nearClip, float farClip);
-		void SetFov(float fov) { SB_CORE_ASSERT(m_Type == Type::Perspective, "Camera is not perspective"); m_Fov = fov; }
+		void SetFov(float fov) { SB_CORE_ASSERT(m_Type == Type::Perspective, "Camera is not perspective"); m_Fov = fov; Recalculate(); }
 		float GetFov() const { SB_CORE_ASSERT(m_Type == Type::Perspective, "Camera is not perspective"); return m_Fov; }
 
 		float GetNearClip() const { return m_NearClip; }
