@@ -53,6 +53,8 @@ namespace Saba {
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 
 
+		m_Scene = MakeRef<Scene>();
+
 		float vertices[] = {
 			 1.0f, -1.0f,  1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
 			 1.0f, -1.0f, -1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
@@ -92,10 +94,7 @@ namespace Saba {
 			16, 17, 18, 18, 19, 16,
 			20, 21, 22, 22, 23, 20,
 		};
-		m_Mesh = MakeRef<Mesh>(vertices, 24, Mesh::MeshType(Mesh::MeshType::Position | Mesh::MeshType::Color), indices, 36);
-
-
-		m_Scene = MakeRef<Scene>();
+		m_Scene->CreateEntity("Model").AddComponent<ModelComponent>(MakeRef<Mesh>(vertices, 24, Mesh::MeshType(Mesh::MeshType::Position | Mesh::MeshType::Color), indices, 36));
 
 		m_Camera = m_Scene->CreateEntity("Camera");
 		m_Camera.AddComponent<CameraComponent>(SceneCamera::Type::Perspective).Camera.SetPerspective(glm::half_pi<float>(), 0.1f, 10.0f);
@@ -149,9 +148,6 @@ namespace Saba {
 		RenderCommand::Clear();
 
 		m_Scene->OnUpdate(ts);
-
-		Renderer3D::BeginScene(m_Camera.GetComponent<CameraComponent>().Camera, m_Camera.GetComponent<TransformComponent>());
-		Renderer3D::DrawMesh(m_Mesh);
 
 		m_FBO->Unbind();
 	}

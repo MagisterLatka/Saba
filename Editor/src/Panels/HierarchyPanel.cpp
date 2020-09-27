@@ -94,6 +94,10 @@ namespace Saba {
 				}
 				else
 				{
+					ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
+					ImGui::DragFloat3("###1", glm::value_ptr(tc.EulerAngles), 0.01f);
+					ImGui::PopItemWidth();
 					ImGui::TextUnformatted("Scale            "); ImGui::SameLine();
 					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
 					ImGui::DragFloat3("###2", glm::value_ptr(tc.Scale), 0.1f, 0.01f, 10.0f);

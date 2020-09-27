@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Saba/Renderer/Texture.h"
+#include "Saba/Renderer/Model.h"
 #include "Saba/Scene/SceneCamera.h"
 #include "Saba/Scene/ScriptableEntity.h"
 
@@ -51,6 +52,23 @@ namespace Saba {
 			: UseTransform(false), Pos(pos), Size(size), Color(color), Texture(texture), TillingFactor(tillingFactor) {}
 		SpriteComponent(glm::vec4 color, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f)
 			: UseTransform(true), Color(color), Texture(texture), TillingFactor(tillingFactor) {}
+	};
+
+	struct ModelComponent
+	{
+		Ref<Model> Model;
+
+		ModelComponent() = default;
+		ModelComponent(const ModelComponent&) = default;
+		ModelComponent(Ref<Saba::Model> model)
+			: Model(model) {}
+		ModelComponent(const std::vector<Ref<Mesh>>& meshes)
+			: Model(MakeRef<Saba::Model>(meshes)) {}
+		ModelComponent(const Ref<Mesh>& mesh)
+			: Model(MakeRef<Saba::Model>(mesh))
+		{}
+
+		operator Ref<Saba::Model>() { return Model; }
 	};
 
 	struct CameraComponent

@@ -27,7 +27,6 @@ namespace Saba {
 
 		Ref<Scene> m_Scene;
 		Entity m_Camera;
-		Ref<Mesh> m_Mesh;
 
 		SceneHierarchyPanel m_HierarchyPanel;
 #if SB_DEBUG

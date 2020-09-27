@@ -5,6 +5,7 @@
 #include "Saba/Scene/ScriptableEntity.h"
 
 #include "Saba/Renderer/Renderer2D.h"
+#include "Saba/Renderer/Renderer3D.h"
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -87,6 +88,17 @@ namespace Saba {
 			}
 		}
 
+		if (renderCamera3D)
+		{
+			Renderer3D::BeginScene(*renderCamera3D, *cameraTransform3D);
+			auto models = m_Registry.group<ModelComponent>(entt::get<TransformComponent>);
+			for (auto entity : models)
+			{
+				auto [model, transform] = models.get<ModelComponent, TransformComponent>(entity);
+				for (auto& mesh : *model.Model)
+					Renderer3D::DrawMesh(mesh, transform);
+			}
+		}
 		if (renderCamera2D)
 		{
 			Renderer2D::BeginScene(*renderCamera2D, *cameraTransform2D);
