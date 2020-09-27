@@ -24,9 +24,8 @@ namespace Saba {
 		ParticleSystem m_ParticleSystem;
 
 		Ref<Scene> m_Scene;
-		Entity m_ColoredQuad;
 		Entity m_Camera;
-		Entity m_ParticleSystemController;
+		Ref<Mesh> m_Mesh;
 
 		SceneHierarchyPanel m_HierarchyPanel;
 #if SB_DEBUG

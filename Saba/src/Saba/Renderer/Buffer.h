@@ -125,7 +125,7 @@ namespace Saba {
 
 		virtual uint32_t GetCount() const = 0;
 
-		static Ref<IndexBuffer> Create(uint32_t* data, uint32_t count);
+		static Ref<IndexBuffer> Create(uint32_t* data, uint32_t count, BufferUsage usage = BufferUsage::Static);
 	};
 
 }

@@ -2,6 +2,7 @@
 
 #include "Saba/Renderer/RenderCommand.h"
 #include "Saba/Renderer/Renderer2D.h"
+#include "Saba/Renderer/Renderer3D.h"
 
 namespace Saba {
 

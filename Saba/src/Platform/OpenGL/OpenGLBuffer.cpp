@@ -32,11 +32,11 @@ namespace Saba {
 
 
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, uint32_t count)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, uint32_t count, BufferUsage usage)
 		: m_Count(count)
 	{
 		glCreateBuffers(1, &m_ID);
-		glNamedBufferData(m_ID, count * sizeof(uint32_t), data, GL_STATIC_DRAW);
+		glNamedBufferData(m_ID, count * sizeof(uint32_t), data, usage == BufferUsage::Static ? GL_STATIC_DRAW : usage == BufferUsage::Dynamic ? GL_DYNAMIC_DRAW : usage == BufferUsage::Stream ? GL_STREAM_DRAW : 0);
 	}
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{

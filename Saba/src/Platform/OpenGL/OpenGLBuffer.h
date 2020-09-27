@@ -26,7 +26,7 @@ namespace Saba {
 	{
 		friend class OpenGLVertexArray;
 	public:
-		OpenGLIndexBuffer(uint32_t* data, uint32_t count);
+		OpenGLIndexBuffer(uint32_t* data, uint32_t count, BufferUsage usage);
 		virtual ~OpenGLIndexBuffer();
 
 		virtual void SetData(uint32_t* data, uint32_t count, uint32_t offset) override;

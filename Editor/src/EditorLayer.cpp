@@ -39,34 +39,58 @@ namespace Saba {
 
 		m_Scene = MakeRef<Scene>();
 
-		for (float y = 0.0f; y < 10.0f; y += m_QuadFrequency)
-		{
-			for (float x = 0.0f; x < 10.0f; x += m_QuadFrequency)
-			{
-				m_Scene->CreateEntity().AddComponent<SpriteComponent>(glm::vec2(x - 5.0f + m_QuadFrequency / 2.0f, y - 5.0f + m_QuadFrequency / 2.0f),
-																	 glm::vec2(m_QuadFrequency * 0.6f, m_QuadFrequency * 0.6f), glm::vec4(x / 10.0f, y / 10.0f, 1.0f, 1.0f));
-			}
-		}
-
-		m_ColoredQuad = m_Scene->CreateEntity("Colored Quad");
-		m_ColoredQuad.AddComponent<SpriteComponent>(glm::vec3(3.0f, 0.0f, 0.3f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		m_Scene->CreateEntity("Colored Quad").AddComponent<SpriteComponent>(glm::vec3(3.0f, 0.0f, 0.3f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 		m_Camera = m_Scene->CreateEntity("Camera");
 		m_Camera.AddComponent<CameraComponent>(SceneCamera::Type::Orthographic).Camera.SetOrthographicSize(10.0f);
 		m_Camera.AddComponent<NativeScriptComponent>().Bind<OrthographicCameraController>();
 
-		m_ParticleSystemController = m_Scene->CreateEntity("Particle system controller");
-		m_ParticleSystemController.AddComponent<NativeScriptComponent>().Bind<ParticleSystemController>();
-
 		m_HierarchyPanel.SetScene(m_Scene);
 
-		m_Scene->OnStart();
 
-		if (auto particleSystemController = m_ParticleSystemController.GetComponent<NativeScriptComponent>().GetInstance<ParticleSystemController>(); !particleSystemController->p_ParticleSystem)
-		{
-			particleSystemController->p_ParticleSystem = &m_ParticleSystem;
-			particleSystemController->p_Camera = m_Camera;
-		}
+		float vertices[] = {
+			 1.0f, -1.0f,  1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
+			 1.0f, -1.0f, -1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
+			 1.0f,  1.0f, -1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
+			 1.0f,  1.0f,  1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
+
+			-1.0f, -1.0f, -1.0f,   0.0f, 1.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f,  1.0f,   0.0f, 1.0f, 0.0f, 1.0f,
+			-1.0f,  1.0f,  1.0f,   0.0f, 1.0f, 0.0f, 1.0f,
+			-1.0f,  1.0f, -1.0f,   0.0f, 1.0f, 0.0f, 1.0f,
+
+			-1.0f,  1.0f,  1.0f,   0.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f,  1.0f,  1.0f,   0.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f,  1.0f, -1.0f,   0.0f, 0.0f, 1.0f, 1.0f,
+			-1.0f,  1.0f, -1.0f,   0.0f, 0.0f, 1.0f, 1.0f,
+
+			 1.0f, -1.0f,  1.0f,   1.0f, 1.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f,  1.0f,   1.0f, 1.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, -1.0f,   1.0f, 1.0f, 0.0f, 1.0f,
+			 1.0f, -1.0f, -1.0f,   1.0f, 1.0f, 0.0f, 1.0f,
+
+			-1.0f, -1.0f,  1.0f,   1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f,  1.0f,   1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f,  1.0f,  1.0f,   1.0f, 0.0f, 1.0f, 1.0f,
+			-1.0f,  1.0f,  1.0f,   1.0f, 0.0f, 1.0f, 1.0f,
+
+			 1.0f, -1.0f, -1.0f,   0.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, -1.0f,   0.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f,  1.0f, -1.0f,   0.0f, 1.0f, 1.0f, 1.0f,
+			 1.0f,  1.0f, -1.0f,   0.0f, 1.0f, 1.0f, 1.0f,
+		};
+		uint32_t indices[] = {
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4,
+			8, 9, 10, 10, 11, 8,
+			12, 13, 14, 14, 15, 12,
+			16, 17, 18, 18, 19, 16,
+			20, 21, 22, 22, 23, 20,
+		};
+		m_Mesh = MakeRef<Mesh>(vertices, 24, Mesh::MeshType(Mesh::MeshType::Position | Mesh::MeshType::Color), indices, 36);
+
+
+		m_Scene->OnStart();
 	}
 	void EditorLayer::OnDetach()
 	{
@@ -85,15 +109,14 @@ namespace Saba {
 		}
 
 		Renderer2D::ResetStats();
+
 		m_FBO->Bind();
 		RenderCommand::Clear();
 
 		m_Scene->OnUpdate(ts);
 
-		Renderer2D::Flush();
-		
-		m_ParticleSystem.OnUpdate(ts);
-		m_ParticleSystem.OnRender(ShaderManager::Get("particle"), m_Camera.GetComponent<CameraComponent>().Camera, m_Camera.GetComponent<TransformComponent>());
+		Renderer3D::BeginScene(m_Camera.GetComponent<CameraComponent>().Camera, m_Camera.GetComponent<TransformComponent>());
+		Renderer3D::DrawMesh(m_Mesh);
 
 		m_FBO->Unbind();
 	}
@@ -158,19 +181,6 @@ namespace Saba {
 				ImGui::Text("Renderer2D stats:");
 				ImGui::Text("\tQuads: %d", Renderer2D::GetStats().quadCount);
 				ImGui::Text("\tDraw calls: %d", Renderer2D::GetStats().drawCalls);
-
-				ImGui::Separator();
-
-				auto particleSystemController = m_ParticleSystemController.GetComponent<NativeScriptComponent>().GetInstance<ParticleSystemController>();
-				ImGui::Checkbox("Enable Particles", &particleSystemController->p_EnableParticles);
-				ImGui::ColorEdit3("ColorBegin", &particleSystemController->p_Particle.ColorBegin[0]);
-				ImGui::ColorEdit3("ColorEnd", &particleSystemController->p_Particle.ColorEnd[0]);
-				ImGui::SliderFloat("LifeTime", &particleSystemController->p_Particle.LifeTime, 0.1f, 10.0f);
-
-				ImGui::Separator();
-
-				auto& color = m_ColoredQuad.GetComponent<SpriteComponent>().Color;
-				ImGui::ColorEdit3("Quad Color", &color[0]);
 
 			ImGui::End();
 

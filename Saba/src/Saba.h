@@ -24,10 +24,12 @@
 #include <Saba/Renderer/AssetsManager.h>
 #include <Saba/Renderer/Buffer.h>
 #include <Saba/Renderer/Framebuffer.h>
+#include <Saba/Renderer/Mesh.h>
 #include <Saba/Renderer/ParticleSystem.h>
 #include <Saba/Renderer/RenderCommand.h>
 #include <Saba/Renderer/Renderer.h>
 #include <Saba/Renderer/Renderer2D.h>
+#include <Saba/Renderer/Renderer3D.h>
 #include <Saba/Renderer/Shader.h>
 #include <Saba/Renderer/Texture.h>
 #include <Saba/Renderer/VertexArray.h>
