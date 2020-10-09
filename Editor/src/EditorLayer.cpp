@@ -48,6 +48,7 @@ namespace Saba {
 
 
 		ShaderManager::Add("particle", "assets/shaders/particle.glsl");
+		Renderer3D::SetShader(ShaderManager::Add("3d", "assets/shaders/3D.glsl"));
 
 
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
@@ -95,6 +96,12 @@ namespace Saba {
 			20, 21, 22, 22, 23, 20,
 		};
 		m_Scene->CreateEntity("Model").AddComponent<ModelComponent>(MakeRef<Mesh>(vertices, 24, Mesh::MeshType(Mesh::MeshType::Position | Mesh::MeshType::Color), indices, 36));
+
+		auto model = m_Scene->CreateEntity("Model2");
+		model.GetComponent<TransformComponent>().Pos.x = -3.0f;
+		auto& mesh = (*model.AddComponent<ModelComponent>(MakeRef<Model>("assets/models/box.fbx")).Model)[0];
+		mesh->SetAlbedoTex(TextureManager::Get2D("checkerboard"));
+
 
 		m_Camera = m_Scene->CreateEntity("Camera");
 		m_Camera.AddComponent<CameraComponent>(SceneCamera::Type::Perspective).Camera.SetPerspective(glm::half_pi<float>(), 0.1f, 10.0f);

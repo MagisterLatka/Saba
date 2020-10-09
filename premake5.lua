@@ -18,6 +18,7 @@ IncludeDirs["ImGui"] = "Saba/vendor/ImGui"
 IncludeDirs["GLM"] = "Saba/vendor/glm"
 IncludeDirs["stbi"] = "Saba/vendor/stb_image"
 IncludeDirs["entt"] = "Saba/vendor/entt/include"
+IncludeDirs["assimp"] = "Saba/vendor/assimp/include"
 
 group "Dep"
 	include "Saba/vendor/GLFW"
@@ -61,7 +62,8 @@ project "Saba"
 		"%{IncludeDirs.ImGui}",
 		"%{IncludeDirs.GLM}",
 		"%{IncludeDirs.stbi}",
-		"%{IncludeDirs.entt}"
+		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.assimp}"
 	}
 	
 	links
@@ -70,7 +72,8 @@ project "Saba"
 		"GLAD",
 		"ImGui",
 		"stb_image",
-		"opengl32.lib"
+		"opengl32.lib",
+		"Saba/vendor/assimp/assimp.lib"
 	}
 	
 	postbuildcommands

@@ -74,27 +74,22 @@ namespace Saba {
 					if (entity.HasComponent<NativeScriptComponent>())
 					{
 						auto ea = tc.EulerAngles;
-						ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+						ImGui::TextUnformatted("Orientation      "); ImGui::SameLine();
 						ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
 						ImGui::DragFloat3("###1", glm::value_ptr(ea), 0.0f);
 						ImGui::PopItemWidth();
 					}
 					else
 					{
-						ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+						ImGui::TextUnformatted("Orientation      "); ImGui::SameLine();
 						ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
 						ImGui::DragFloat3("###1", glm::value_ptr(tc.EulerAngles), 0.01f);
 						ImGui::PopItemWidth();
 					}
-					auto scale = tc.Scale;
-					ImGui::TextUnformatted("Scale            "); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat3("###2", glm::value_ptr(scale), 0.0f);
-					ImGui::PopItemWidth();
 				}
 				else
 				{
-					ImGui::TextUnformatted("Euler angles     "); ImGui::SameLine();
+					ImGui::TextUnformatted("Orientation      "); ImGui::SameLine();
 					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
 					ImGui::DragFloat3("###1", glm::value_ptr(tc.EulerAngles), 0.01f);
 					ImGui::PopItemWidth();

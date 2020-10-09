@@ -146,8 +146,30 @@ namespace Saba {
 			}
 			else s_Data3D.currentMeshID = mesh->m_MeshID;
 
-			memcpy(s_Data3D.buffer, &mesh->GetVertexData()[0], sizeof(Mesh::VertexData) * mesh->GetVerticesCount());
-			s_Data3D.verticesCount = mesh->GetVerticesCount();
+			Mesh::VertexData* at = s_Data3D.buffer;
+			auto& vertices = mesh->GetVertexData();
+			s_Data3D.verticesCount = 0;
+			for (auto& vertex : vertices)
+			{
+				if (mesh->GetMeshType() & Mesh::MeshType::Position)
+					at->pos = vertex.pos;
+				else at->pos = { 0.0f, 0.0f, 0.0f };
+				if (mesh->GetMeshType() & Mesh::MeshType::Normal)
+					at->normal_Use = vertex.normal_Use;
+				else at->normal_Use.w = 0.0f;
+				if (mesh->GetMeshType() & Mesh::MeshType::Tangent)
+					at->tangent_Use = vertex.tangent_Use;
+				else at->tangent_Use.w = 0.0f;
+				if (mesh->GetMeshType() & Mesh::MeshType::UV)
+					at->uv = vertex.uv;
+				else at->uv = { 0.0f, 0.0f };
+				if (mesh->GetMeshType() & Mesh::MeshType::Color)
+					at->color = vertex.color;
+				else at->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+				at++;
+				s_Data3D.verticesCount++;
+			}
 			s_Data3D.vao->GetVertexBuffers()[0]->SetData(s_Data3D.buffer, sizeof(Mesh::VertexData) * s_Data3D.verticesCount);
 
 			if (mesh->GetIndicesCount() > 0)

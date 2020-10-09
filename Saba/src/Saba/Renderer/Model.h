@@ -10,6 +10,9 @@ namespace Saba {
 		Model() = default;
 		Model(const std::vector<Ref<Mesh>>& meshes);
 		Model(const Ref<Mesh>& mesh);
+		Model(const std::string& filepath);
+
+		void Load(const std::string& filepath);
 
 		void AddMesh(const Ref<Mesh>& mesh);
 		Ref<Mesh> GetMesh(uint32_t id) const { return m_Meshes[id]; }
