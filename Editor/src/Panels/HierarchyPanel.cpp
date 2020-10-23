@@ -2,7 +2,8 @@
 #include <Saba.h>
 #include "HierarchyPanel.h"
 
-#include <ImGui/imgui.h>
+#include <imgui/imgui.h>
+#include "Saba/ImGui/SabaImGui.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -50,54 +51,23 @@ namespace Saba {
 	{
 		if (!entity) return;
 		if (entity.HasComponent<TagComponent>())
-			ImGui::TextUnformatted(entity.GetComponent<TagComponent>().Tag.c_str());
+		{
+			auto& tag = entity.GetComponent<TagComponent>().Tag;
+			static char buffer[256];
+			memset(buffer, 0, sizeof(buffer));
+			strcpy_s(buffer, sizeof(buffer), tag.c_str());
+			if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
+				tag = buffer;
+		}
 		if (entity.HasComponent<TransformComponent>())
 		{
 			if (ImGui::TreeNodeEx("Transform component", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				auto& tc = entity.GetComponent<TransformComponent>();
 
-				ImGui::Text("[%.3f  %.3f  %.3f  %.3f]", tc.Transform[0][0], tc.Transform[1][0], tc.Transform[2][0], tc.Transform[3][0]);
-				ImGui::Text("[%.3f  %.3f  %.3f  %.3f]", tc.Transform[0][1], tc.Transform[1][1], tc.Transform[2][1], tc.Transform[3][1]);
-				ImGui::Text("[%.3f  %.3f  %.3f  %.3f]", tc.Transform[0][2], tc.Transform[1][2], tc.Transform[2][2], tc.Transform[3][2]);
-				ImGui::Text("[%.3f  %.3f  %.3f  %.3f]", tc.Transform[0][3], tc.Transform[1][3], tc.Transform[2][3], tc.Transform[3][3]);
-
-				ImGui::Separator();
-
-				ImGui::TextUnformatted("Pos              "); ImGui::SameLine();
-				ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-				ImGui::DragFloat3("###0", glm::value_ptr(tc.Pos), 0.1f);
-				ImGui::PopItemWidth();
-
-				if (entity.HasComponent<CameraComponent>())
-				{
-					if (entity.HasComponent<NativeScriptComponent>())
-					{
-						auto ea = tc.EulerAngles;
-						ImGui::TextUnformatted("Orientation      "); ImGui::SameLine();
-						ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-						ImGui::DragFloat3("###1", glm::value_ptr(ea), 0.0f);
-						ImGui::PopItemWidth();
-					}
-					else
-					{
-						ImGui::TextUnformatted("Orientation      "); ImGui::SameLine();
-						ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-						ImGui::DragFloat3("###1", glm::value_ptr(tc.EulerAngles), 0.01f);
-						ImGui::PopItemWidth();
-					}
-				}
-				else
-				{
-					ImGui::TextUnformatted("Orientation      "); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat3("###1", glm::value_ptr(tc.EulerAngles), 0.01f);
-					ImGui::PopItemWidth();
-					ImGui::TextUnformatted("Scale            "); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat3("###2", glm::value_ptr(tc.Scale), 0.1f, 0.01f, 10.0f);
-					ImGui::PopItemWidth();
-				}
+				Saba::DragFloat3("Pos", tc.Pos, 0.0f, 0.0f, 0.0f, 0.1f);
+				Saba::DragFloat3("Orientation", tc.Orientation, 0.0f, 0.0f, 0.0f, 0.01f);
+				Saba::DragFloat3("Scale", tc.Scale, 1.0f, 0.01f, 10.0f, 0.01f);
 
 				ImGui::TreePop();
 			}
@@ -108,23 +78,8 @@ namespace Saba {
 			{
 				auto& sprc = entity.GetComponent<SpriteComponent>();
 
-				ImGui::Checkbox("Use transform", &sprc.UseTransform);
-				ImGui::TextUnformatted("Position         "); ImGui::SameLine();
-				ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-				ImGui::DragFloat3("###0", glm::value_ptr(sprc.Pos), 0.1f);
-				ImGui::PopItemWidth();
-				ImGui::TextUnformatted("Size             "); ImGui::SameLine();
-				ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-				ImGui::DragFloat2("###1", glm::value_ptr(sprc.Size), 0.1f, 0.001f, 10.0f);
-				ImGui::PopItemWidth();
-				ImGui::TextUnformatted("Color            "); ImGui::SameLine();
-				ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-				ImGui::ColorEdit4("###2", glm::value_ptr(sprc.Color));
-				ImGui::PopItemWidth();
-				ImGui::TextUnformatted("Tilling factor   "); ImGui::SameLine();
-				ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-				ImGui::DragFloat("###3", &sprc.TillingFactor, 0.1f, 0.01f, 10.0f);
-				ImGui::PopItemWidth();
+				Saba::ColorEdit4("Color", sprc.Color);
+				Saba::DragFloat("Tilling factor", sprc.TillingFactor, 1.0f, 0.01f, 10.0f, 0.01f);
 				ImGui::TreePop();
 			}
 		}
@@ -135,44 +90,43 @@ namespace Saba {
 				auto& cc = entity.GetComponent<CameraComponent>();
 
 				ImGui::Checkbox("Primary camera", &cc.Primary);
-				if (cc.Camera.GetType() == SceneCamera::Type::Orthographic)
+				
+				static constexpr char* typeStrings[] = { "Perspective", "Orthographic" };
+				const char* currentType = typeStrings[(int)cc.Camera.m_Type];
+				if (ImGui::BeginCombo("Projection", currentType))
 				{
-					ImGui::TextUnformatted("Type: orthographic camera");
-					ImGui::TextUnformatted("Orthographic size"); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat("###0", &cc.Camera.m_Fov, 0.1f, 0.5f, 20.0f);
-					ImGui::PopItemWidth();
+					for (int i = 0; i < 2; i++)
+					{
+						bool isSelected = currentType == typeStrings[i];
+						if (ImGui::Selectable(typeStrings[i], isSelected))
+						{
+							currentType = typeStrings[i];
+							cc.Camera.m_Type = (SceneCamera::Type)i;
+						}
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
 				}
-				else if (cc.Camera.GetType() == SceneCamera::Type::Perspective)
+
+				if (cc.Camera.m_Type == SceneCamera::Type::Perspective)
 				{
-					ImGui::TextUnformatted("Type: perspective camera");
-					ImGui::TextUnformatted("FOV              "); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat("###0", &cc.Camera.m_Fov, 0.1f, glm::pi<float>() / 18.0f, glm::quarter_pi<float>() * 3.0f);
-					ImGui::PopItemWidth();
-					ImGui::TextUnformatted("Near clip plane  "); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat("###1", &cc.Camera.m_NearClip, 0.01f, 0.01f, 0.5f);
-					ImGui::PopItemWidth();
-					ImGui::TextUnformatted("Far clip plane   "); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat("###2", &cc.Camera.m_FarClip, 0.1f, 1.0f, 100.0f);
-					ImGui::PopItemWidth();
+					Saba::DragFloat("FOV", cc.Camera.m_PerspectiveFov, glm::half_pi<float>(), glm::pi<float>() / 18.0f, glm::quarter_pi<float>() * 3.0f, 0.1f);
+					Saba::DragFloat("Near clip", cc.Camera.m_PerspectiveNear, 0.01f, 0.01f, 0.5f, 0.01f);
+					Saba::DragFloat("Far clip", cc.Camera.m_PerspectiveFar, 10.0f, 1.0f, 100.0f, 1.0f);
 				}
 				else
 				{
-					ImGui::TextUnformatted("Type: none");
+					Saba::DragFloat("Size", cc.Camera.m_OrthographicSize, 10.0f, 0.5f, 20.0f, 0.1f);
+					Saba::DragFloat("Near clip", cc.Camera.m_OrthographicNear, -1.0f, -10.0f, -1.0f, 0.1f);
+					Saba::DragFloat("Far clip", cc.Camera.m_OrthographicFar, 1.0f, 1.0f, 10.0f, 0.1f);
 				}
+
 				ImGui::Checkbox("Fixed aspect ratio", &cc.FixedAspectRatio);
 				if (cc.FixedAspectRatio)
-				{
-					ImGui::TextUnformatted("Aspect ratio     "); ImGui::SameLine();
-					ImGui::PushItemWidth(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 12.0f);
-					ImGui::DragFloat("###3", &cc.Camera.m_AspectRatio, 0.01f, 0.25f, 4.0f);
-					ImGui::PopItemWidth();
-				}
-				else
-					cc.Camera.SetViewportSize(m_Scene->GetViewportSize().x, m_Scene->GetViewportSize().y);
+					Saba::DragFloat("Aspect ratio", cc.Camera.m_AspectRatio, (float)m_Scene->m_ViewportSize.x / (float)m_Scene->m_ViewportSize.y, 0.25f, 4.0f, 0.01f);
+				else cc.Camera.m_AspectRatio = (float)m_Scene->m_ViewportSize.x / (float)m_Scene->m_ViewportSize.y;
 
 				cc.Camera.Recalculate();
 				ImGui::TreePop();

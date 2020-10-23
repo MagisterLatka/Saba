@@ -13,12 +13,22 @@ namespace Saba {
 	}
 	Ref<Shader> ShaderManager::Add(const std::string& filepath)
 	{
-		auto a = filepath.rfind('/');
+		auto a = filepath.find_last_of("\\/");
 		auto b = filepath.find(".glsl");
 		std::string name(&filepath[a + 1], b - a - 1);
-		SB_CORE_ASSERT((s_Shaders.find(name) == s_Shaders.end()), "Shader \"{0}\" already exist", name.c_str());
+		SB_CORE_ASSERT(s_Shaders.find(name) == s_Shaders.end(), "Shader \"{0}\" already exist", name.c_str());
 		s_Shaders[name] = Shader::Create(filepath);
 		return s_Shaders[name];
+	}
+
+	Ref<Shader> ShaderManager::GetFromFilepath(const std::string& filepath)
+	{
+		auto a = filepath.find_last_of("\\/");
+		auto b = filepath.find(".glsl");
+		std::string name(&filepath[a + 1], b - a - 1);
+		if (s_Shaders.find(name) != s_Shaders.end())
+			return s_Shaders[name];
+		else return Add(filepath);
 	}
 
 

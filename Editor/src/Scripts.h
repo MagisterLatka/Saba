@@ -18,7 +18,7 @@ namespace Saba {
 
 				if (p_RotationEnabled)
 				{
-					float& rotation = tc.EulerAngles.z;
+					float& rotation = tc.Orientation.z;
 					if (Input::IsKeyPressed(KeyCode::Q))
 						rotation += m_CameraRotationSpeed * (float)ts;
 					if (Input::IsKeyPressed(KeyCode::E))
@@ -74,27 +74,30 @@ namespace Saba {
 			auto& tc = GetComponent<TransformComponent>();
 
 			glm::vec3& translate = tc.Pos;
-			glm::vec3 dir(-glm::sin(tc.EulerAngles.y), 0.0f, -glm::cos(tc.EulerAngles.y));
+			glm::vec3 dir(-glm::sin(tc.Orientation.y), 0.0f, -glm::cos(tc.Orientation.y));
 
-			if (Input::IsKeyPressed(Key::W))
-				translate += dir * p_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(Key::S))
-				translate -= dir * p_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(Key::A))
-				translate += glm::normalize(glm::cross({ 0.0f, 1.0f, 0.0f }, dir)) * p_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(Key::D))
-				translate -= glm::normalize(glm::cross({ 0.0f, 1.0f, 0.0f }, dir)) * p_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(Key::Space))
-				translate.y += p_CameraMovementSpeed * (float)ts;
-			if (Input::IsKeyPressed(Key::C))
-				translate.y -= p_CameraMovementSpeed * (float)ts;
+			if (GetScene()->IsViewportFocused())
+			{
+				if (Input::IsKeyPressed(Key::W))
+					translate += dir * p_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(Key::S))
+					translate -= dir * p_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(Key::A))
+					translate += glm::normalize(glm::cross({ 0.0f, 1.0f, 0.0f }, dir)) * p_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(Key::D))
+					translate -= glm::normalize(glm::cross({ 0.0f, 1.0f, 0.0f }, dir)) * p_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(Key::Space))
+					translate.y += p_CameraMovementSpeed * (float)ts;
+				if (Input::IsKeyPressed(Key::C))
+					translate.y -= p_CameraMovementSpeed * (float)ts;
+			}
 		}
 	private:
 		bool OnScrollEvent(MouseScrolledEvent& e)
 		{
 			auto& camera = GetComponent<CameraComponent>().Camera;
-			camera.SetFov(glm::clamp(camera.GetFov() - e.GetYOffset() * p_ScrollSensivity, glm::radians(10.0f), glm::radians(90.0f)));
-			m_MouseSensivity = m_MouseSens * glm::pow(glm::two_over_pi<float>() * camera.GetFov(), 1 / 2.0f);
+			camera.SetPerspectiveFOV(glm::clamp(camera.GetPerspectiveFOV() - e.GetYOffset() * p_ScrollSensivity, glm::radians(10.0f), glm::radians(90.0f)));
+			m_MouseSensivity = m_MouseSens * glm::pow(glm::two_over_pi<float>() * camera.GetPerspectiveFOV(), 1 / 2.0f);
 			return false;
 		}
 		bool OnMouseMoveEvent(MouseMovedEvent& e)
@@ -106,8 +109,8 @@ namespace Saba {
 
 			if (p_EnableRotations)
 			{
-				tc.EulerAngles.y += -offset.x * m_MouseSensivity;
-				tc.EulerAngles.x += -offset.y * m_MouseSensivity;
+				tc.Orientation.y += -offset.x * m_MouseSensivity;
+				tc.Orientation.x += -offset.y * m_MouseSensivity;
 			}
 			return false;
 		}
@@ -150,7 +153,7 @@ namespace Saba {
 					auto viewportPos = GetScene()->GetViewportPos();
 					auto viewportSize = GetScene()->GetViewportSize();
 
-					glm::vec2 bounds = { camera.GetWidth(), camera.GetHeight() };
+					glm::vec2 bounds = { camera.GetOrthographicWidth(), camera.GetOrthographicHeight() };
 					pos.x = (pos.x - viewportPos.x) / viewportSize.x * bounds.x - bounds.x * 0.5f;
 					pos.y = bounds.y * 0.5f - (pos.y - viewportPos.y) / viewportSize.y * bounds.y;
 

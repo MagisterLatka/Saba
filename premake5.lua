@@ -119,7 +119,8 @@ project "Game"
 		"Saba/vendor",
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.GLM}",
-		"%{IncludeDirs.entt}"
+		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.ImGui}"
 	}
 	
 	links
@@ -170,7 +171,8 @@ project "Editor"
 		"Saba/vendor",
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.GLM}",
-		"%{IncludeDirs.entt}"
+		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.ImGui}"
 	}
 	
 	links

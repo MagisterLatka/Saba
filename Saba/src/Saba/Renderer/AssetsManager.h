@@ -20,6 +20,7 @@ namespace Saba {
 		}
 
 		static Ref<Shader> Get(const std::string& name) { SB_CORE_ASSERT((s_Shaders.find(name) != s_Shaders.end()), "Shader \"{0}\" does not exist", name.c_str()); return s_Shaders[name]; }
+		static Ref<Shader> GetFromFilepath(const std::string& filepath);
 	private:
 		static std::unordered_map<std::string, Ref<Shader>> s_Shaders;
 	};

@@ -15,7 +15,7 @@ namespace Saba {
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), static_cast<int>(button));
-		return (state == GLFW_PRESS);
+		return state == GLFW_PRESS;
 	}
 
 	glm::vec2 Input::GetMousePos()

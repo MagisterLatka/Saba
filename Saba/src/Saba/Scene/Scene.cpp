@@ -57,10 +57,10 @@ namespace Saba {
 		});
 		m_Registry.view<TransformComponent>().each([](auto entity, auto& component)
 		{
-			component.Transform = glm::translate(glm::mat4(1.0f), component.Pos) * glm::scale(glm::toMat4(glm::quat(component.EulerAngles)), component.Scale);
-			component.EulerAngles.x = glm::clamp(component.EulerAngles.x, -glm::half_pi<float>(), glm::half_pi<float>());
-			component.EulerAngles.y = glm::mod(component.EulerAngles.y + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
-			component.EulerAngles.z = glm::mod(component.EulerAngles.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+			component.Transform = glm::translate(glm::mat4(1.0f), component.Pos) * glm::scale(glm::toMat4(glm::quat(component.Orientation)), component.Scale);
+			component.Orientation.x = glm::clamp(component.Orientation.x, -glm::half_pi<float>(), glm::half_pi<float>());
+			component.Orientation.y = glm::mod(component.Orientation.y + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+			component.Orientation.z = glm::mod(component.Orientation.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
 		});
 
 		Camera* renderCamera2D = nullptr;
@@ -106,10 +106,7 @@ namespace Saba {
 			for (auto entity : sprites)
 			{
 				auto [transform, sprite] = sprites.get<TransformComponent, SpriteComponent>(entity);
-				if (sprite.UseTransform)
-					Renderer2D::DrawQuad(transform, sprite.Color, sprite.Texture, sprite.TillingFactor);
-				else
-					Renderer2D::DrawQuad(sprite.Pos, sprite.Size, sprite.Color, sprite.Texture, sprite.TillingFactor);
+				Renderer2D::DrawRotatedQuad(transform.Pos, { transform.Scale.x, transform.Scale.y }, transform.Orientation.z, sprite.Color, sprite.Texture, sprite.TillingFactor);
 			}
 			Renderer2D::Flush();
 		}

@@ -2,7 +2,7 @@
 #include <Saba.h>
 #include "EditorLayer.h"
 
-#include <imgui/imgui.h>
+#include "Saba/ImGui/SabaImGui.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Scripts.h"
@@ -48,7 +48,6 @@ namespace Saba {
 
 
 		ShaderManager::Add("particle", "assets/shaders/particle.glsl");
-		Renderer3D::SetShader(ShaderManager::Add("3d", "assets/shaders/3D.glsl"));
 
 
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
@@ -216,16 +215,30 @@ namespace Saba {
 
 				ImGui::Separator();
 
-				ImGui::Text("Renderer2D stats:");
+				ImGui::TextUnformatted("Renderer2D stats:");
 				ImGui::Text("\tQuads: %d", Renderer2D::GetStats().quadCount);
 				ImGui::Text("\tDraw calls: %d", Renderer2D::GetStats().drawCalls);
 
 				ImGui::Separator();
 
-				ImGui::Text("Renderer3D stats:");
+				ImGui::TextUnformatted("Renderer3D stats:");
 				ImGui::Text("\tVertices: %d", Renderer3D::GetStats().verticesCount);
 				ImGui::Text("\tIndices: %d", Renderer3D::GetStats().indicesCount);
 				ImGui::Text("\tDraw calls: %d", Renderer3D::GetStats().drawCalls);
+
+				static Saba::ImFileBrowser fileBrowser(0, { ".glsl" });
+				static std::string filepath;
+				if (ImGui::Button("Select shader"))
+					fileBrowser.Open();
+
+				fileBrowser.Display();
+				if (fileBrowser.HasSelected())
+				{
+					filepath = std::filesystem::relative(fileBrowser.GetSelected().string()).string();
+					Renderer3D::SetShader(ShaderManager::GetFromFilepath(filepath));
+					fileBrowser.ClearSelected();
+				}
+				ImGui::SameLine(); ImGui::Text("%s", filepath.c_str());
 
 				ImGui::Separator();
 
