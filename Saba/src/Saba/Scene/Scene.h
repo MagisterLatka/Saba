@@ -12,6 +12,7 @@ namespace Saba {
 	class Scene
 	{
 		friend class Entity;
+		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
 	public:
 		Scene() = default;

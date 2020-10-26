@@ -5,6 +5,8 @@
 #include "Saba/ImGui/SabaImGui.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Saba/Scene/SceneSerializer.h"
+#include "Saba/Utils/PlatformUtils.h"
 #include "Scripts.h"
 
 namespace Saba {
@@ -39,7 +41,7 @@ namespace Saba {
 
 		m_Scene = MakeRef<Scene>();
 
-		float vertices[] = {
+		/*float vertices[] = {
 			 1.0f, -1.0f,  1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
 			 1.0f, -1.0f, -1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
 			 1.0f,  1.0f, -1.0f,   1.0f, 0.0f, 0.0f, 1.0f,
@@ -88,7 +90,7 @@ namespace Saba {
 
 		m_Camera = m_Scene->CreateEntity("Camera");
 		m_Camera.AddComponent<CameraComponent>(SceneCamera::Type::Perspective).Camera.SetPerspective(glm::half_pi<float>(), 0.1f, 10.0f);
-		m_Camera.AddComponent<NativeScriptComponent>().Bind<PerspectiveCameraController>();
+		m_Camera.AddComponent<NativeScriptComponent>().Bind<PerspectiveCameraController>();*/
 
 		m_HierarchyPanel.SetScene(m_Scene);
 
@@ -97,10 +99,6 @@ namespace Saba {
 	void EditorLayer::OnDetach()
 	{
 		m_Scene->OnEnd();
-	}
-	void EditorLayer::OnEvent(Event& event)
-	{
-		m_Scene->OnEvent(event);
 	}
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
@@ -165,7 +163,18 @@ namespace Saba {
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Exit")) Application::Get().Close();
+				if (ImGui::MenuItem("New", "Ctrl+N"))
+					NewScene();
+				if (ImGui::MenuItem("Open...", "Ctrl+O"))
+					OpenScene();
+				if (ImGui::MenuItem("Save", "Ctrl+S"))
+					SaveScene();
+				if (ImGui::MenuItem("Save As", "Ctrl+Shift+S"))
+					SaveAsScene();
+
+				if (ImGui::MenuItem("Exit"))
+					Application::Get().Close();
+
 				ImGui::EndMenu();
 			}
 
@@ -193,20 +202,6 @@ namespace Saba {
 				ImGui::Text("\tIndices: %d", Renderer3D::GetStats().indicesCount);
 				ImGui::Text("\tDraw calls: %d", Renderer3D::GetStats().drawCalls);
 
-				static Saba::ImFileBrowser fileBrowser(0, { ".glsl" });
-				static std::string filepath;
-				if (ImGui::Button("Select shader"))
-					fileBrowser.Open();
-
-				fileBrowser.Display();
-				if (fileBrowser.HasSelected())
-				{
-					filepath = std::filesystem::relative(fileBrowser.GetSelected().string()).string();
-					Renderer3D::SetShader(ShaderManager::GetFromFilepath(filepath));
-					fileBrowser.ClearSelected();
-				}
-				ImGui::SameLine(); ImGui::Text("%s", filepath.c_str());
-
 			ImGui::End();
 
 			m_HierarchyPanel.OnImGuiRender();
@@ -232,5 +227,84 @@ namespace Saba {
 			ImGui::PopStyleVar();
 
 		ImGui::End();
+	}
+	void EditorLayer::OnEvent(Event& event)
+	{
+		m_Scene->OnEvent(event);
+
+		Dispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(SB_BIND_EVENT_FUNC(EditorLayer::OnKeyPress));
+	}
+	bool EditorLayer::OnKeyPress(KeyPressedEvent& e)
+	{
+		if (e.GetRepeatedCount() > 0)
+			return false;
+
+		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+
+		switch (e.GetKeyCode())
+		{
+			case Key::N:
+				if (control)
+					NewScene();
+				break;
+			case Key::O:
+				if (control)
+					OpenScene();
+				break;
+			case Key::S:
+				if (control && !shift)
+					SaveScene();
+				else if (control && shift)
+					SaveAsScene();
+				break;
+		}
+
+		return false;
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_Scene = MakeRef<Scene>();
+		m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_HierarchyPanel.SetScene(m_Scene);
+		m_CurrentScene = {};
+	}
+	void EditorLayer::OpenScene()
+	{
+		std::string filepath = FileDialogs::Open("Saba scene (*.saba)\0*.saba\0");
+		if (!filepath.empty())
+		{
+			m_Scene = MakeRef<Scene>();
+			m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_HierarchyPanel.SetScene(m_Scene);
+
+			SceneSerializer serializer(m_Scene);
+			serializer.Deserialize(filepath);
+
+			m_CurrentScene = filepath;
+		}
+		else
+			m_CurrentScene = {};
+	}
+	void EditorLayer::SaveScene()
+	{
+		if (!m_CurrentScene.empty())
+		{
+			SceneSerializer serializer(m_Scene);
+			serializer.Serialize(m_CurrentScene);
+		}
+		else SaveAsScene();
+	}
+	void EditorLayer::SaveAsScene()
+	{
+		std::string filepath = FileDialogs::Save("Saba scene (*.saba)\0*.saba\0");
+		if (!filepath.empty())
+		{
+			SceneSerializer serializer(m_Scene);
+			serializer.Serialize(filepath);
+			m_CurrentScene = filepath;
+		}
 	}
 }

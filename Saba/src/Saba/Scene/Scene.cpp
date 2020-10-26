@@ -6,6 +6,7 @@
 
 #include "Saba/Renderer/Renderer2D.h"
 #include "Saba/Renderer/Renderer3D.h"
+#include "Saba/Renderer/RenderCommand.h"
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -67,34 +68,24 @@ namespace Saba {
 			component.Orientation.z = glm::mod(component.Orientation.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
 		});
 
-		Camera* renderCamera2D = nullptr;
-		Camera* renderCamera3D = nullptr;
-		glm::mat4* cameraTransform2D = nullptr;
-		glm::mat4* cameraTransform3D = nullptr;
-		{		
+		Camera* renderCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
+		{
 			auto cameras = m_Registry.group<CameraComponent>(entt::get<TransformComponent>);
 			for (auto entity : cameras)
 			{
 				auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
 				if (camera.Primary)
 				{
-					if (camera.Camera.GetType() == SceneCamera::Type::Orthographic)
-					{
-						renderCamera2D = &camera.Camera;
-						cameraTransform2D = &cameras.get<TransformComponent>(entity).Transform;
-					}
-					else
-					{
-						renderCamera3D = &camera.Camera;
-						cameraTransform3D = &cameras.get<TransformComponent>(entity).Transform;
-					}
+					renderCamera = &camera.Camera;
+					cameraTransform = &transform.Transform;
 				}
 			}
 		}
 
-		if (renderCamera3D)
+		if (renderCamera)
 		{
-			Renderer3D::BeginScene(*renderCamera3D, *cameraTransform3D);
+			Renderer3D::BeginScene(*renderCamera, *cameraTransform);
 			auto models = m_Registry.group<ModelComponent>(entt::get<TransformComponent>);
 			for (auto entity : models)
 			{
@@ -102,10 +93,8 @@ namespace Saba {
 				for (auto& mesh : *model.Model)
 					Renderer3D::DrawMesh(mesh, transform);
 			}
-		}
-		if (renderCamera2D)
-		{
-			Renderer2D::BeginScene(*renderCamera2D, *cameraTransform2D);
+
+			Renderer2D::BeginScene(*renderCamera, *cameraTransform);
 			auto sprites = m_Registry.group<SpriteComponent>(entt::get<TransformComponent>);
 			for (auto entity : sprites)
 			{

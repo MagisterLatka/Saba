@@ -17,6 +17,7 @@ namespace Saba {
 	void Saba::SceneHierarchyPanel::SetScene(const Ref<Scene>& scene)
 	{
 		m_Scene = scene;
+		m_Selected = {};
 	}
 
 	void Saba::SceneHierarchyPanel::OnImGuiRender()
@@ -35,7 +36,7 @@ namespace Saba {
 		if (ImGui::BeginPopupContextWindow(0, 1, false))
 		{
 			if (ImGui::MenuItem("Create entity"))
-				m_Scene->CreateEntity();
+				m_Selected = m_Scene->CreateEntity();
 
 			ImGui::EndPopup();
 		}
@@ -152,7 +153,11 @@ namespace Saba {
 		DrawComponent<TransformComponent>(m_Scene, "Transform component", entity, [](auto& component, auto& scene)
 		{
 			Saba::DragFloat3("Pos", component.Pos, 0.0f, 0.0f, 0.0f, 0.1f);
-			Saba::DragFloat3("Orientation", component.Orientation, 0.0f, 0.0f, 0.0f, 0.01f);
+
+			glm::vec3 orientationDegrees = glm::degrees(component.Orientation);
+			Saba::DragFloat3("Orientation", orientationDegrees, 0.0f, 0.0f, 0.0f, 1.0f);
+			component.Orientation = glm::radians(orientationDegrees);
+
 			Saba::DragFloat3("Scale", component.Scale, 1.0f, 0.01f, 10.0f, 0.01f);
 		}, false);
 		DrawComponent<SpriteComponent>(m_Scene, "Sprite component", entity, [](auto& component, auto& scene)

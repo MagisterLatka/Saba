@@ -17,7 +17,7 @@ namespace Saba {
 		{
 			SB_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
 			auto& component = m_Scene->m_Registry.emplace<T>(m_ID, std::forward<Args>(args)...);
-			//m_Scene->OnAddComponent<T>(*this, component);
+			m_Scene->OnAddComponent<T>(*this, component);
 			return component;
 		}
 		template<typename T>

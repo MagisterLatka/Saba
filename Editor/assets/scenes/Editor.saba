@@ -1,0 +1,60 @@
+Scene: Untitled
+Entities:
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Quad2
+    TransformComponent:
+      Position: [-2.0999999, -1.29999995, 0]
+      Orientation: [0, 0, 0]
+      Scale: [3.19000006, 1, 1]
+    SpriteComponent:
+      Color: [0, 1, 0.41568628, 1]
+      Tilling factor: 1
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Quad1
+    TransformComponent:
+      Position: [2.79999995, 0.699999988, 0]
+      Orientation: [0, 0, 0]
+      Scale: [1.25999999, 2.25, 1]
+    SpriteComponent:
+      Color: [1, 1, 0, 1]
+      Tilling factor: 1
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Quad
+    TransformComponent:
+      Position: [-2.79999995, 2.79999995, 0]
+      Orientation: [0, 0, 0]
+      Scale: [1.37, 1.72000003, 1]
+    SpriteComponent:
+      Color: [1, 0, 0, 1]
+      Tilling factor: 1
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Position: [0, 0, 0]
+      Orientation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 1.57079637
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 100
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Quad3
+    TransformComponent:
+      Position: [0, 1, 0]
+      Orientation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteComponent:
+      Color: [0, 1, 1, 1]
+      Tilling factor: 1

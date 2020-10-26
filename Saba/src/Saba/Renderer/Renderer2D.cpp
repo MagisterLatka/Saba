@@ -297,11 +297,11 @@ namespace Saba {
 				s_Data.texIndex++;
 			}
 		}
-		glm::mat3 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(angle), { 0.0f, 0.0f, 1.0f });
+		glm::mat3 rotate = glm::rotate(glm::mat4(1.0f), angle, { 0.0f, 0.0f, 1.0f });
 
 		for (int i = 0; i < 4; i++)
 		{
-			s_Data.at->pos = (rotate * s_Data.quadData[i]) * glm::vec3(size, 1.0f) + pos;
+			s_Data.at->pos = rotate * (s_Data.quadData[i] * glm::vec3(size, 1.0f)) + pos;
 			s_Data.at->color = color;
 			s_Data.at->uv_texID_TillingFactor.z = tid;
 			s_Data.at->uv_texID_TillingFactor.w = tillingFactor;

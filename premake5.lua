@@ -19,12 +19,14 @@ IncludeDirs["GLM"] = "Saba/vendor/glm"
 IncludeDirs["stbi"] = "Saba/vendor/stb_image"
 IncludeDirs["entt"] = "Saba/vendor/entt/include"
 IncludeDirs["assimp"] = "Saba/vendor/assimp/include"
+IncludeDirs["yaml_cpp"] = "Saba/vendor/yaml-cpp/include"
 
 group "Dep"
 	include "Saba/vendor/GLFW"
 	include "Saba/vendor/GLAD"
 	include "Saba/vendor/ImGui"
 	include "Saba/vendor/stb_image"
+	include "Saba/vendor/yaml-cpp"
 group ""
 	
 project "Saba"
@@ -63,7 +65,8 @@ project "Saba"
 		"%{IncludeDirs.GLM}",
 		"%{IncludeDirs.stbi}",
 		"%{IncludeDirs.entt}",
-		"%{IncludeDirs.assimp}"
+		"%{IncludeDirs.assimp}",
+		"%{IncludeDirs.yaml_cpp}"
 	}
 	
 	links
@@ -72,6 +75,7 @@ project "Saba"
 		"GLAD",
 		"ImGui",
 		"stb_image",
+		"yaml-cpp",
 		"opengl32.lib",
 		"Saba/vendor/assimp/assimp.lib"
 	}

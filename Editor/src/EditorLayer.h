@@ -17,6 +17,11 @@ namespace Saba {
 		virtual void OnImGuiRender() override;
 	private:
 		bool OnKeyPress(KeyPressedEvent& e);
+
+		void NewScene();
+		void OpenScene();
+		void SaveScene();
+		void SaveAsScene();
 	private:
 		Ref<Framebuffer> m_FBO;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
@@ -27,6 +32,7 @@ namespace Saba {
 
 		Ref<Scene> m_Scene;
 		Entity m_Camera;
+		std::string m_CurrentScene;
 
 		SceneHierarchyPanel m_HierarchyPanel;
 #if SB_DEBUG
