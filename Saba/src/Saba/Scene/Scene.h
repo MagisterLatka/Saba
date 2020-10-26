@@ -18,6 +18,7 @@ namespace Saba {
 		~Scene() = default;
 
 		Entity CreateEntity(const std::string& name = std::string());
+		void DestroyEntity(Entity entity);
 
 		void OnStart();
 		void OnEnd();
@@ -33,6 +34,9 @@ namespace Saba {
 		bool IsViewportFocused() const { return m_ViewportFocused; }
 		void SetViewportHoverState(bool hovered) { m_ViewportHovered = hovered; }
 		bool IsViewportHovered() const { return m_ViewportHovered; }
+	private:
+		template<typename T>
+		void OnAddComponent(Entity entity, T& component);
 	private:
 		entt::registry m_Registry;
 		glm::uvec2 m_ViewportSize = { 0, 0 };

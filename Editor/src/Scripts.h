@@ -66,6 +66,7 @@ namespace Saba {
 			Dispatcher dispatcher(e);
 			dispatcher.Dispatch<MouseScrolledEvent>(SB_BIND_EVENT_FUNC(PerspectiveCameraController::OnScrollEvent));
 			dispatcher.Dispatch<MouseMovedEvent>(SB_BIND_EVENT_FUNC(PerspectiveCameraController::OnMouseMoveEvent));
+			dispatcher.Dispatch<KeyPressedEvent>(SB_BIND_EVENT_FUNC(PerspectiveCameraController::OnKeyPress));
 		}
 		virtual void OnUpdate(Timestep ts) override
 		{
@@ -93,6 +94,25 @@ namespace Saba {
 			}
 		}
 	private:
+		bool OnKeyPress(KeyPressedEvent& e)
+		{
+			if (e.GetKeyCode() == KeyCode::I)
+			{
+				if (p_EnableRotations)
+				{
+					p_EnableRotations = false;
+					Application::Get().GetWindow().EnableCursor();
+					Application::Get().GetImGuiLayer()->EnableMouseEvents();
+				}
+				else
+				{
+					p_EnableRotations = true;
+					Application::Get().GetWindow().EnableCursor(false);
+					Application::Get().GetImGuiLayer()->EnableMouseEvents(false);
+				}
+			}
+			return false;
+		}
 		bool OnScrollEvent(MouseScrolledEvent& e)
 		{
 			auto& camera = GetComponent<CameraComponent>().Camera;

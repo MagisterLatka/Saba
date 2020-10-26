@@ -12,7 +12,7 @@ namespace Saba {
 		s_Application = this;
 		SB_CORE_INFO("Created application!");
 
-		m_Window = Window::Create(WindowProps(name));
+		m_Window = Window::Create(WindowProps(name, 1600, 900));
 		m_Window->SetEventCallback(SB_BIND_EVENT_FUNC(Application::OnEvent));
 
 		Renderer::Init();

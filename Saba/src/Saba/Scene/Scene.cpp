@@ -19,6 +19,10 @@ namespace Saba {
 		entity.AddComponent<TagComponent>() = name.empty() ? "Entity" : name;
 		return entity;
 	}
+	void Scene::DestroyEntity(Entity entity)
+	{
+		m_Registry.destroy(entity);
+	}
 
 	void Scene::OnStart()
 	{
@@ -124,4 +128,39 @@ namespace Saba {
 		}
 	}
 
+	template<typename T>
+	void Scene::OnAddComponent(Entity entity, T& component)
+	{
+		static_assert(false);
+	}
+	template<>
+	void Scene::OnAddComponent<TransformComponent>(Entity entity, TransformComponent& component)
+	{
+
+	}
+	template<>
+	void Scene::OnAddComponent<TagComponent>(Entity entity, TagComponent& component)
+	{
+
+	}
+	template<>
+	void Scene::OnAddComponent<SpriteComponent>(Entity entity, SpriteComponent& component)
+	{
+
+	}
+	template<>
+	void Scene::OnAddComponent<ModelComponent>(Entity entity, ModelComponent& component)
+	{
+
+	}
+	template<>
+	void Scene::OnAddComponent<CameraComponent>(Entity entity, CameraComponent& component)
+	{
+		component.Camera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+	}
+	template<>
+	void Scene::OnAddComponent<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{
+
+	}
 }

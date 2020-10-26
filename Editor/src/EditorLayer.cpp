@@ -7,22 +7,6 @@
 
 #include "Scripts.h"
 
-namespace ImGui {
-
-	static void HelpMarker(const char* desc) //From imgui_demo.cpp
-	{
-		ImGui::TextDisabled("(?)");
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-			ImGui::TextUnformatted(desc);
-			ImGui::PopTextWrapPos();
-			ImGui::EndTooltip();
-		}
-	}
-}
-
 namespace Saba {
 
 	EditorLayer::EditorLayer()
@@ -116,28 +100,7 @@ namespace Saba {
 	}
 	void EditorLayer::OnEvent(Event& event)
 	{
-		Dispatcher dispatcher(event);
-		dispatcher.Dispatch<KeyPressedEvent>(SB_BIND_EVENT_FUNC(EditorLayer::OnKeyPress));
 		m_Scene->OnEvent(event);
-	}
-	bool EditorLayer::OnKeyPress(KeyPressedEvent& e)
-	{
-		if (e.GetKeyCode() == Key::I)
-		{
-			if (m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations)
-			{
-				m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations = false;
-				Application::Get().GetWindow().EnableCursor();
-				Application::Get().GetImGuiLayer()->EnableMouseEvents();
-			}
-			else
-			{
-				m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations = true;
-				Application::Get().GetWindow().EnableCursor(false);
-				Application::Get().GetImGuiLayer()->EnableMouseEvents(false);
-			}
-		}
-		return false;
 	}
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
@@ -188,11 +151,15 @@ namespace Saba {
 			ImGui::PopStyleVar(2);
 
 		ImGuiIO& io = ImGui::GetIO();
+		ImGuiStyle& style = ImGui::GetStyle();
+		float minWindowWidth = style.WindowMinSize.x;
+		style.WindowMinSize.x = 370.0f;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGuiID dockspaceID = ImGui::GetID("DockSpace");
 			ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspaceFlags);
 		}
+		style.WindowMinSize.x = minWindowWidth;
 
 		if (ImGui::BeginMenuBar())
 		{
@@ -239,12 +206,6 @@ namespace Saba {
 					fileBrowser.ClearSelected();
 				}
 				ImGui::SameLine(); ImGui::Text("%s", filepath.c_str());
-
-				ImGui::Separator();
-
-				bool enable = m_Camera.GetComponent<NativeScriptComponent>().GetInstance<PerspectiveCameraController>()->p_EnableRotations;
-				ImGui::Checkbox("Camera rotations enabled", &enable);
-				ImGui::SameLine(); ImGui::HelpMarker("Press I key to enable camera rotations");
 
 			ImGui::End();
 

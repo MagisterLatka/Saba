@@ -43,7 +43,7 @@ namespace Saba {
 
 		SpriteComponent() = default;
 		SpriteComponent(const SpriteComponent&) = default;
-		SpriteComponent(glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f)
+		SpriteComponent(glm::vec4 color, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f)
 			: Color(color), Texture(texture), TillingFactor(tillingFactor) {}
 	};
 
@@ -70,7 +70,7 @@ namespace Saba {
 		bool Primary = true;
 		bool FixedAspectRatio = false;
 
-		CameraComponent() = delete;
+		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 		CameraComponent(const SceneCamera& camera)
 			: Camera(camera) {}

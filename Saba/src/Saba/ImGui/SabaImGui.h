@@ -36,4 +36,5 @@ namespace Saba {
 	bool ColorEdit3(const std::string& label, glm::vec3& values, float columnWidth = 100.0f);
 	bool ColorEdit4(const std::string& label, glm::vec4& values, float columnWidth = 100.0f);
 
+	void HelpMarker(const char* desc);
 }

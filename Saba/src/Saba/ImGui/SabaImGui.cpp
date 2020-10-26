@@ -65,7 +65,10 @@ namespace Saba {
 
 	bool DragFloat(const std::string& label, float& value, float resetValue, float minVal, float maxVal, float speed, float columnWidth)
 	{
+		auto& boldFont = ImGui::GetIO().Fonts->Fonts[0];
+
 		ImGui::PushID(label.c_str());
+
 		ImGui::Columns(2);
 		ImGui::SetColumnWidth(0, columnWidth);
 		ImGui::TextUnformatted(label.c_str());
@@ -80,8 +83,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize))
 			value = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -96,7 +101,10 @@ namespace Saba {
 	}
 	bool DragFloat2(const std::string& label, glm::vec2& values, float resetValue, float minVal, float maxVal, float speed, float columnWidth)
 	{
+		auto& boldFont = ImGui::GetIO().Fonts->Fonts[0];
+
 		ImGui::PushID(label.c_str());
+
 		ImGui::Columns(2);
 		ImGui::SetColumnWidth(0, columnWidth);
 		ImGui::TextUnformatted(label.c_str());
@@ -111,8 +119,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize))
 			values.x = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -124,8 +134,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
 			values.y = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -141,7 +153,10 @@ namespace Saba {
 	}
 	bool DragFloat3(const std::string& label, glm::vec3& values, float resetValue, float minVal, float maxVal, float speed, float columnWidth)
 	{
+		auto& boldFont = ImGui::GetIO().Fonts->Fonts[0];
+
 		ImGui::PushID(label.c_str());
+
 		ImGui::Columns(2);
 		ImGui::SetColumnWidth(0, columnWidth);
 		ImGui::TextUnformatted(label.c_str());
@@ -156,8 +171,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize))
 			values.x = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -169,8 +186,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
 			values.y = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -182,8 +201,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize))
 			values.z = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -199,7 +220,10 @@ namespace Saba {
 	}
 	bool DragFloat4(const std::string& label, glm::vec4& values, float resetValue, float minVal, float maxVal, float speed, float columnWidth)
 	{
+		auto& boldFont = ImGui::GetIO().Fonts->Fonts[0];
+
 		ImGui::PushID(label.c_str());
+
 		ImGui::Columns(2);
 		ImGui::SetColumnWidth(0, columnWidth);
 		ImGui::TextUnformatted(label.c_str());
@@ -214,8 +238,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize))
 			values.x = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -227,8 +253,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
 			values.y = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -240,8 +268,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize))
 			values.z = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -253,8 +283,10 @@ namespace Saba {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.8f, 0.1f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.9f, 0.15f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.8f, 0.1f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("W", buttonSize))
 			values.w = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -304,4 +336,16 @@ namespace Saba {
 		return changed;
 	}
 
+	void HelpMarker(const char* desc) //From imgui_demo.cpp
+	{
+		ImGui::TextDisabled("(?)");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
 }

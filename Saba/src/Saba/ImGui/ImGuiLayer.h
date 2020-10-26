@@ -21,6 +21,8 @@ namespace Saba {
 		bool IsBlockingEvents() const { return m_BlockEvents; }
 
 		void EnableMouseEvents(bool enable = true);
+
+		void SetDarkThemeColors();
 	private:
 		bool m_BlockEvents = true;
 	};

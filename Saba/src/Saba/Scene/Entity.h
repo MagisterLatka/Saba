@@ -15,7 +15,10 @@ namespace Saba {
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
 		{
-			return m_Scene->m_Registry.emplace<T>(m_ID, std::forward<Args>(args)...);
+			SB_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
+			auto& component = m_Scene->m_Registry.emplace<T>(m_ID, std::forward<Args>(args)...);
+			//m_Scene->OnAddComponent<T>(*this, component);
+			return component;
 		}
 		template<typename T>
 		T& GetComponent()
@@ -35,6 +38,7 @@ namespace Saba {
 
 		operator bool() const { return m_ID != entt::null; }
 		operator uint32_t() const { return (uint32_t)m_ID; }
+		operator entt::entity() const { return m_ID; }
 
 		bool operator==(const Entity& other) const { return m_ID == other.m_ID && m_Scene == other.m_Scene; }
 		bool operator!=(const Entity& other) const { return !(*this == other); }
