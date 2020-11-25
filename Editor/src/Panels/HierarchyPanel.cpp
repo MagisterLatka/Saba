@@ -135,22 +135,28 @@ namespace Saba {
 
 		if (ImGui::BeginPopup("add"))
 		{
-			if (ImGui::MenuItem("Camera"))
+			if (!entity.HasComponent<CameraComponent>())
 			{
-				entity.AddComponent<CameraComponent>();
-				ImGui::CloseCurrentPopup();
+				if (ImGui::MenuItem("Camera"))
+				{
+					entity.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 			}
-			if (ImGui::MenuItem("Sprite"))
+			if (!entity.HasComponent<SpriteComponent>())
 			{
-				entity.AddComponent<SpriteComponent>();
-				ImGui::CloseCurrentPopup();
+				if (ImGui::MenuItem("Sprite"))
+				{
+					entity.AddComponent<SpriteComponent>();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 			ImGui::EndPopup();
 		}
 		ImGui::PopItemWidth();
 
 
-		DrawComponent<TransformComponent>(m_Scene, "Transform component", entity, [](auto& component, auto& scene)
+		DrawComponent<TransformComponent>(m_Scene, "Transform component", entity, [](TransformComponent& component, auto& scene)
 		{
 			Saba::DragFloat3("Pos", component.Pos, 0.0f, 0.0f, 0.0f, 0.1f);
 
@@ -160,14 +166,36 @@ namespace Saba {
 
 			Saba::DragFloat3("Scale", component.Scale, 1.0f, 0.01f, 10.0f, 0.01f);
 		}, false);
-		DrawComponent<SpriteComponent>(m_Scene, "Sprite component", entity, [](auto& component, auto& scene)
+		DrawComponent<SpriteComponent>(m_Scene, "Sprite component", entity, [](SpriteComponent& component, auto& scene)
 		{
 			Saba::ColorEdit4("Color", component.Color);
 			Saba::DragFloat("Tilling factor", component.TillingFactor, 1.0f, 0.01f, 10.0f, 0.01f);
+
+			static char buffer[256];
+			memset(buffer, 0, sizeof(buffer));
+			strcpy_s(buffer, sizeof(buffer), component.TextureID.c_str());
+			if (ImGui::InputText("Texture", buffer, sizeof(buffer)))
+			{
+				std::string textureID(buffer);
+ 				if (TextureManager::Has2D(textureID))
+				{
+					component.Texture = TextureManager::Get2D(textureID);
+					component.TextureID = buffer;
+				}
+				else
+				{
+					if (auto a = TextureManager::GetFromFilepath(textureID); a.first)
+					{
+						component.Texture = a.first;
+						component.TextureID = buffer;
+					}
+				}
+			}
 		});
-		DrawComponent<CameraComponent>(m_Scene, "Camera component", entity, [](auto& component, auto& scene)
+		DrawComponent<CameraComponent>(m_Scene, "Camera component", entity, [](CameraComponent& component, auto& scene)
 		{
-			ImGui::Checkbox("Primary camera", &component.Primary);
+			ImGui::Checkbox("Primary 2D camera", &component.Primary2D);
+			ImGui::Checkbox("Primary 3D camera", &component.Primary3D);
 
 			static constexpr char* typeStrings[] = { "Perspective", "Orthographic" };
 			const char* currentType = typeStrings[(int)component.Camera.m_Type];

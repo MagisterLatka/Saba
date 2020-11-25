@@ -34,6 +34,8 @@ namespace Saba {
 
 		virtual void SetUniformMat3(const std::string& name, const glm::mat3& value) override;
 		virtual void SetUniformMat4(const std::string& name, const glm::mat4& value) override;
+
+		virtual bool HasUniform(const std::string& name) override;
 	private:
 		std::string Read(const std::string& filepath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);

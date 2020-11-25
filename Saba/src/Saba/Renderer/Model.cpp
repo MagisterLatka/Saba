@@ -54,12 +54,12 @@ namespace Saba {
 	Model::Model(const Ref<Mesh>& mesh)
 		: m_Meshes({ mesh })
 	{}
-	Model::Model(const std::string & filepath)
+	Model::Model(const std::string& filepath)
 	{
 		Load(filepath);
 	}
 
-	void Model::Load(const std::string & filepath)
+	void Model::Load(const std::string& filepath)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filepath, aiProcess_CalcTangentSpace | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate);

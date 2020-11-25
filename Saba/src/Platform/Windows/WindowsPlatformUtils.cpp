@@ -18,7 +18,7 @@ namespace Saba {
 	std::string FileDialogs::Open(const char* filter)
 	{
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
+		CHAR szFile[256] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
 		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
@@ -37,7 +37,7 @@ namespace Saba {
 	std::string FileDialogs::Save(const char* filter)
 	{
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
+		CHAR szFile[256] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
 		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());

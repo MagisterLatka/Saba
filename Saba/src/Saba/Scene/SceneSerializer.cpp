@@ -3,6 +3,7 @@
 
 #include "Saba/Scene/Entity.h"
 #include "Saba/Scene/Components.h"
+#include "Saba/Utils/AssetsManager.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -126,7 +127,8 @@ namespace Saba {
 			out << YAML::Key << "OrthographicFar" << YAML::Value << camera.GetOrthographicFarClip();
 			out << YAML::EndMap; // Camera
 
-			out << YAML::Key << "Primary" << YAML::Value << cameraComponent.Primary;
+			out << YAML::Key << "Primary 2D" << YAML::Value << cameraComponent.Primary2D;
+			out << YAML::Key << "Primary 3D" << YAML::Value << cameraComponent.Primary3D;
 			out << YAML::Key << "FixedAspectRatio" << YAML::Value << cameraComponent.FixedAspectRatio;
 
 			out << YAML::EndMap; // CameraComponent
@@ -140,6 +142,7 @@ namespace Saba {
 			auto& spriteComponent = entity.GetComponent<SpriteComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteComponent.Color;
 			out << YAML::Key << "Tilling factor" << YAML::Value << spriteComponent.TillingFactor;
+			out << YAML::Key << "Texture" << YAML::Value << spriteComponent.TextureID;
 
 			out << YAML::EndMap; // SpriteComponent
 		}
@@ -196,8 +199,7 @@ namespace Saba {
 
 				Entity deserializedEntity = m_Scene->CreateEntity(name);
 
-				auto transformComponent = entity["TransformComponent"];
-				if (transformComponent)
+				if (auto transformComponent = entity["TransformComponent"])
 				{
 					// Entities always have transforms
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
@@ -205,9 +207,7 @@ namespace Saba {
 					tc.Orientation = transformComponent["Orientation"].as<glm::vec3>();
 					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
 				}
-
-				auto cameraComponent = entity["CameraComponent"];
-				if (cameraComponent)
+				if (auto cameraComponent = entity["CameraComponent"])
 				{
 					auto& cc = deserializedEntity.AddComponent<CameraComponent>();
 
@@ -222,15 +222,26 @@ namespace Saba {
 					cc.Camera.SetOrthographicNearClip(cameraProps["OrthographicNear"].as<float>());
 					cc.Camera.SetOrthographicFarClip(cameraProps["OrthographicFar"].as<float>());
 
-					cc.Primary = cameraComponent["Primary"].as<bool>();
+					cc.Primary2D = cameraComponent["Primary 2D"].as<bool>();
+					cc.Primary3D = cameraComponent["Primary 3D"].as<bool>();
 					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
 				}
-
-				auto spriteRendererComponent = entity["SpriteComponent"];
-				if (spriteRendererComponent)
+				if (auto spriteComponent = entity["SpriteComponent"])
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteComponent>();
-					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
+					src.Color = spriteComponent["Color"].as<glm::vec4>();
+					src.TillingFactor = spriteComponent["Tilling factor"].as<float>();
+					if (spriteComponent["Texture"])
+					{
+						src.TextureID = spriteComponent["Texture"].as<std::string>();
+						if (TextureManager::Has2D(src.TextureID))
+							src.Texture = TextureManager::Get2D(src.TextureID);
+						else
+						{
+							if (auto a = TextureManager::GetFromFilepath(src.TextureID); a.first)
+								src.Texture = a.first;
+						}
+					}
 				}
 			}
 		}

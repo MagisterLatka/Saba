@@ -27,12 +27,6 @@ namespace Saba {
 		m_FBO = Framebuffer::Create(fbSpec);
 
 
-		TextureData texData;
-		texData.Filepath = "assets/textures/checkerboard.png";
-		texData.MagnificationFilter = Filter::Nearest;
-		TextureManager::Add2D("checkerboard", texData);
-
-
 		ShaderManager::Add("particle", "assets/shaders/particle.glsl");
 
 
@@ -194,6 +188,29 @@ namespace Saba {
 				ImGui::TextUnformatted("Renderer2D stats:");
 				ImGui::Text("\tQuads: %d", Renderer2D::GetStats().quadCount);
 				ImGui::Text("\tDraw calls: %d", Renderer2D::GetStats().drawCalls);
+				ImGui::Text("\tShader: %s", ShaderManager::GetName(Renderer2D::GetCurrentShader()).c_str());
+				ImGui::SameLine();
+				if (ImGui::Button("Select shader"))
+				{
+					std::string filepath = FileDialogs::Open("Shader file (*.glsl)\0*.glsl\0");
+					auto [shader, created] = ShaderManager::GetFromFilepath(filepath);
+					if (shader)
+					{
+						Renderer2D::SetShader(shader);
+						if (created)
+						{
+							static int texIDs[] = {
+								0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+							};
+							shader->Bind();
+							if (shader->HasUniform("u_Textures"))
+								shader->SetUniformInt1v("u_Textures", texIDs, 32);
+						}
+					}
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Default"))
+					Renderer2D::SetShader();
 
 				ImGui::Separator();
 
@@ -201,6 +218,29 @@ namespace Saba {
 				ImGui::Text("\tVertices: %d", Renderer3D::GetStats().verticesCount);
 				ImGui::Text("\tIndices: %d", Renderer3D::GetStats().indicesCount);
 				ImGui::Text("\tDraw calls: %d", Renderer3D::GetStats().drawCalls);
+				ImGui::Text("\tShader: %s", ShaderManager::GetName(Renderer3D::GetCurrentShader()).c_str());
+				ImGui::SameLine();
+				if (ImGui::Button("Select shader"))
+				{
+					std::string filepath = FileDialogs::Open("Shader file (*.glsl)\0*.glsl\0");
+					auto [shader, created] = ShaderManager::GetFromFilepath(filepath);
+					if (shader)
+					{
+						Renderer3D::SetShader(shader);
+						if (created)
+						{
+							static int texIDs[] = {
+								0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+							};
+							shader->Bind();
+							if (shader->HasUniform("u_Textures"))
+								shader->SetUniformInt1v("u_Textures", texIDs, 32);
+						}
+					}
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Default"))
+					Renderer3D::SetShader();
 
 			ImGui::End();
 

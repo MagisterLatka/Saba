@@ -39,6 +39,7 @@ namespace Saba {
 	{
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture = {};
+		std::string TextureID = {};
 		float TillingFactor = 1.0f;
 
 		SpriteComponent() = default;
@@ -67,7 +68,8 @@ namespace Saba {
 	struct CameraComponent
 	{
 		SceneCamera Camera;
-		bool Primary = true;
+		bool Primary2D = true;
+		bool Primary3D = true;
 		bool FixedAspectRatio = false;
 
 		CameraComponent() = default;

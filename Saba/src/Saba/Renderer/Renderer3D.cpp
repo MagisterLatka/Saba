@@ -107,6 +107,10 @@ namespace Saba {
 		delete[] s_Data3D.indicesBuffer;
 	}
 
+	Ref<Shader> Renderer3D::GetCurrentShader()
+	{
+		return s_Data3D.activeShader;
+	}
 	void Renderer3D::SetShader(Ref<Shader> shader)
 	{
 		if (shader)

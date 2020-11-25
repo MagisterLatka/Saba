@@ -12,6 +12,7 @@ namespace Saba {
 		static void Init();
 		static void Shutdown();
 
+		static Ref<Shader> GetCurrentShader();
 		static void SetShader(Ref<Shader> shader = {});
 
 		static void BeginScene(const Camera& camera, const glm::mat4& tranform = glm::mat4(1.0f));

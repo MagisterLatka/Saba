@@ -32,6 +32,8 @@ namespace Saba {
 		virtual void SetUniformMat3(const std::string& name, const glm::mat3& value) = 0;
 		virtual void SetUniformMat4(const std::string& name, const glm::mat4& value) = 0;
 
+		virtual bool HasUniform(const std::string& name) = 0;
+
 		static Ref<Shader> Create(const std::string& vertexSrc, const std::string& fragmentSrc);
 		static Ref<Shader> Create(const std::string& vertexSrc, const std::string& geometrySrc, const std::string& fragmentSrc);
 		static Ref<Shader> Create(const std::string& filepath);

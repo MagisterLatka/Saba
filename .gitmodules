@@ -13,3 +13,6 @@
 [submodule "Saba/vendor/yaml-cpp"]
 	path = Saba/vendor/yaml-cpp
 	url = https://github.com/MagisterLatka/yaml-cpp
+[submodule "Saba/vendor/ImGuizmo"]
+	path = Saba/vendor/ImGuizmo
+	url = https://github.com/MagisterLatka/ImGuizmo

@@ -125,6 +125,11 @@ namespace Saba {
 		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
+	bool OpenGLShader::HasUniform(const std::string& name)
+	{
+		return glGetUniformLocation(m_ID, name.c_str()) != -1;
+	}
+
 	std::string OpenGLShader::Read(const std::string& filepath)
 	{
 		std::string result;

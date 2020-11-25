@@ -68,40 +68,55 @@ namespace Saba {
 			component.Orientation.z = glm::mod(component.Orientation.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
 		});
 
-		Camera* renderCamera = nullptr;
-		glm::mat4* cameraTransform = nullptr;
+		Camera* renderCamera2D = nullptr;
+		Camera* renderCamera3D = nullptr;
+		glm::mat4* cameraTransform2D = nullptr;
+		glm::mat4* cameraTransform3D = nullptr;
 		{
 			auto cameras = m_Registry.group<CameraComponent>(entt::get<TransformComponent>);
 			for (auto entity : cameras)
 			{
 				auto [transform, camera] = cameras.get<TransformComponent, CameraComponent>(entity);
-				if (camera.Primary)
+				if (camera.Primary2D)
 				{
-					renderCamera = &camera.Camera;
-					cameraTransform = &transform.Transform;
+					renderCamera2D = &camera.Camera;
+					cameraTransform2D = &transform.Transform;
+				}
+				if (camera.Primary3D)
+				{
+					renderCamera3D = &camera.Camera;
+					cameraTransform3D = &transform.Transform;
 				}
 			}
 		}
 
-		if (renderCamera)
+		if (renderCamera3D)
 		{
-			Renderer3D::BeginScene(*renderCamera, *cameraTransform);
 			auto models = m_Registry.group<ModelComponent>(entt::get<TransformComponent>);
-			for (auto entity : models)
+			if (!models.empty())
 			{
-				auto [model, transform] = models.get<ModelComponent, TransformComponent>(entity);
-				for (auto& mesh : *model.Model)
-					Renderer3D::DrawMesh(mesh, transform);
+				Renderer3D::BeginScene(*renderCamera3D, *cameraTransform3D);
+				for (auto entity : models)
+				{
+					auto [model, transform] = models.get<ModelComponent, TransformComponent>(entity);
+					for (auto& mesh : *model.Model)
+						Renderer3D::DrawMesh(mesh, transform);
+				}
 			}
-
-			Renderer2D::BeginScene(*renderCamera, *cameraTransform);
+		}
+		if (renderCamera2D)
+		{
 			auto sprites = m_Registry.group<SpriteComponent>(entt::get<TransformComponent>);
-			for (auto entity : sprites)
+			if (!sprites.empty())
 			{
-				auto [transform, sprite] = sprites.get<TransformComponent, SpriteComponent>(entity);
-				Renderer2D::DrawRotatedQuad(transform.Pos, { transform.Scale.x, transform.Scale.y }, transform.Orientation.z, sprite.Color, sprite.Texture, sprite.TillingFactor);
+				Renderer2D::BeginScene(*renderCamera2D, *cameraTransform2D);
+				for (auto entity : sprites)
+				{
+					auto [transform, sprite] = sprites.get<TransformComponent, SpriteComponent>(entity);
+					Renderer2D::DrawRotatedQuad(transform.Pos, { transform.Scale.x, transform.Scale.y }, transform.Orientation.z, sprite.Color, sprite.Texture, sprite.TillingFactor);
+				}
+				Renderer2D::Flush();
 			}
-			Renderer2D::Flush();
 		}
 	}
 

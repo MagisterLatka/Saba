@@ -10,6 +10,7 @@ Entities:
     SpriteComponent:
       Color: [0, 1, 0.41568628, 1]
       Tilling factor: 1
+      Texture: ""
   - Entity: 12837192831273
     TagComponent:
       Tag: Quad1
@@ -20,6 +21,7 @@ Entities:
     SpriteComponent:
       Color: [1, 1, 0, 1]
       Tilling factor: 1
+      Texture: ""
   - Entity: 12837192831273
     TagComponent:
       Tag: Quad
@@ -30,9 +32,10 @@ Entities:
     SpriteComponent:
       Color: [1, 0, 0, 1]
       Tilling factor: 1
+      Texture: ""
   - Entity: 12837192831273
     TagComponent:
-      Tag: Camera
+      Tag: Camera2D
     TransformComponent:
       Position: [0, 0, 0]
       Orientation: [0, 0, 0]
@@ -46,7 +49,8 @@ Entities:
         OrthographicSize: 10
         OrthographicNear: -1
         OrthographicFar: 1
-      Primary: true
+      Primary 2D: true
+      Primary 3D: false
       FixedAspectRatio: false
   - Entity: 12837192831273
     TagComponent:
@@ -56,5 +60,6 @@ Entities:
       Orientation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteComponent:
-      Color: [0, 1, 1, 1]
+      Color: [1, 1, 1, 1]
       Tilling factor: 1
+      Texture: assets/textures/checkerboard.png

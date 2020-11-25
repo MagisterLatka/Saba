@@ -1,5 +1,13 @@
 #pragma once
 
+#include <Saba/Platform.h>
+
+#ifdef SB_PLATFORM_WINDOWS
+#	ifndef NOMINMAX
+#		define NOMINMAX
+#	endif
+#endif
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -16,3 +24,7 @@
 #include <glm/glm.hpp>
 
 #include <Saba/Log.h>
+
+#ifdef SB_PLATFORM_WINDOWS
+#	include <Windows.h>
+#endif

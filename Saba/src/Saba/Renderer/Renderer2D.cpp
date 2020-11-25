@@ -144,6 +144,10 @@ namespace Saba {
 		s_Data.defaultShader.reset();
 	}
 
+	Ref<Shader> Renderer2D::GetCurrentShader()
+	{
+		return s_Data.activeShader;
+	}
 	void Renderer2D::SetShader(Ref<Shader> shader)
 	{
 		if (shader)
