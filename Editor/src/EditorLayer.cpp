@@ -4,6 +4,8 @@
 
 #include "Saba/ImGui/SabaImGui.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <ImGuizmo.h>
 
 #include "Saba/Scene/SceneSerializer.h"
 #include "Saba/Utils/PlatformUtils.h"
@@ -253,7 +255,7 @@ namespace Saba {
 				m_ViewportHovered = ImGui::IsWindowHovered();
 				m_Scene->SetViewportFocusState(m_ViewportFocused);
 				m_Scene->SetViewportHoverState(m_ViewportHovered);
-				Application::Get().GetImGuiLayer()->BlockEvent(!m_ViewportFocused || !m_ViewportHovered);
+				Application::Get().GetImGuiLayer()->BlockEvent(!m_ViewportFocused && !m_ViewportHovered);
 
 				ImVec2 viewportSize = ImGui::GetContentRegionAvail();
 				m_ViewportSize = { viewportSize.x, viewportSize.y };
@@ -262,6 +264,71 @@ namespace Saba {
 				m_Scene->SetViewportPos(m_ViewportPos);
 
 				ImGui::Image(m_FBO->GetAttachmentID(0), viewportSize, { 0.0f, 1.0f }, { 1.0f, 0.0f });
+
+				Entity selected = m_HierarchyPanel.GetSelected();
+				if (selected && m_GuimzoType != -1)
+				{
+					bool hasCamera = false;
+					glm::mat4 cameraProjection, cameraView;
+
+					if (selected.HasComponent<SpriteComponent>())
+					{
+						ImGuizmo::SetOrthographic(true);
+
+						auto& camera = m_Scene->GetPrimary2DCameraEntity();
+						if (camera)
+						{
+							cameraProjection = camera.GetComponent<CameraComponent>().Camera.GetProjection();
+							cameraView = glm::inverse(camera.GetComponent<TransformComponent>().Transform);
+							hasCamera = true;
+						}
+					}
+					else
+					{
+						ImGuizmo::SetOrthographic(false);
+
+						auto& camera = m_Scene->GetPrimary3DCameraEntity();
+						if (camera)
+						{
+							cameraProjection = camera.GetComponent<CameraComponent>().Camera.GetProjection();
+							cameraView = glm::inverse(camera.GetComponent<TransformComponent>().Transform);
+							hasCamera = true;
+						}
+					}
+
+					if (hasCamera)
+					{
+						ImGuizmo::SetDrawlist();
+
+						float windowWidth = (float)ImGui::GetWindowWidth();
+						float windowHeight = (float)ImGui::GetWindowHeight();
+						ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+						auto& tc = selected.GetComponent<TransformComponent>();
+						glm::mat4 entityTransform = tc.Transform;
+						float a = entityTransform[3][0];
+
+						bool snap = Input::IsKeyPressed(Key::LeftControl);
+						float snapValue = 0.5f;
+						if (m_GuimzoType == ImGuizmo::OPERATION::ROTATE)
+							snapValue = 45.0f;
+						float snapValues[3] = { snapValue, snapValue, snapValue };
+
+						ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GuimzoType, ImGuizmo::MODE::LOCAL,
+											 glm::value_ptr(entityTransform), nullptr, snap ? snapValues : nullptr);
+
+						if (ImGuizmo::IsUsing())
+						{
+							glm::vec3 translation, rotation, scale;
+							Math::Decompose(entityTransform, translation, rotation, scale);
+
+							glm::vec3 delta = rotation - tc.Orientation;
+							tc.Pos = translation;
+							tc.Orientation += delta;
+							tc.Scale = scale;
+						}
+					}
+				}
 
 			ImGui::End();
 			ImGui::PopStyleVar();
@@ -298,6 +365,19 @@ namespace Saba {
 					SaveScene();
 				else if (control && shift)
 					SaveAsScene();
+				break;
+
+			case Key::Q:
+				m_GuimzoType = -1;
+				break;
+			case Key::W:
+				m_GuimzoType = 0;
+				break;
+			case Key::E:
+				m_GuimzoType = 1;
+				break;
+			case Key::R:
+				m_GuimzoType = 2;
 				break;
 		}
 

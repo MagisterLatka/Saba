@@ -10,6 +10,8 @@ namespace Saba {
 
 		void SetScene(const Ref<Scene>& scene);
 
+		Entity GetSelected() const { return m_Selected; }
+
 		void OnImGuiRender();
 	private:
 		void DrawEntityNode(Entity entity);

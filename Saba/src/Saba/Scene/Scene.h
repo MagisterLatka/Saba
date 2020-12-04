@@ -8,7 +8,6 @@
 
 namespace Saba {
 
-	class Entity;
 	class Scene
 	{
 		friend class Entity;
@@ -20,6 +19,9 @@ namespace Saba {
 
 		Entity CreateEntity(const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
+
+		Entity GetPrimary2DCameraEntity();
+		Entity GetPrimary3DCameraEntity();
 
 		void OnStart();
 		void OnEnd();

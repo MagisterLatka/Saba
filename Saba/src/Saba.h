@@ -35,3 +35,4 @@
 #include <Saba/Renderer/VertexArray.h>
 
 #include <Saba/Utils/AssetsManager.h>
+#include <Saba/Utils/Math.h>

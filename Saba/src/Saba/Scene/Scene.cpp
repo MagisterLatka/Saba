@@ -25,6 +25,29 @@ namespace Saba {
 		m_Registry.destroy(entity);
 	}
 
+	Entity Scene::GetPrimary2DCameraEntity()
+	{
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			auto& camera = view.get<CameraComponent>(entity);
+			if (camera.Primary2D)
+				return Entity(entity, this);
+		}
+		return {};
+	}
+	Entity Scene::GetPrimary3DCameraEntity()
+	{
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			auto& camera = view.get<CameraComponent>(entity);
+			if (camera.Primary3D)
+				return Entity(entity, this);
+		}
+		return {};
+	}
+
 	void Scene::OnStart()
 	{
 		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& component)

@@ -35,10 +35,6 @@ namespace Saba {
 		std::string m_CurrentScene;
 
 		SceneHierarchyPanel m_HierarchyPanel;
-#if SB_DEBUG
-		static constexpr float m_QuadFrequency = 0.5f;
-#else
-		static constexpr float m_QuadFrequency = 0.1f;
-#endif
+		int m_GuimzoType = -1;
 	};
 }

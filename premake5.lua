@@ -20,6 +20,7 @@ IncludeDirs["stbi"] = "Saba/vendor/stb_image"
 IncludeDirs["entt"] = "Saba/vendor/entt/include"
 IncludeDirs["assimp"] = "Saba/vendor/assimp/include"
 IncludeDirs["yaml_cpp"] = "Saba/vendor/yaml-cpp/include"
+IncludeDirs["ImGuizmo"] = "Saba/vendor/ImGuizmo"
 
 group "Dep"
 	include "Saba/vendor/GLFW"
@@ -45,7 +46,9 @@ project "Saba"
 	files
 	{
 		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/src/**.h"
+		"%{prj.name}/src/**.h",
+		"Saba/vendor/ImGuizmo/ImGuizmo.cpp",
+		"Saba/vendor/ImGuizmo/ImGuizmo.h"
 	}
 	
 	defines
@@ -66,7 +69,8 @@ project "Saba"
 		"%{IncludeDirs.stbi}",
 		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.assimp}",
-		"%{IncludeDirs.yaml_cpp}"
+		"%{IncludeDirs.yaml_cpp}",
+		"%{IncludeDirs.ImGuizmo}"
 	}
 	
 	links
@@ -80,10 +84,9 @@ project "Saba"
 		"Saba/vendor/assimp/assimp.lib"
 	}
 	
-	postbuildcommands
-	{
-		
-	}
+	filter "files:Saba/vendor/ImGuizmo/**.cpp"
+		flags { "NoPCH" }
+	
 	
 	filter "configurations:Debug"
 		defines "SB_DEBUG"
@@ -124,7 +127,8 @@ project "Game"
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.GLM}",
 		"%{IncludeDirs.entt}",
-		"%{IncludeDirs.ImGui}"
+		"%{IncludeDirs.ImGui}",
+		"%{IncludeDirs.ImGuizmo}"
 	}
 	
 	links
@@ -176,7 +180,8 @@ project "Editor"
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.GLM}",
 		"%{IncludeDirs.entt}",
-		"%{IncludeDirs.ImGui}"
+		"%{IncludeDirs.ImGui}",
+		"%{IncludeDirs.ImGuizmo}"
 	}
 	
 	links
