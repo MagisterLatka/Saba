@@ -1,0 +1,55 @@
+cmake_minimum_required(VERSION 3.21...3.27 FATAL_ERROR)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+project(Saba VERSION 0.0.1 DESCRIPTION "Saba Engine" LANGUAGES CXX)
+
+include(Cmake/PreventInSourceIntermediates.cmake)
+
+set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-x86_64-$<PATH:GET_FILENAME,${CMAKE_CXX_COMPILER}>")
+if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${outputdir}/out")
+endif()
+if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${outputdir}/out")
+endif()
+if(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${outputdir}/lib")
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(SB_DEBUG)
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+	add_compile_definitions(SB_RELEASE)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+	add_compile_definitions(SB_DIST)
+endif()
+
+if(${USE_COMPILER} STREQUAL "cl")
+    add_compile_definitions(SB_COMPILER_CL)
+elseif(${USE_COMPILER} STREQUAL "clang-cl")
+    add_compile_definitions(SB_COMPILER_CLANG_CL)
+elseif(${USE_COMPILER} STREQUAL "gcc")
+    add_compile_definitions(SB_COMPILER_GCC)
+elseif(${USE_COMPILER} STREQUAL "clang")
+    add_compile_definitions(SB_COMPILER_CLANG)
+endif()
+
+add_compile_definitions(GLM_FORCE_CXX11)
+add_compile_definitions(GLM_FORCE_SILENT_WARNINGS)
+
+include_directories(Saba/vendor/spdlog/include)
+include_directories(Saba/vendor/glm)
+include_directories(Saba/vendor)
+include_directories(Saba/src)
+
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ProjectOptions.cmake)
+include(ProjectOptions.cmake)
+SabaOptionsSetup()
+SabaApplyOptions()
+target_compile_features(SabaOptions INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+
+add_subdirectory(Saba)
+add_subdirectory(App)
