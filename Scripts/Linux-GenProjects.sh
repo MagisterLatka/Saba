@@ -23,6 +23,6 @@ case $option in
 esac
 
 pushd $(dirname "$0")/../ > /dev/null
-rm -r bin bin-int
 cmake . --preset $option
+echo "${option}" > .cmake-option
 popd > /dev/null

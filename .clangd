@@ -1,2 +1,2 @@
 CompileFlags:
-    CompilationDatabase: bin-int
+    CompilationDatabase: bin-int/unixlike-clang-debug

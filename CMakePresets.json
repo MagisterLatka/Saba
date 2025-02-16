@@ -11,8 +11,8 @@
             "description": "General settings used by all build types",
             "hidden": true,
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/bin-int",
-            "installDir": "${sourceDir}/install"
+            "binaryDir": "${sourceDir}/bin-int/${presetName}",
+            "installDir": "${sourceDir}/install/${presetName}"
         },
         {
             "name": "windows-common",
