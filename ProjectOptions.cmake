@@ -3,13 +3,11 @@ include(CheckCXXCompilerFlag)
 
 macro(SabaOptionsSetup)
     option(SabaWarningsAsErrors "Treat Warnings As Errors" OFF)
-    option(SabaEnableClangTidy "Enable clang-tidy" ON)
     option(SabaEnableCppCheck "Enable cpp-check analysis" OFF)
     option(SabaEnablePCH "Enable precompiled headers" ON)
 
     mark_as_advanced(
         SabaWarningsAsErrors
-        SabaEnableClangTidy
         SabaEnableCppCheck
         SabaEnablePCH
     )
@@ -31,17 +29,12 @@ macro(SabaApplyOptions)
     include(Cmake/CompilerWarnings.cmake)
     SetProjectWarnings(SabaWarnings ${SabaWarningsAsErrors} "" "" "" "")
 
-    include(Cmake/ClangTidy.cmake)
-    if (SabaEnableClangTidy)
-        EnableClangTidy(SabaOptions ${SabaWarningsAsErrors})
-    endif()
-
     include(Cmake/CppCheck.cmake)
     if (SabaEnableCppCheck)
         EnableCppCheck(${SabaWarningsAsErrors} "")
     endif()
 
     if (SabaEnablePCH)
-        target_precompile_headers(SabaOptions INTERFACE "<pch.h>")
+        target_precompile_headers(SabaOptions INTERFACE Saba/src/pch.h)
     endif()
 endmacro()

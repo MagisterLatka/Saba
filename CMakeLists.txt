@@ -8,7 +8,7 @@ project(Saba VERSION 0.0.1 DESCRIPTION "Saba Engine" LANGUAGES CXX)
 
 include(Cmake/PreventInSourceIntermediates.cmake)
 
-set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-x86_64-$<PATH:GET_FILENAME,${CMAKE_CXX_COMPILER}>")
+set(outputdir "${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-x86_64-$<PATH:GET_STEM,${CMAKE_CXX_COMPILER}>")
 if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${outputdir}/out")
 endif()

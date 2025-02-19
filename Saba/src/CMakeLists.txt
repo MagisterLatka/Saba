@@ -6,5 +6,5 @@ endforeach()
 
 add_library(Saba SHARED ${SabaSrc})
 target_include_directories(Saba PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(Saba PUBLIC SB_BUILD_DLL)
+target_compile_definitions(Saba PRIVATE SB_BUILD_DLL)
 target_link_libraries(Saba PRIVATE SabaOptions SabaWarnings)

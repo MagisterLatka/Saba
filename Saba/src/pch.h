@@ -30,7 +30,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#if defined(SOF_PLATFORM_WINDOWS)
+#if defined(SB_PLATFORM_WINDOWS)
 #ifndef NOMIXMAX
 #define NOMINMAX
 #endif
