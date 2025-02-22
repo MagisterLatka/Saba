@@ -7,11 +7,13 @@ public:
     ExampleLayer();
     ~ExampleLayer();
 
-    virtual void OnAttach() override;
-    virtual void OnDetach() override;
-    virtual void OnUpdate(Saba::Timestep ts) override;
-    virtual void OnUIRender() override;
-    virtual void OnEvent(Saba::Event& e) override;
+    void OnAttach() override;
+    void OnDetach() override;
+    void OnUpdate(Saba::Timestep ts) override;
+    void OnUIRender() override;
+    void OnEvent(Saba::Event& e) override;
 private:
-    double m_Time = 0.0;
+    bool OnMouseButtonPressed(Saba::MouseButtonPressedEvent& e);
+private:
+    std::string m_Title;
 };

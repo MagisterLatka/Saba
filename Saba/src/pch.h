@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Saba/Platform.h>
+#include <Saba/Core/Platform.h>
 
 #include <algorithm>
 #include <array>
@@ -22,7 +22,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <Saba/Log.h>
+#include <Saba/Core/Log.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>

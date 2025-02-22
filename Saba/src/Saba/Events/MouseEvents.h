@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Saba/Events/Event.h"
-#include "Saba/MouseCodes.h"
+#include "Saba/Core/MouseCodes.h"
 
 namespace Saba {
 

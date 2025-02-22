@@ -1,2 +1,31 @@
 CompileFlags:
     CompilationDatabase: bin-int/unixlike-clang-debug
+
+Diagnostics:
+    ClangTidy:
+        Add:
+            - modernize-*
+            - readability-*
+            - bugprone-*
+            - performance-*
+        Remove:
+            - modernize-use-trailing-return-type
+            - readability-function-cognitive-complexity
+            - readability-braces-around-statements
+            - readability-identifier-length
+            - readability-isolate-declaration
+            - modernize-use-nodiscard
+            - performance-avoid-endl
+            - modernize-use-designated-initializers
+            - bugprone-easily-swappable-parameters
+            - readability-uppercase-literal-suffix
+            - readability-redundant-access-specifiers
+    UnusedIncludes: Strict
+
+InlayHints:
+    BlockEnd: No
+    Designators: Yes
+    Enabled: Yes
+    ParameterNames: No
+    DeducedTypes: Yes
+    TypeNameLimit: 40

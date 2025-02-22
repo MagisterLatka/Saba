@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.21...3.27 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 project(Saba VERSION 0.0.1 DESCRIPTION "Saba Engine" LANGUAGES CXX)
 
@@ -42,6 +43,8 @@ add_compile_definitions(GLM_FORCE_SILENT_WARNINGS)
 
 include_directories(Saba/vendor/spdlog/include)
 include_directories(Saba/vendor/glm)
+include_directories(Saba/vendor/glfw/include)
+include_directories(Saba/vendor/glad/include)
 include_directories(Saba/vendor)
 include_directories(Saba/src)
 

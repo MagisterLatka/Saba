@@ -1,17 +1,17 @@
 #pragma once
 
 #include "Saba/Events/Event.h"
-#include "Saba/Timestep.h"
+#include "Saba/Core/Timestep.h"
 
 namespace Saba {
 
 class SB_CORE WindowResizeEvent : public Event {
 public:
-    WindowResizeEvent(int xsize, int ysize) noexcept
+    WindowResizeEvent(uint32_t xsize, uint32_t ysize) noexcept
         : m_XSize(xsize), m_YSize(ysize) {}
 
-    int GetXSize() const noexcept { return m_XSize; }
-    int GetYSize() const noexcept { return m_YSize; }
+    uint32_t GetXSize() const noexcept { return m_XSize; }
+    uint32_t GetYSize() const noexcept { return m_YSize; }
 
     std::string ToString() const noexcept override {
         std::ostringstream oss;
@@ -22,7 +22,7 @@ public:
     EVENT_CATEGORY(EventCategoryApplication)
     EVENT_TYPE(WindowResized)
 private:
-    int m_XSize, m_YSize;
+    uint32_t m_XSize, m_YSize;
 };
 
 class SB_CORE WindowCloseEvent : public Event {

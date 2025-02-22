@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Saba/Events/Event.h"
-#include "Saba/KeyCodes.h"
+#include "Saba/Core/KeyCodes.h"
 
 namespace Saba {
 

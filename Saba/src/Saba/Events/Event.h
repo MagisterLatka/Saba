@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Saba/Core.h"
+#include "Saba/Core/Core.h"
 
 namespace Saba {
 
@@ -48,9 +48,10 @@ public:
     Dispatcher(Event &e) noexcept : m_Event(e) {}
 
     template <typename T, typename F>
-    bool Dispatch(const F &fn) noexcept {
+    requires (std::is_base_of_v<Event, T> && std::is_convertible_v<std::invoke_result_t<F, T&>, bool>)
+    bool Dispatch(const F& fn) noexcept {
       if (m_Event.GetEventType() == T::GetStaticType()) {
-        m_Event.p_Handled |= fn(static_cast<T &>(m_Event));
+        m_Event.p_Handled |= fn(static_cast<T&>(m_Event));
         return true;
       }
       return false;
