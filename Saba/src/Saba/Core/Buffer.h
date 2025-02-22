@@ -38,12 +38,12 @@ public:
     ~Buffer() {
         if (m_Delete) {
             switch (m_Allocator) {
-            case Allocator::New:
-                delete[] (uint8_t*)Data;
-                break;
-            case Allocator::Malloc:
-                free(Data);
-                break;
+                case Allocator::New:
+                    delete[] (uint8_t*)Data;
+                    break;
+                case Allocator::Malloc:
+                    free(Data);
+                    break;
             }
         }
     }
@@ -51,15 +51,15 @@ public:
     Buffer& operator=(const Buffer &other) {
         if (m_Delete && Data) {
             switch (m_Allocator) {
-            case Allocator::None:
-            default:
-                SB_CORE_THROW_INFO("Invalid allocator");
-            case Allocator::New:
-                delete[] (uint8_t*)Data;
-                break;
-            case Allocator::Malloc:
-                free(Data);
-                break;
+                case Allocator::None:
+                default:
+                    SB_CORE_THROW_INFO("Invalid allocator");
+                case Allocator::New:
+                    delete[] (uint8_t*)Data;
+                    break;
+                case Allocator::Malloc:
+                    free(Data);
+                    break;
             }
         }
         m_Delete = true;
@@ -67,17 +67,17 @@ public:
         Size = other.Size;
 
         switch (m_Allocator) {
-        case Saba::Buffer::Allocator::None:
-            SB_CORE_THROW_INFO("Invalid allocator");
-            m_Allocator = Allocator::New;
-            Data = new uint8_t[Size];
-            break;
-        case Saba::Buffer::Allocator::New:
-            Data = new uint8_t[Size];
-            break;
-        case Saba::Buffer::Allocator::Malloc:
-            Data = malloc(Size);
-            break;
+            case Saba::Buffer::Allocator::None:
+                SB_CORE_THROW_INFO("Invalid allocator");
+                m_Allocator = Allocator::New;
+                Data = new uint8_t[Size];
+                break;
+            case Saba::Buffer::Allocator::New:
+                Data = new uint8_t[Size];
+                break;
+            case Saba::Buffer::Allocator::Malloc:
+                Data = malloc(Size);
+                break;
         }
 
         memcpy(Data, other.Data, Size);
@@ -86,14 +86,14 @@ public:
     Buffer& operator=(Buffer &&other) noexcept {
         if (m_Delete && Data) {
             switch (m_Allocator) {
-            case Allocator::None:
-                break;
-            case Allocator::New:
-                delete[] (uint8_t*)Data;
-                break;
-            case Allocator::Malloc:
-                free(Data);
-                break;
+                case Allocator::None:
+                    break;
+                case Allocator::New:
+                    delete[] (uint8_t*)Data;
+                    break;
+                case Allocator::Malloc:
+                    free(Data);
+                    break;
             }
         }
 
@@ -119,21 +119,21 @@ public:
         if (size > Size) {
             void *oldData = Data;
             switch (newAllocator) {
-            case Saba::Buffer::Allocator::None: {
-                if (m_Allocator == Allocator::New)
+                case Saba::Buffer::Allocator::None: {
+                    if (m_Allocator == Allocator::New)
+                        Data = new uint8_t[size];
+                    else if (m_Allocator == Allocator::Malloc)
+                        Data = malloc(size);
+                    else
+                        Data = new uint8_t[size];
+                    break;
+                }
+                case Saba::Buffer::Allocator::New:
                     Data = new uint8_t[size];
-                else if (m_Allocator == Allocator::Malloc)
+                    break;
+                case Saba::Buffer::Allocator::Malloc:
                     Data = malloc(size);
-                else
-                    Data = new uint8_t[size];
-                break;
-            }
-            case Saba::Buffer::Allocator::New:
-                Data = new uint8_t[size];
-                break;
-            case Saba::Buffer::Allocator::Malloc:
-                Data = malloc(size);
-                break;
+                    break;
             }
 
             if (oldData) memcpy(Data, oldData, Size);
@@ -142,17 +142,17 @@ public:
 
             if (m_Delete && oldData) {
                 switch (m_Allocator) {
-                case Allocator::None:
-                default:
-                    SB_CORE_THROW_INFO("Invalid allocator");
-                    delete[] (uint8_t*)Data;
-                    break;
-                case Allocator::New:
-                    delete[] (uint8_t*)Data;
-                    break;
-                case Allocator::Malloc:
-                    free(Data);
-                    break;
+                    case Allocator::None:
+                    default:
+                        SB_CORE_THROW_INFO("Invalid allocator");
+                        delete[] (uint8_t*)Data;
+                        break;
+                    case Allocator::New:
+                        delete[] (uint8_t*)Data;
+                        break;
+                    case Allocator::Malloc:
+                        free(Data);
+                        break;
                 }
             }
 

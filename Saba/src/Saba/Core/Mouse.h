@@ -6,6 +6,7 @@ namespace Saba {
 
 class Mouse {
     friend class LinuxWindow;
+    friend class WindowsWindow;
 public:
     class Event {
     public:

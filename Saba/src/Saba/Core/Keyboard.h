@@ -6,6 +6,7 @@ namespace Saba {
 
 class Keyboard {
     friend class LinuxWindow;
+    friend class WindowsWindow;
 public:
     class Event {
     public:

@@ -100,27 +100,27 @@ void LinuxWindow::Init(const WindowProps& props) {
         auto& data = *reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
         KeyCode code = GetKeyCodeFromGLFW(key);
         switch (action) {
-        case GLFW_PRESS: {
-            data.keyboard.OnKeyPressed(static_cast<uint8_t>(code));
-            KeyPressedEvent e(code, 0);
-            data.eventCallback(e);
-            break;
-        }
-        case GLFW_REPEAT: {
-            data.keyboard.OnKeyPressed(static_cast<uint8_t>(code));
-            KeyPressedEvent e(code, 1);
-            data.eventCallback(e);
-            break;
-            break;
-        }
-        case GLFW_RELEASE: {
-            data.keyboard.OnKeyReleased(static_cast<uint8_t>(code));
-            KeyReleasedEvent e(code);
-            data.eventCallback(e);
-            break;
-        }
-        default:
-            throw;
+            case GLFW_PRESS: {
+                data.keyboard.OnKeyPressed(static_cast<uint8_t>(code));
+                KeyPressedEvent e(code, 0);
+                data.eventCallback(e);
+                break;
+            }
+            case GLFW_REPEAT: {
+                data.keyboard.OnKeyPressed(static_cast<uint8_t>(code));
+                KeyPressedEvent e(code, 1);
+                data.eventCallback(e);
+                break;
+                break;
+            }
+            case GLFW_RELEASE: {
+                data.keyboard.OnKeyReleased(static_cast<uint8_t>(code));
+                KeyReleasedEvent e(code);
+                data.eventCallback(e);
+                break;
+            }
+            default:
+                throw;
         }
     });
     glfwSetCharCallback(m_Window, [](GLFWwindow* window, uint32_t code) {
