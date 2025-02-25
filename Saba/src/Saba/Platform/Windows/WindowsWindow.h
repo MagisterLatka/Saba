@@ -9,6 +9,8 @@
 namespace Saba {
 
 class WindowsWindow : public Window {
+    friend class OpenGLContext;
+    friend class DX11Context;
 public:
     class WindowException : public SabaException {
     public:
@@ -39,6 +41,7 @@ public:
     SB_CORE ~WindowsWindow();
 
     SB_CORE void OnUpdate() override;
+    SB_CORE void BindWindow() noexcept override {}
     SB_CORE void BindToRender() noexcept override;
     SB_CORE void Clear(const glm::vec4& color) noexcept override;
     SB_CORE static std::optional<int> ProcessEvents();
@@ -79,8 +82,7 @@ private:
     Mouse m_Mouse;
 
     HWND m_Window = nullptr;
-    ComPtr<IDXGISwapChain> m_SwapChain;
-    ComPtr<ID3D11RenderTargetView> m_TargetView;
+    HGLRC m_Context = nullptr;
 };
 
 }

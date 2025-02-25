@@ -2,9 +2,9 @@
 
 extern Saba::Application* Saba::CreateApplication();
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv, [[maybe_unused]] char** envp)
+int main(int argc, char** argv, char** envp)
 {
-    Saba::InitializeCore();
+    Saba::InitializeCore(argc, argv, envp);
 
     Saba::Application* app = nullptr;
     int returnVal = 0;

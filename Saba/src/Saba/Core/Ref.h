@@ -119,7 +119,7 @@ public:
     bool CanConvert() noexcept { return dynamic_cast<T2*>(m_Instance) != nullptr; }
 
     template<typename T2>
-    Ref<T2> As() noexcept { return Ref<T2>(*this); }
+    Ref<T2> As() const noexcept { return Ref<T2>(*this); }
 
     template<typename ...Args>
     static Ref<T> Create(Args&& ...args) noexcept

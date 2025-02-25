@@ -11,7 +11,7 @@ struct WindowProps {
     std::string Title;
     uint32_t Width, Height;
 
-    SB_CORE WindowProps(std::string title = "Saba Engine", uint32_t width = 1280, uint32_t height = 720)
+    SB_CORE WindowProps(std::string title = "Saba Engine", uint32_t width = 1280u, uint32_t height = 720u)
         : Title(std::move(title)), Width(width), Height(height) {}
 };
 
@@ -22,6 +22,7 @@ public:
     SB_CORE virtual ~Window() = default;
 
     SB_CORE virtual void OnUpdate() = 0;
+    SB_CORE virtual void BindWindow() noexcept = 0;
     SB_CORE virtual void BindToRender() noexcept = 0;
     SB_CORE virtual void Clear(const glm::vec4& color = { 0.0f, 0.0f, 0.0f, 1.0f }) noexcept = 0;
     SB_CORE static std::optional<int> ProcessEvents();

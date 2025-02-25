@@ -1,9 +1,7 @@
 #include <pch.h>
-
-#include <ranges>
 #include "Application.h"
 
-#include "Saba/Events/ApplicationEvents.h"
+#include "Saba/Renderer/Renderer.h"
 
 namespace Saba {
 
@@ -31,11 +29,18 @@ void Application::Init() {
     m_Window = Window::Create(windowProps);
     m_Window->SetEventCallback(SB_BIND_EVENT_FN(Application::OnEvent));
 
+    //init renderer command queue & shader library
+    Renderer::Init();
+
     //call OnAttach() on layers in LayerStack
     m_LayerStack->Init();
+
+    Renderer::Render();
 }
 void Application::Shutdown() {
     m_LayerStack.reset();
+
+    Renderer::Shutdown();
     m_Window.Reset();
     m_GraphicsContext.Reset();
 }

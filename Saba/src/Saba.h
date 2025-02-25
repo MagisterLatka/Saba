@@ -6,3 +6,7 @@
 #include <Saba/Events/ApplicationEvents.h>
 #include <Saba/Events/KeyEvents.h>
 #include <Saba/Events/MouseEvents.h>
+
+#include <Saba/Renderer/Renderer.h>
+#include <Saba/Renderer/RenderCommand.h>
+#include <Saba/Renderer/InputLayout.h>

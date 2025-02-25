@@ -7,6 +7,7 @@
 namespace Saba {
 
 class LinuxWindow : public Window {
+    friend class OpenGLContext;
 public:
     SB_CORE LinuxWindow(const WindowProps& props);
     LinuxWindow(const LinuxWindow&) = delete;
@@ -14,7 +15,8 @@ public:
     SB_CORE ~LinuxWindow();
 
     SB_CORE void OnUpdate() override;
-    SB_CORE void BindToRender() noexcept override;
+    SB_CORE void BindWindow() noexcept override;
+    SB_CORE void BindToRender() noexcept override {}
     SB_CORE void Clear(const glm::vec4& color) noexcept override;
     SB_CORE static std::optional<int> ProcessEvents();
 
@@ -49,7 +51,6 @@ private:
     } m_Data;
 
     GLFWwindow* m_Window = nullptr;
-    Ref<OpenGLContext> m_Context;
 };
 
 }

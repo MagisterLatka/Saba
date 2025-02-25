@@ -24,6 +24,7 @@ function(SetProjectWarnings projectName warningsAsErrors msvcWarnings clangWarni
             /w14906 # string literal cast to 'LPWSTR'
             /w14928 # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
             /permissive- # standards conformance mode for MSVC compiler.
+            /Zc:preprocessor
         )
     endif()
     if("${clangWarnings}" STREQUAL "")

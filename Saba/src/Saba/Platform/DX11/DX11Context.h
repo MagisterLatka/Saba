@@ -32,6 +32,13 @@ public:
     SB_CORE ~DX11Context() = default;
 
     SB_CORE void Init() override;
+    SB_CORE void InitForWindow(void* window) override;
+    SB_CORE void ShutdownForWindow(void *window) override;
+
+    SB_CORE void SwapBuffers(void *window) override;
+    SB_CORE void BindWindow([[maybe_unused]] void *window) override {}
+    SB_CORE void BindToRender(void *window) override;
+    SB_CORE void Clear(void *window, const glm::vec4 &color) override;
 
     SB_CORE ComPtr<ID3D11Device> GetDevice() { SB_CORE_ASSERT(m_Device, "No DX11Device created"); return m_Device; }
     SB_CORE ComPtr<ID3D11DeviceContext> GetContext() { SB_CORE_ASSERT(m_Context, "No DX11DeviceContext created"); return m_Context; }
@@ -40,6 +47,8 @@ public:
 private:
     ComPtr<ID3D11Device> m_Device;
     ComPtr<ID3D11DeviceContext> m_Context;
+
+    std::unordered_map<HWND, std::pair<ComPtr<IDXGISwapChain>, ComPtr<ID3D11RenderTargetView>>> m_WindowData;
 };
 
 #define SB_DX_GRAPHICS_EXCEPT(hr) Saba::DX11Context::GraphicsException(__LINE__, __FILE__, hr)
@@ -51,7 +60,7 @@ private:
 #   define SB_DX_GRAPHICS_CALL_INFO_ONLY(func) { Saba::DX11Context::s_DxgiInfoManager.Set(); (func); { auto str = Saba::DX11Context::s_DxgiInfoManager.GetMessages();\
         if (!str.empty()) throw Saba::MessageException(__LINE__, __FILE__, str); } }
 #else
-#   define SB_DX_GRAPHICS_CALL_INFO(func) { if (FAILED(hr = (func))) throw Saba::DX11Context::GraphicsException(__LINE__, __FILE__, hr); }
+#   define SB_DX_GRAPHICS_CALL_INFO(func) { if (hr = (func); FAILED(hr)) throw Saba::DX11Context::GraphicsException(__LINE__, __FILE__, hr); }
 #   define SB_DX_GRAPHICS_CALL_INFO_ONLY(func) (func)
 #endif
 

@@ -10,15 +10,34 @@ ExampleLayer::~ExampleLayer() {
 }
 
 void ExampleLayer::OnAttach() {
+    if (Saba::RendererAPI::GetAPI() == Saba::RendererAPI::API::DX11)
+        m_Shader = Saba::Shader::Create(L"assets/shaders/basic.vert.cso", L"assets/shaders/basic.frag.cso");
+    else
+        m_Shader = Saba::Shader::Create(L"assets/shaders/basic.shader");
 
+    float vertices[] = {
+         0.0f,  0.5f,
+         0.5f, -0.5f,
+        -0.5f, -0.5f
+    };
+    Saba::BufferLayout layout = {
+        { "Position", Saba::BufferLayoutElementDataType::Float2 }
+    };
+    Ref<Saba::VertexBuffer> vbo = Saba::VertexBuffer::Create(layout, vertices, sizeof(vertices));
+    m_InputLayout = Saba::InputLayout::Create({ vbo }, m_Shader);
 }
 void ExampleLayer::OnDetach() {
 
 }
 void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
+    Saba::Application::Get().GetWindow()->BindToRender();
     Saba::Application::Get().GetWindow()->Clear();
-    auto pos = Saba::Application::Get().GetWindow()->GetMouse().GetPos();
-    m_Title = std::to_string(pos.x) + ", " + std::to_string(pos.y);
+
+    m_Shader->Bind();
+    m_InputLayout->Bind();
+
+    Saba::RenderCommand::Draw(Saba::RendererAPI::Topology::Triangles, 3u);
+    Saba::Renderer::Render();
 }
 void ExampleLayer::OnUIRender() {
 
@@ -28,9 +47,5 @@ void ExampleLayer::OnEvent(Saba::Event& e) {
     dispatcher.Dispatch<Saba::MouseButtonPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
 }
 bool ExampleLayer::OnMouseButtonPressed(Saba::MouseButtonPressedEvent& e) {
-    if (e.GetButton() == Saba::MouseCode::ButtonLeft) {
-        SB_TRACE("Set title to `{0}`", m_Title);
-        Saba::Application::Get().GetWindow()->SetTitle(m_Title);
-    }
     return false;
 }

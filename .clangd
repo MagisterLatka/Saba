@@ -20,6 +20,8 @@ Diagnostics:
             - bugprone-easily-swappable-parameters
             - readability-uppercase-literal-suffix
             - readability-redundant-access-specifiers
+            - readability-simplify-boolean-expr
+            - readability-math-missing-parentheses
     UnusedIncludes: Strict
 
 InlayHints:

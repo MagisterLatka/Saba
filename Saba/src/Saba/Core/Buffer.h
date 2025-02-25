@@ -5,11 +5,8 @@
 namespace Saba {
 
 struct SB_CORE Buffer {
-    enum class Allocator { None = 0, New, Malloc };
-private:
-    bool m_Delete = false;
-    Allocator m_Allocator = Allocator::None;
-public:
+    enum class Allocator : uint8_t { None = 0, New, Malloc };
+    
     void *Data = nullptr;
     uint32_t Size = 0u;
 
@@ -19,7 +16,7 @@ public:
         SB_CORE_ASSERT(!takeControl || allocator != Allocator::None, "Saba::Buffer expects an allocator to be specified");
     }
     Buffer(const Buffer &other)
-        : m_Delete(true), m_Allocator(other.m_Allocator), Size(other.Size) {
+        : Size(other.Size), m_Delete(true), m_Allocator(other.m_Allocator) {
         if (m_Allocator == Allocator::New)
             Data = new uint8_t[Size];
         else if (m_Allocator == Allocator::Malloc)
@@ -39,7 +36,7 @@ public:
         if (m_Delete) {
             switch (m_Allocator) {
                 case Allocator::New:
-                    delete[] (uint8_t*)Data;
+                    delete[] reinterpret_cast<uint8_t*>(Data);
                     break;
                 case Allocator::Malloc:
                     free(Data);
@@ -48,14 +45,17 @@ public:
         }
     }
 
-    Buffer& operator=(const Buffer &other) {
-        if (m_Delete && Data) {
+    Buffer& operator=(const Buffer& other) {
+        if (this == &other)
+            return *this;
+
+        if (m_Delete && Data != nullptr) {
             switch (m_Allocator) {
                 case Allocator::None:
                 default:
                     SB_CORE_THROW_INFO("Invalid allocator");
                 case Allocator::New:
-                    delete[] (uint8_t*)Data;
+                    delete[] reinterpret_cast<uint8_t*>(Data);
                     break;
                 case Allocator::Malloc:
                     free(Data);
@@ -84,12 +84,12 @@ public:
         return *this;
     }
     Buffer& operator=(Buffer &&other) noexcept {
-        if (m_Delete && Data) {
+        if (m_Delete && Data != nullptr) {
             switch (m_Allocator) {
                 case Allocator::None:
                     break;
                 case Allocator::New:
-                    delete[] (uint8_t*)Data;
+                    delete[] reinterpret_cast<uint8_t*>(Data);
                     break;
                 case Allocator::Malloc:
                     free(Data);
@@ -120,9 +120,7 @@ public:
             void *oldData = Data;
             switch (newAllocator) {
                 case Saba::Buffer::Allocator::None: {
-                    if (m_Allocator == Allocator::New)
-                        Data = new uint8_t[size];
-                    else if (m_Allocator == Allocator::Malloc)
+                    if (m_Allocator == Allocator::Malloc)
                         Data = malloc(size);
                     else
                         Data = new uint8_t[size];
@@ -136,19 +134,20 @@ public:
                     break;
             }
 
-            if (oldData) memcpy(Data, oldData, Size);
+            if (oldData != nullptr)
+                memcpy(Data, oldData, Size);
             Size = size;
             m_Delete = true;
 
-            if (m_Delete && oldData) {
+            if (m_Delete && oldData != nullptr) {
                 switch (m_Allocator) {
                     case Allocator::None:
                     default:
                         SB_CORE_THROW_INFO("Invalid allocator");
-                        delete[] (uint8_t*)Data;
+                        delete[] reinterpret_cast<uint8_t*>(Data);
                         break;
                     case Allocator::New:
-                        delete[] (uint8_t*)Data;
+                        delete[] reinterpret_cast<uint8_t*>(Data);
                         break;
                     case Allocator::Malloc:
                         free(Data);
@@ -162,37 +161,41 @@ public:
     }
 
     void Zero() noexcept {
-        if (Data) memset(Data, 0, Size);
+        if (Data != nullptr)
+            memset(Data, 0, Size);
     }
 
     template<typename T>
     T& Read(uint32_t offset = 0) {
         SB_CORE_ASSERT(offset + sizeof(T) <= Size, "Accesing data out of buffer");
-        return *(T*)(Data + offset);
+        return *reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(Data) + offset);
     }
 
     void Write(void *data, uint32_t size, uint32_t offset = 0) {
         SB_CORE_ASSERT(Data, "Buffer has no memory allocated");
         SB_CORE_ASSERT(size + offset <= Size, "Accesing data out of buffer");
-        memcpy((uint8_t *)Data + offset, data, size);
+        memcpy(reinterpret_cast<uint8_t*>(Data) + offset, data, size);
     }
 
-    operator bool() noexcept { return Data; }
+    operator bool() const noexcept { return Data != nullptr; }
     template<typename T>
     T& operator[](uint32_t index) {
         SB_CORE_ASSERT(index * sizeof(T) < Size);
-        return ((T *)Data)[index];
+        return reinterpret_cast<T*>(Data)[index];
     }
     template<typename T>
     T operator[](uint32_t index) const {
         SB_CORE_ASSERT(index * sizeof(T) < Size);
-        return ((T *)Data)[index];
+        return reinterpret_cast<T*>(Data)[index];
     }
 
     template<typename T>
-    T* As() noexcept { return (T *)Data; }
+    T* As() noexcept { return reinterpret_cast<T*>(Data); }
 
     uint32_t GetSize() const noexcept { return Size; }
+private:
+    bool m_Delete = false;
+    Allocator m_Allocator = Allocator::None;
 };
 
 } // namespace Saba

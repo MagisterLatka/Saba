@@ -30,14 +30,14 @@
 #define SB_CORE_THROW throw Saba::SabaException(__LINE__, __FILE__, true);
 #define SB_THROW throw Saba::SabaException(__LINE__, __FILE__, false);
 
-#define SB_CORE_THROW_INFO(message) { SB_CORE_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, message, true); }
-#define SB_THROW_INFO(message) { SB_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, message, false); }
+#define SB_CORE_THROW_INFO(message) { SB_CORE_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, (message), true); }
+#define SB_THROW_INFO(message) { SB_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, (message), false); }
 
 #include <Saba/Core/Timer.h>
 
 namespace Saba {
 
-void SB_CORE InitializeCore();
+void SB_CORE InitializeCore(int argc, char** argv, char** envp);
 void SB_CORE ShutdownCore();
 uint64_t SB_CORE GetTime() noexcept;
 

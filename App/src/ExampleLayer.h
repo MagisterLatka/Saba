@@ -15,5 +15,6 @@ public:
 private:
     bool OnMouseButtonPressed(Saba::MouseButtonPressedEvent& e);
 private:
-    std::string m_Title;
+    Ref<Saba::Shader> m_Shader;
+    Ref<Saba::InputLayout> m_InputLayout;
 };

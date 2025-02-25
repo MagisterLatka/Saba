@@ -7,7 +7,13 @@
 
 namespace Saba {
 
-void InitializeCore() {
+static std::filesystem::path s_Current;
+void InitializeCore([[maybe_unused]] int argc, char** argv, [[maybe_unused]] char** envp) {
+#if defined(SB_PLATFORM_LINUX)
+    s_Current = std::filesystem::current_path();
+    std::filesystem::current_path(std::filesystem::path(argv[0]).parent_path());
+#endif
+
     Log::Init();
 
     SB_CORE_INFO("Saba Engine {}", SB_BUILD_ID);
@@ -15,6 +21,9 @@ void InitializeCore() {
 }
 void ShutdownCore() {
     SB_CORE_INFO("Shutting down...");
+#if defined(SB_PLATFORM_LINUX)
+    std::filesystem::current_path(s_Current);
+#endif
 }
 
 uint64_t GetTime() noexcept {

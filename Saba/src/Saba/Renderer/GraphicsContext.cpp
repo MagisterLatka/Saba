@@ -9,10 +9,10 @@
 
 namespace Saba {
 
-Ref<GraphicsContext> GraphicsContext::Create(void* data) {
+Ref<GraphicsContext> GraphicsContext::Create() {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
-        case RendererAPI::API::OpenGL:  return Ref<OpenGLContext>::Create(data);
+        case RendererAPI::API::OpenGL:  return Ref<OpenGLContext>::Create();
 #if defined(SB_PLATFORM_WINDOWS)
         case RendererAPI::API::DX11:    return Ref<DX11Context>::Create();
         case RendererAPI::API::DX12:    SB_CORE_THROW_INFO("DX12 is not supported yet"); return nullptr;
