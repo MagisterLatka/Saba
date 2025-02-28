@@ -11,6 +11,7 @@ namespace Saba {
 class WindowsWindow : public Window {
     friend class OpenGLContext;
     friend class DX11Context;
+    friend class ImGuiLayer;
 public:
     class WindowException : public SabaException {
     public:
@@ -64,8 +65,9 @@ private:
     SB_CORE void Shutdown();
 
     SB_CORE static LRESULT CALLBACK HandleMsgSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-    SB_CORE static LRESULT CALLBACK HandleMsgCall(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-    SB_CORE LRESULT HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+    SB_CORE static LRESULT CALLBACK HandleMsgCall(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
+    SB_CORE LRESULT HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
+    SB_CORE void HandleImGuiInput(bool handle = true) noexcept { m_HandleImGuiInput = handle; }
 
     SB_CORE void DefaultEventCallback([[maybe_unused]] Event& e) {}
 private:
@@ -82,7 +84,10 @@ private:
     Mouse m_Mouse;
 
     HWND m_Window = nullptr;
+    HDC m_DC = nullptr;
     HGLRC m_Context = nullptr;
+
+    bool m_HandleImGuiInput = false;
 };
 
 }

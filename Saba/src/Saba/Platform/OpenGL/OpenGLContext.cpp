@@ -21,10 +21,15 @@ typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
 namespace Saba {
 
+void OpenGLContext::Shutdown() {
+#if !defined(SB_PLATFORM_WINDOWS)
+    glfwTerminate();
+#endif
+}
+
 void OpenGLContext::InitForWindow([[maybe_unused]] void* window) {
 #if defined(SB_PLATFORM_WINDOWS)
     WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
-    HDC hdc = GetDC(wnd->m_Window);
 
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
@@ -37,13 +42,13 @@ void OpenGLContext::InitForWindow([[maybe_unused]] void* window) {
     pfd.cStencilBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
 
-    int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+    int pixelFormat = ChoosePixelFormat(wnd->m_DC, &pfd);
     if (pixelFormat == 0)
         throw SB_WINDOWS_WINDOW_LAST_EXCEPTION();
-    SetPixelFormat(hdc, pixelFormat, &pfd);
+    SetPixelFormat(wnd->m_DC, pixelFormat, &pfd);
 
-    HGLRC tempRC = wglCreateContext(hdc);
-    wglMakeCurrent(hdc, tempRC);
+    HGLRC tempRC = wglCreateContext(wnd->m_DC);
+    wglMakeCurrent(wnd->m_DC, tempRC);
     PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 
     const int attribList[] = {
@@ -54,10 +59,10 @@ void OpenGLContext::InitForWindow([[maybe_unused]] void* window) {
         WGL_CONTEXT_COREPROFILE_BIT_ARB, 0,
     };
 
-    wnd->m_Context = wglCreateContextAttribsARB(hdc, 0, attribList);
+    wnd->m_Context = wglCreateContextAttribsARB(wnd->m_DC, 0, attribList);
     wglMakeCurrent(NULL, NULL);
     wglDeleteContext(tempRC);
-    wglMakeCurrent(hdc, wnd->m_Context);
+    wglMakeCurrent(wnd->m_DC, wnd->m_Context);
 
     int success = gladLoadGL();
     SB_CORE_ASSERT(success, "Failed to initialize GLAD");
@@ -81,19 +86,18 @@ void OpenGLContext::InitForWindow([[maybe_unused]] void* window) {
     SB_CORE_ASSERT(success, "Failed to initialize GLAD");
 
     SB_CORE_INFO("OpenGL info:");
-    SB_CORE_INFO("\tRenderer: {0}", (char*)glGetString(GL_RENDERER));
-    SB_CORE_INFO("\tVersion: {0}", (char*)glGetString(GL_VERSION));
+    SB_CORE_INFO("\tRenderer: {0}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+    SB_CORE_INFO("\tVersion: {0}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 #endif
 }
 void OpenGLContext::ShutdownForWindow([[maybe_unused]] void* window)
 {
 #if defined(SB_PLATFORM_WINDOWS)
     WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
-    HDC hdc = GetDC(wnd->m_Window);
 
     wglMakeCurrent(NULL, NULL);
     wglDeleteContext(wnd->m_Context);
-    ReleaseDC(wnd->m_Window, hdc);
+    ReleaseDC(wnd->m_Window, wnd->m_DC);
 #endif
 }
 
@@ -101,7 +105,6 @@ void OpenGLContext::SwapBuffers(void* window)
 {
 #if defined(SB_PLATFORM_WINDOWS)
     WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
-    HDC hdc = GetDC(wnd->m_Window);
 
     static bool vsync = false;
     if (vsync != wnd->m_Data.vSync) {
@@ -109,7 +112,7 @@ void OpenGLContext::SwapBuffers(void* window)
         m_WGLSwapInternalEXT(vsync ? 1 : 0);
     }
 
-    ::SwapBuffers(hdc);
+    ::SwapBuffers(wnd->m_DC);
 
     if (vsync)
         glFinish();
@@ -122,8 +125,7 @@ void OpenGLContext::BindWindow(void* window)
 {
 #if defined(SB_PLATFORM_WINDOWS)
     WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
-    HDC hdc = GetDC(wnd->m_Window);
-    wglMakeCurrent(hdc, wnd->m_Context);
+    wglMakeCurrent(wnd->m_DC, wnd->m_Context);
 #else
     glfwMakeContextCurrent(reinterpret_cast<LinuxWindow*>(window)->m_Window);
 #endif

@@ -6,6 +6,9 @@
 #include "Saba/Events/MouseEvents.h"
 #include "Saba/Core/Application.h"
 
+#include <imgui.h>
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 namespace Saba {
 
 WindowsWindow::WindowsWindow(const WindowProps& props) {
@@ -65,6 +68,8 @@ void WindowsWindow::Init(const WindowProps& props) {
     if (m_Window == nullptr)
         throw SB_WINDOWS_WINDOW_LAST_EXCEPTION();
 
+    m_DC = GetDC(m_Window);
+
     Application::Get().GetGraphicsContext()->InitForWindow(this);
 
     ShowWindow(m_Window, SW_SHOW);
@@ -84,11 +89,16 @@ LRESULT WindowsWindow::HandleMsgSetup(HWND windowHandle, UINT msg, WPARAM wParam
     }
     return DefWindowProcA(windowHandle, msg, wParam, lParam);
 }
-LRESULT WindowsWindow::HandleMsgCall(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
+LRESULT WindowsWindow::HandleMsgCall(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
     WindowsWindow* window = reinterpret_cast<WindowsWindow*>(GetWindowLongPtrA(windowHandle, GWLP_USERDATA));
     return window->HandleMsg(windowHandle, msg, wParam, lParam);
 }
-LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
+LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) {
+    if (m_HandleImGuiInput) {
+        if (ImGui_ImplWin32_WndProcHandler(windowHandle, msg, wParam, lParam))
+            return true;
+    }
+
     switch (msg)
     {
         case WM_CLOSE: {

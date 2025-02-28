@@ -32,6 +32,10 @@ void Application::Init() {
     //init renderer command queue & shader library
     Renderer::Init();
 
+    //init ui layer
+    m_ImGuiLayer = new ImGuiLayer;
+    m_LayerStack->PushOverlay(m_ImGuiLayer);
+
     //call OnAttach() on layers in LayerStack
     m_LayerStack->Init();
 
@@ -49,7 +53,6 @@ void Application::Close() noexcept {
 }
 
 int Application::Run() {
-    Init();
     m_Timer.Reset();
     int returnVal = 0; //return val from quit message
     while (m_Running)
@@ -66,6 +69,11 @@ int Application::Run() {
         }
         { auto e = AppUpdateEvent(); OnEvent(e); }
 
+        //update ui
+        m_ImGuiLayer->Begin();
+        ImGuiRender();
+        m_ImGuiLayer->End();
+
         //update frame
         m_Window->OnUpdate();
         { auto e = AppRenderEvent(); OnEvent(e); }
@@ -76,8 +84,12 @@ int Application::Run() {
             m_Running = false;
         }
     }
-    Shutdown();
     return returnVal;
+}
+
+void Application::ImGuiRender() {
+    for (auto* layer : *m_LayerStack)
+        layer->OnUIRender();
 }
 
 void Application::OnEvent(Event& e) {
@@ -88,8 +100,8 @@ void Application::OnEvent(Event& e) {
 
     //pass events to layers
     if (m_LayerStack) {
-        for (auto* it : std::ranges::reverse_view(*m_LayerStack)) {
-            it->OnEvent(e);
+        for (auto* layer : *m_LayerStack | std::views::reverse) {
+            layer->OnEvent(e);
             if (e.p_Handled)
                 break;
         }

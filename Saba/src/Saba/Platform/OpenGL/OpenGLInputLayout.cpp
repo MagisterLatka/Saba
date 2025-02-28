@@ -37,14 +37,14 @@ void OpenGLInputLayout::Create() {
                         for (int i = 0; i < 3; ++i) {
                             glEnableVertexAttribArray(index);
                             glVertexAttribPointer(index++, 3, GL_FLOAT, element.Normalized, static_cast<int>(buffer->GetLayout().GetStride()),
-                                (const void*)(static_cast<uint64_t>(element.Offset + sizeof(float) * 3 * static_cast<uint64_t>(i))));
+                                (const void*)(element.Offset + sizeof(float) * 3 * static_cast<uint64_t>(i)));
                         }
                         break;
                     case BufferLayoutElementDataType::Mat4:
                         for (int i = 0; i < 4; ++i) {
                             glEnableVertexAttribArray(index);
                             glVertexAttribPointer(index++, 4, GL_FLOAT, element.Normalized, static_cast<int>(buffer->GetLayout().GetStride()),
-                                (const void*)(static_cast<uint64_t>(element.Offset + sizeof(float) * 4 * static_cast<uint64_t>(i))));
+                                (const void*)(element.Offset + sizeof(float) * 4 * static_cast<uint64_t>(i)));
                         }
                         break;
                     case BufferLayoutElementDataType::Float:
@@ -71,6 +71,7 @@ void OpenGLInputLayout::Create() {
                         glVertexAttribIPointer(index++, static_cast<int>(element.GetComponentCount()), GL_UNSIGNED_INT,
                             static_cast<int>(buffer->GetLayout().GetStride()), (const void*)(static_cast<uint64_t>(element.Offset)));
                         break;
+                    default: break;
                 }
             }
         }

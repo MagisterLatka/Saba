@@ -24,6 +24,7 @@ inline uint32_t BufferLayoutElementDataTypeSize(BufferLayoutElementDataType type
         case BufferLayoutElementDataType::UInt2:    return 2 * sizeof(uint32_t);
         case BufferLayoutElementDataType::UInt3:    return 3 * sizeof(uint32_t);
         case BufferLayoutElementDataType::UInt4:    return 4 * sizeof(uint32_t);
+        default: break;
     }
 
     SB_CORE_THROW_INFO("Unknown buffer layout element data type");
@@ -55,6 +56,7 @@ struct BufferLayoutElement {
             case BufferLayoutElementDataType::UInt2:    return 2;
             case BufferLayoutElementDataType::UInt3:    return 3;
             case BufferLayoutElementDataType::UInt4:    return 4;
+            default: break;
         }
 
         SB_CORE_THROW_INFO("Unknown buffer layout element data type");

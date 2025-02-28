@@ -12,6 +12,7 @@ public:
     SB_CORE virtual ~GraphicsContext() = default;
 protected:
     SB_CORE virtual void Init() = 0;
+    SB_CORE virtual void Shutdown() = 0;
     SB_CORE virtual void InitForWindow(void* window) = 0;
     SB_CORE virtual void ShutdownForWindow(void* window) = 0;
 

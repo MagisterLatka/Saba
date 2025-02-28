@@ -8,7 +8,7 @@
 namespace Saba {
 
 static std::filesystem::path s_Current;
-void InitializeCore([[maybe_unused]] int argc, char** argv, [[maybe_unused]] char** envp) {
+void InitializeCore([[maybe_unused]] int argc, [[maybe_unused]] char** argv, [[maybe_unused]] char** envp) {
 #if defined(SB_PLATFORM_LINUX)
     s_Current = std::filesystem::current_path();
     std::filesystem::current_path(std::filesystem::path(argv[0]).parent_path());

@@ -22,6 +22,7 @@ Diagnostics:
             - readability-redundant-access-specifiers
             - readability-simplify-boolean-expr
             - readability-math-missing-parentheses
+            - readability-magic-numbers
     UnusedIncludes: Strict
 
 InlayHints:

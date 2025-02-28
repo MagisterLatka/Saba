@@ -14,6 +14,7 @@ static GLenum GetUsage(BufferUsage usage)
         case BufferUsage::Default:      return GL_STATIC_DRAW;
         case BufferUsage::Dynamic:      return GL_DYNAMIC_DRAW;
         case BufferUsage::Immutable:    return GL_STATIC_DRAW;
+        default: break;
     }
     SB_CORE_THROW_INFO("Invalid buffer usage");
     return 0;

@@ -22,6 +22,7 @@ static DXGI_FORMAT GetFormat(BufferLayoutElementDataType type) {
         case BufferLayoutElementDataType::UInt2:    return DXGI_FORMAT_R32G32_UINT;
         case BufferLayoutElementDataType::UInt3:    return DXGI_FORMAT_R32G32B32_UINT;
         case BufferLayoutElementDataType::UInt4:    return DXGI_FORMAT_R32G32B32A32_UINT;
+        default: break;
     }
     SB_CORE_THROW_INFO("Unknown buffer layout element data type");
     return DXGI_FORMAT_UNKNOWN;
@@ -59,7 +60,7 @@ void DX11InputLayout::Create() {
         uint32_t index = 0u;
         instance->m_Strides = new uint32_t[instance->m_VertexBuffers.size()];
         instance->m_Buffers = new ID3D11Buffer*[instance->m_VertexBuffers.size()];
-        for (int i = 0; i < instance->m_VertexBuffers.size(); ++i) {
+        for (uint64_t i = 0; i < instance->m_VertexBuffers.size(); ++i) {
             instance->m_Strides[i] = instance->m_VertexBuffers[i]->m_Layout.GetStride();
             instance->m_Buffers[i] = instance->m_VertexBuffers[i]->m_Buffer.Get();
 

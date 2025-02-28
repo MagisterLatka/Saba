@@ -4,3 +4,7 @@
 [submodule "Saba/vendor/glm"]
 	path = Saba/vendor/glm
 	url = https://github.com/g-truc/glm
+[submodule "Saba/vendor/ImGui"]
+	path = Saba/vendor/ImGui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking

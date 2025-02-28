@@ -41,6 +41,7 @@ struct SB_CORE Buffer {
                 case Allocator::Malloc:
                     free(Data);
                     break;
+                default: break;
             }
         }
     }

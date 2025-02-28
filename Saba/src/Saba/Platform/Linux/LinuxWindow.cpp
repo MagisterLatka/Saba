@@ -63,6 +63,7 @@ void LinuxWindow::Init(const WindowProps& props) {
 
     glfwMakeContextCurrent(m_Window);
     glfwSetWindowUserPointer(m_Window, &m_Data);
+    glfwSwapInterval(m_Data.vSync ? 1 : 0);
 
     Application::Get().GetGraphicsContext()->InitForWindow(this);
 

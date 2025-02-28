@@ -6,6 +6,7 @@
 #include "Saba/Renderer/GraphicsContext.h"
 #include "Saba/Renderer/RendererAPI.h"
 #include "Saba/Events/ApplicationEvents.h"
+#include "Saba/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv, char** envp);
 
@@ -36,6 +37,7 @@ public:
 
     SB_CORE Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
     SB_CORE Ref<Window> GetWindow() const noexcept { return m_Window; }
+    SB_CORE ImGuiLayer* GetImGuiLayer() const noexcept { return m_ImGuiLayer; }
 
     SB_CORE const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
@@ -48,6 +50,8 @@ private:
     SB_CORE void OnEvent(Event& e);
     SB_CORE bool OnWindowClose(WindowCloseEvent& e) noexcept;
     SB_CORE bool OnWindowResize(WindowResizeEvent& e) noexcept;
+
+    SB_CORE void ImGuiRender();
 private:
     ApplicationSpecifications m_Specs;
 
@@ -55,6 +59,7 @@ private:
     Ref<Window> m_Window;
 
     Scope<LayerStack> m_LayerStack;
+    ImGuiLayer* m_ImGuiLayer;
 
     Timer m_Timer;
     Timestep m_Timestep;

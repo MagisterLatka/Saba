@@ -2,6 +2,8 @@
 #include <Saba.h>
 #include "ExampleLayer.h"
 
+#include <imgui.h>
+
 ExampleLayer::ExampleLayer() {
 
 }
@@ -40,12 +42,15 @@ void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
     Saba::Renderer::Render();
 }
 void ExampleLayer::OnUIRender() {
-
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::Begin("Settings");
+    ImGui::Text("Frame time: %.3fms (%.1f fps)", static_cast<double>(1000.0f / io.Framerate), static_cast<double>(io.Framerate));
+    ImGui::End();
 }
 void ExampleLayer::OnEvent(Saba::Event& e) {
     Saba::Dispatcher dispatcher(e);
     dispatcher.Dispatch<Saba::MouseButtonPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
 }
-bool ExampleLayer::OnMouseButtonPressed(Saba::MouseButtonPressedEvent& e) {
+bool ExampleLayer::OnMouseButtonPressed([[maybe_unused]] Saba::MouseButtonPressedEvent& e) {
     return false;
 }

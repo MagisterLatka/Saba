@@ -41,11 +41,13 @@ endif()
 
 add_compile_definitions(GLM_FORCE_CXX11)
 add_compile_definitions(GLM_FORCE_SILENT_WARNINGS)
+add_compile_definitions(IMGUI_API=SB_CORE)
 
 include_directories(Saba/vendor/spdlog/include)
 include_directories(Saba/vendor/glm)
 include_directories(Saba/vendor/glfw/include)
 include_directories(Saba/vendor/glad/include)
+include_directories(Saba/vendor/ImGui)
 include_directories(Saba/vendor)
 include_directories(Saba/src)
 

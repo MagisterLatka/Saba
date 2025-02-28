@@ -36,6 +36,7 @@ void DX11RendererAPI::SetTopology(ComPtr<ID3D11DeviceContext> context, Topology 
         case Saba::RendererAPI::Topology::TriangleStrip:
             context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
             return;
+        default: break;
     }
     SB_CORE_THROW_INFO("Unknown topology");
 }

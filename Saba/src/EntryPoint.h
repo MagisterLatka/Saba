@@ -11,7 +11,10 @@ int main(int argc, char** argv, char** envp)
     try {
         app = Saba::CreateApplication();
         SB_CORE_ASSERT(app, "Could not initialize app!");
+        app->Init();
+        ImGui::SetCurrentContext(app->m_ImGuiLayer->GetContext());
         returnVal = app->Run();
+        app->Shutdown();
     }
 #if defined(SB_PLATFORM_WINDOWS)
     catch (const Saba::SabaException& e)

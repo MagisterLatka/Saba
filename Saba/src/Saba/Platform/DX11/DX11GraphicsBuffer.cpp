@@ -11,6 +11,7 @@ static D3D11_USAGE GetUsage(BufferUsage usage) {
         case Saba::BufferUsage::Default:   return D3D11_USAGE_DEFAULT;
         case Saba::BufferUsage::Dynamic:   return D3D11_USAGE_DYNAMIC;
         case Saba::BufferUsage::Immutable: return D3D11_USAGE_IMMUTABLE;
+        default: break;
     }
     SB_CORE_THROW_INFO("Unknown buffer usage");
     return D3D11_USAGE_DEFAULT;
@@ -199,7 +200,7 @@ DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, Buffer&& buf
     Create();
 }
 DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer)
-    : m_Size(buffer.GetBufferSize()), m_Data(std::move(Buffer::Copy(buffer.GetBuffer(), buffer.GetBufferSize()))), m_Binding(binding)
+    : m_Data(Buffer::Copy(buffer.GetBuffer(), buffer.GetBufferSize())), m_Size(buffer.GetBufferSize()), m_Binding(binding)
 {
     Create();
 }

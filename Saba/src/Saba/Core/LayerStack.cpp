@@ -5,7 +5,7 @@ namespace Saba {
 
 LayerStack::~LayerStack()
 {
-    for (auto layer : m_Layers)
+    for (auto* layer : m_Layers)
     {
         layer->OnDetach();
         delete layer;
@@ -15,13 +15,12 @@ LayerStack::~LayerStack()
 void LayerStack::Init()
 {
     m_IsInitialized = true;
-    for (auto layer : m_Layers)
+    for (auto* layer : m_Layers | std::views::reverse)
         layer->OnAttach();
 }
 void LayerStack::Shutdown()
 {
-    for (auto layer : m_Layers)
-    {
+    for (auto* layer : m_Layers) {
         layer->OnDetach();
         delete layer;
     }
@@ -46,8 +45,7 @@ Layer* LayerStack::PushOverlay(Layer* overlay)
 Layer* LayerStack::PopLayer(Layer* layer)
 {
     auto it = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);
-    if (it != m_Layers.begin() + m_LayerInsertIndex)
-    {
+    if (it != m_Layers.begin() + m_LayerInsertIndex) {
         if (m_IsInitialized)
             layer->OnDetach();
         m_Layers.erase(it);
@@ -58,8 +56,7 @@ Layer* LayerStack::PopLayer(Layer* layer)
 Layer* LayerStack::PopOverlay(Layer* overlay)
 {
     auto it = std::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), overlay);
-    if (it != m_Layers.end())
-    {
+    if (it != m_Layers.end()) {
         if (m_IsInitialized)
             overlay->OnDetach();
         m_Layers.erase(it);
