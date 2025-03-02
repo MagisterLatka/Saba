@@ -13,13 +13,14 @@ public:
 
     SB_CORE void Init() override {}
     SB_CORE void Shutdown() override;
-    SB_CORE void InitForWindow(void* window) override;
-    SB_CORE void ShutdownForWindow(void* window) override;
+    SB_CORE void InitForWindow(Window* window) override;
+    SB_CORE void ShutdownForWindow(Window* window) override;
 
-    SB_CORE void SwapBuffers(void* window) override;
-    SB_CORE void BindWindow(void* window) override;
-    SB_CORE void BindToRender(void* window) override;
-    SB_CORE void Clear(void *window, const glm::vec4 &color) override;
+    SB_CORE void SwapBuffers(Window* window) override;
+    SB_CORE void RecreateSwapChain([[maybe_unused]] Window *window) override {}
+    SB_CORE void BindWindow(Window* window) override;
+    SB_CORE void BindToRender(Window* window) override;
+    SB_CORE void Clear(Window *window, const glm::vec4 &color) override;
 private:
 #if defined(SB_PLATFORM_WINDOWS)
     int (__stdcall *m_WGLSwapInternalEXT)(int) = nullptr;

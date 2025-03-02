@@ -33,13 +33,14 @@ public:
 
     SB_CORE void Init() override;
     SB_CORE void Shutdown() override {}
-    SB_CORE void InitForWindow(void* window) override;
-    SB_CORE void ShutdownForWindow(void *window) override;
+    SB_CORE void InitForWindow(Window* window) override;
+    SB_CORE void ShutdownForWindow(Window *window) override;
 
-    SB_CORE void SwapBuffers(void *window) override;
-    SB_CORE void BindWindow([[maybe_unused]] void *window) override {}
-    SB_CORE void BindToRender(void *window) override;
-    SB_CORE void Clear(void *window, const glm::vec4 &color) override;
+    SB_CORE void SwapBuffers(Window *window) override;
+    SB_CORE void RecreateSwapChain(Window *window) override;
+    SB_CORE void BindWindow([[maybe_unused]] Window *window) override {}
+    SB_CORE void BindToRender(Window *window) override;
+    SB_CORE void Clear(Window *window, const glm::vec4 &color) override;
 
     SB_CORE ComPtr<ID3D11Device> GetDevice() { SB_CORE_ASSERT(m_Device, "No DX11Device created"); return m_Device; }
     SB_CORE ComPtr<ID3D11DeviceContext> GetContext() { SB_CORE_ASSERT(m_Context, "No DX11DeviceContext created"); return m_Context; }

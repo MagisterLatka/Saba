@@ -5,7 +5,7 @@
 #include <dxgi1_3.h>
 
 #include "Saba/Platform/Windows/WindowsWindow.h"
-
+#include "Saba/Renderer/Renderer.h"
 
 namespace Saba {
 
@@ -24,12 +24,12 @@ void DX11Context::Init() {
         &m_Device, nullptr, &m_Context));
 }
 
-void DX11Context::InitForWindow(void* window) {
+void DX11Context::InitForWindow(Window* window) {
     WindowsWindow* wind = reinterpret_cast<WindowsWindow*>(window);
     auto& [swapChain, buffer] = m_WindowData[wind->m_Window];
 
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-    swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     swapChainDesc.BufferDesc.Width = wind->m_Data.width;
     swapChainDesc.BufferDesc.Height = wind->m_Data.height;
     swapChainDesc.BufferDesc.RefreshRate.Numerator = 0u;
@@ -55,19 +55,19 @@ void DX11Context::InitForWindow(void* window) {
         SB_DX_GRAPHICS_CALL_INFO(factory->CreateSwapChain(m_Device.Get(), &swapChainDesc, &swapChain));
     }
 
-    ComPtr<ID3D11Resource> backBuffer;
+    ComPtr<ID3D11Texture2D> backBuffer;
     SB_DX_GRAPHICS_CALL_INFO(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer));
     SB_DX_GRAPHICS_CALL_INFO(m_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, &buffer));
 }
 
-void DX11Context::ShutdownForWindow(void* window) {
+void DX11Context::ShutdownForWindow(Window* window) {
     WindowsWindow* wind = reinterpret_cast<WindowsWindow*>(window);
     auto& [swapChain, buffer] = m_WindowData[wind->m_Window];
     buffer.Reset();
     swapChain.Reset();
 }
 
-void DX11Context::SwapBuffers(void* window) {
+void DX11Context::SwapBuffers(Window* window) {
     WindowsWindow* wind = reinterpret_cast<WindowsWindow*>(window);
     auto& [swapChain, buffer] = m_WindowData[wind->m_Window];
     HRESULT hr;
@@ -76,25 +76,47 @@ void DX11Context::SwapBuffers(void* window) {
     else
         SB_DX_GRAPHICS_CALL_INFO(swapChain->Present(0u, DXGI_PRESENT_ALLOW_TEARING));
 }
-void DX11Context::BindToRender(void* window) {
-    WindowsWindow* wind = reinterpret_cast<WindowsWindow*>(window);
-    auto& [swapChain, buffer] = m_WindowData[wind->m_Window];
 
-    m_Context->OMSetRenderTargets(1u, buffer.GetAddressOf(), nullptr);
-    D3D11_VIEWPORT viewport;
-    viewport.Width = static_cast<float>(wind->m_Data.width);
-    viewport.Height = static_cast<float>(wind->m_Data.height);
-    viewport.TopLeftX = 0.0f;
-    viewport.TopLeftY = 0.0f;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    m_Context->RSSetViewports(1u, &viewport);
+void DX11Context::RecreateSwapChain(Window* window) {
+    WindowsWindow* wnd = (WindowsWindow*)window;
+    auto& [swapChain, targetView] = m_WindowData[wnd->m_Window];
+
+    if (swapChain && wnd->m_Data.width != 0 && wnd->m_Data.height != 0) {
+        m_Context->OMSetRenderTargets(0u, nullptr, nullptr);
+        targetView.Reset();
+        HRESULT hr;
+        SB_DX_GRAPHICS_CALL_INFO(swapChain->ResizeBuffers(0u, 0u, 0u, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING));
+
+        ComPtr<ID3D11Texture2D> backBuffer;
+        SB_DX_GRAPHICS_CALL_INFO(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer));
+        SB_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateRenderTargetView(backBuffer.Get(), nullptr, &targetView));
+    }
 }
-void DX11Context::Clear(void* window, const glm::vec4& color) {
-    WindowsWindow* wind = reinterpret_cast<WindowsWindow*>(window);
-    auto& [swapChain, buffer] = m_WindowData[wind->m_Window];
+void DX11Context::BindToRender(Window* window) {
+    Ref<DX11Context> instance = this;
+    Renderer::Submit([instance, window]() mutable {
+        WindowsWindow* wind = reinterpret_cast<WindowsWindow*>(window);
+        auto& [swapChain, buffer] = instance->m_WindowData[wind->m_Window];
 
-    m_Context->ClearRenderTargetView(buffer.Get(), glm::value_ptr(color));
+        instance->m_Context->OMSetRenderTargets(1u, buffer.GetAddressOf(), nullptr);
+        D3D11_VIEWPORT viewport;
+        viewport.Width = static_cast<float>(wind->m_Data.width);
+        viewport.Height = static_cast<float>(wind->m_Data.height);
+        viewport.TopLeftX = 0.0f;
+        viewport.TopLeftY = 0.0f;
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        instance->m_Context->RSSetViewports(1u, &viewport);
+    });
+}
+void DX11Context::Clear(Window* window, const glm::vec4& color) {
+    Ref<DX11Context> instance = this;
+    Renderer::Submit([instance, window, color]() mutable {
+        WindowsWindow* wind = reinterpret_cast<WindowsWindow*>(window);
+        auto& [swapChain, buffer] = instance->m_WindowData[wind->m_Window];
+
+        instance->m_Context->ClearRenderTargetView(buffer.Get(), glm::value_ptr(color));
+    });
 }
 
 

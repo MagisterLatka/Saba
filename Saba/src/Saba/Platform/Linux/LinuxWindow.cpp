@@ -8,6 +8,7 @@
 #include "Saba/Events/MouseEvents.h"
 
 #include <glad/glad.h>
+#include <stb_image.h>
 
 namespace Saba {
 
@@ -28,6 +29,9 @@ std::optional<int> LinuxWindow::ProcessEvents() {
 void LinuxWindow::BindWindow() noexcept {
     Application::Get().GetGraphicsContext()->BindWindow(this);
 }
+void LinuxWindow::BindToRender() noexcept {
+    Application::Get().GetGraphicsContext()->BindToRender(this);
+}
 void LinuxWindow::Clear(const glm::vec4& color) noexcept {
     Application::Get().GetGraphicsContext()->Clear(this, color);
 }
@@ -45,6 +49,30 @@ void LinuxWindow::DisableVSync() noexcept {
     m_Data.vSync = false;
 }
 
+void LinuxWindow::Minimize() noexcept {
+    m_Data.minimized = true;
+    glfwIconifyWindow(m_Window);
+}
+void LinuxWindow::Maximize() noexcept {
+    m_Data.maximized = true;
+    glfwMaximizeWindow(m_Window);
+}
+void LinuxWindow::Restore() noexcept {
+    m_Data.maximized = false;
+    glfwRestoreWindow(m_Window);
+}
+
+void LinuxWindow::SetIcon(const std::filesystem::path& iconPath) {
+    std::string path = iconPath.string();
+    if (std::filesystem::exists(iconPath)) {
+        GLFWimage image;
+        int channels;
+        image.pixels = stbi_load(path.c_str(), &image.width, &image.height, &channels, 4);
+        glfwSetWindowIcon(m_Window, 1, &image);
+        stbi_image_free(image.pixels);
+    }
+}
+
 SB_CORE static void GLFWErrorCallback(int error, const char* message) {
     SB_CORE_ERROR("GLFWError {0} {1}", error, message);
 }
@@ -52,10 +80,16 @@ void LinuxWindow::Init(const WindowProps& props) {
     m_Data.title = props.Title;
     m_Data.width = props.Width;
     m_Data.height = props.Height;
+    m_Data.titlebar = props.HasTitleBar;
+    m_Data.maximized = props.Maximized;
     m_Data.eventCallback = SB_BIND_EVENT_FN(LinuxWindow::DefaultEventCallback);
 
     SB_CORE_ASSERT(glfwInit(), "Failed to initialize GLFW");
     glfwSetErrorCallback(GLFWErrorCallback);
+
+    glfwWindowHint(GLFW_RESIZABLE, static_cast<int>(props.Resizable));
+    glfwWindowHint(GLFW_DECORATED, static_cast<int>(props.HasTitleBar));
+    glfwWindowHint(GLFW_MAXIMIZED, static_cast<int>(props.Maximized));
 
     m_Window = glfwCreateWindow(static_cast<int>(m_Data.width), static_cast<int>(m_Data.height), m_Data.title.c_str(), nullptr, nullptr);
     SB_CORE_ASSERT(m_Window, "Could not create GLFW window");
@@ -141,6 +175,39 @@ void LinuxWindow::Init(const WindowProps& props) {
 
             MouseButtonPressedEvent e(static_cast<MouseCode>(button));
             data.eventCallback(e);
+
+            if (!data.titlebar && button == GLFW_MOUSE_BUTTON_LEFT) {
+                int titlebarHitTest = 0;
+                glm::ivec2 mousePos = data.mouse.GetPos();
+                if (data.titlebarHitTest)
+                    data.titlebarHitTest(mousePos.x, mousePos.y, titlebarHitTest);
+
+                if (titlebarHitTest)
+                    glfwDragWindow(window);
+
+                if (!data.maximized) {
+                    static uint32_t borderThickness = 4;
+                    enum : uint8_t { left = 0x1, top = 0x2, right = 0x4, bottom = 0x8 };
+                    int hit = 0;
+                    if (mousePos.x <= static_cast<int>(borderThickness)) hit |= left;
+                    if (mousePos.x >= static_cast<int>(data.width - borderThickness)) hit |= right;
+                    if (mousePos.y <= static_cast<int>(borderThickness)) hit |= top;
+                    if (mousePos.y >= static_cast<int>(data.height - borderThickness)) hit |= bottom;
+
+                    int border = -1;
+                    if (hit & top && hit & left)            border = GLFW_WINDOW_LEFT_TOP;
+                    else if (hit & top && hit & right)      border = GLFW_WINDOW_RIGHT_TOP;
+                    else if (hit & bottom && hit & left)    border = GLFW_WINDOW_LEFT_BOTTOM;
+                    else if (hit & bottom && hit & right)   border = GLFW_WINDOW_RIGHT_BOTTOM;
+                    else if (hit & left)                    border = GLFW_WINDOW_LEFT;
+                    else if (hit & top)                     border = GLFW_WINDOW_TOP;
+                    else if (hit & right)                   border = GLFW_WINDOW_RIGHT;
+                    else if (hit & bottom)                  border = GLFW_WINDOW_BOTTOM;
+
+                    if (border != -1)
+                        glfwResizeWindow(window, border);
+                }
+            }
         }
         else {
             if (button == GLFW_MOUSE_BUTTON_LEFT)

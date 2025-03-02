@@ -7,6 +7,8 @@
 #include "Saba/Renderer/RendererAPI.h"
 #include "Saba/Events/ApplicationEvents.h"
 #include "Saba/ImGui/ImGuiLayer.h"
+#include "Saba/Renderer/Texture.h"
+#include "Saba/Core/Buffer.h"
 
 int main(int argc, char** argv, char** envp);
 
@@ -16,6 +18,10 @@ struct ApplicationSpecifications
 {
     std::string Name = "Saba Engine";
     uint32_t Width = 1280u, Height = 900u;
+    std::filesystem::path WindowIconPath;
+    Buffer TitleBarIconData;
+    bool ResizableWindow = true, CustomTitleBar = false;
+
 #if defined(SB_PLATFORM_WINDOWS)
     RendererAPI::API GraphicsAPI = RendererAPI::API::DX11;
 #else
@@ -27,6 +33,8 @@ class Application
 {
     friend int ::main(int, char**, char**);
 public:
+    using MenuBarCallbackFn = std::function<void()>;
+
     SB_CORE Application(ApplicationSpecifications applicationSpecifications = ApplicationSpecifications());
     SB_CORE virtual ~Application() = default;
 
@@ -38,6 +46,7 @@ public:
     SB_CORE Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
     SB_CORE Ref<Window> GetWindow() const noexcept { return m_Window; }
     SB_CORE ImGuiLayer* GetImGuiLayer() const noexcept { return m_ImGuiLayer; }
+    SB_CORE void SetMenuBarCallback(MenuBarCallbackFn callback) noexcept { m_MenuBarCallback = std::move(callback); }
 
     SB_CORE const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
@@ -52,6 +61,8 @@ private:
     SB_CORE bool OnWindowResize(WindowResizeEvent& e) noexcept;
 
     SB_CORE void ImGuiRender();
+    SB_CORE void DrawTitleBar(float& titleBarHeight);
+    SB_CORE void DrawMenuBarUI();
 private:
     ApplicationSpecifications m_Specs;
 
@@ -60,6 +71,9 @@ private:
 
     Scope<LayerStack> m_LayerStack;
     ImGuiLayer* m_ImGuiLayer;
+    MenuBarCallbackFn m_MenuBarCallback;
+    bool m_TitleBarHovered = false;
+    Ref<Texture2D> m_TitleBarIcon, m_CloseIcon, m_MinimizeIcon, m_MaximizeIcon, m_RestoreIcon;
 
     Timer m_Timer;
     Timestep m_Timestep;

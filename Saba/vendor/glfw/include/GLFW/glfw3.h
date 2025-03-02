@@ -1344,6 +1344,15 @@ extern "C" {
 #define GLFW_PLATFORM_NULL          0x00060005
 /*! @} */
 
+#define GLFW_WINDOW_LEFT            0
+#define GLFW_WINDOW_TOP             1
+#define GLFW_WINDOW_RIGHT           2
+#define GLFW_WINDOW_BOTTOM          3
+#define GLFW_WINDOW_LEFT_TOP        4
+#define GLFW_WINDOW_RIGHT_TOP       5
+#define GLFW_WINDOW_LEFT_BOTTOM     6
+#define GLFW_WINDOW_RIGHT_BOTTOM    7
+
 #define GLFW_DONT_CARE              -1
 
 
@@ -3968,6 +3977,37 @@ GLFWAPI void glfwHideWindow(GLFWwindow* window);
  *  @ingroup window
  */
 GLFWAPI void glfwFocusWindow(GLFWwindow* window);
+
+/*! @brief Starts drag operation to the specified window.
+ *
+ *  This function starts the drag operation of the specified window.
+ *
+ *  @param[in] window The window to start the dragging operation.
+ *  @thread_safety This function must only be called from the main thread.
+ *
+ *  @sa @ref window_drag
+ *
+ *  @since Added in version 3.3.
+ *
+ *  @ingroup window
+ */
+GLFWAPI void glfwDragWindow(GLFWwindow* handle);
+
+/*! @brief Starts resize operation to the specified window.
+ *
+ *  This function starts the resize operation of the specified window.
+ *
+ *  @param[in] window The window to start the resizing operation.
+ *  @param[in] border The border of the resizing operation.
+ *  @thread_safety This function must only be called from the main thread.
+ *
+ *  @sa @ref window_resize
+ *
+ *  @since Added in version 3.3.
+ *
+ *  @ingroup window
+ */
+GLFWAPI void glfwResizeWindow(GLFWwindow* handle, int border);
 
 /*! @brief Requests user attention to the specified window.
  *

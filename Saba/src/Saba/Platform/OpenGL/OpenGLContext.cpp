@@ -19,6 +19,8 @@ typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 #endif
 #include <glad/glad.h>
 
+#include "Saba/Renderer/Renderer.h"
+
 namespace Saba {
 
 void OpenGLContext::Shutdown() {
@@ -27,9 +29,9 @@ void OpenGLContext::Shutdown() {
 #endif
 }
 
-void OpenGLContext::InitForWindow([[maybe_unused]] void* window) {
+void OpenGLContext::InitForWindow([[maybe_unused]] Window* window) {
 #if defined(SB_PLATFORM_WINDOWS)
-    WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
+    auto* wnd = reinterpret_cast<WindowsWindow*>(window);
 
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
@@ -90,10 +92,10 @@ void OpenGLContext::InitForWindow([[maybe_unused]] void* window) {
     SB_CORE_INFO("\tVersion: {0}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 #endif
 }
-void OpenGLContext::ShutdownForWindow([[maybe_unused]] void* window)
+void OpenGLContext::ShutdownForWindow([[maybe_unused]] Window* window)
 {
 #if defined(SB_PLATFORM_WINDOWS)
-    WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
+    auto* wnd = reinterpret_cast<WindowsWindow*>(window);
 
     wglMakeCurrent(NULL, NULL);
     wglDeleteContext(wnd->m_Context);
@@ -101,10 +103,10 @@ void OpenGLContext::ShutdownForWindow([[maybe_unused]] void* window)
 #endif
 }
 
-void OpenGLContext::SwapBuffers(void* window)
+void OpenGLContext::SwapBuffers(Window* window)
 {
 #if defined(SB_PLATFORM_WINDOWS)
-    WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
+    auto* wnd = reinterpret_cast<WindowsWindow*>(window);
 
     static bool vsync = false;
     if (vsync != wnd->m_Data.vSync) {
@@ -121,23 +123,32 @@ void OpenGLContext::SwapBuffers(void* window)
 #endif
 }
 
-void OpenGLContext::BindWindow(void* window)
+void OpenGLContext::BindWindow(Window* window)
 {
 #if defined(SB_PLATFORM_WINDOWS)
-    WindowsWindow* wnd = reinterpret_cast<WindowsWindow*>(window);
+    auto* wnd = reinterpret_cast<WindowsWindow*>(window);
     wglMakeCurrent(wnd->m_DC, wnd->m_Context);
 #else
     glfwMakeContextCurrent(reinterpret_cast<LinuxWindow*>(window)->m_Window);
 #endif
 }
-void OpenGLContext::BindToRender([[maybe_unused]] void* window) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+void OpenGLContext::BindToRender(Window* window) {
+    Renderer::Submit([window]() {
+#if defined(SB_PLATFORM_WINDOWS)
+        auto* wnd = reinterpret_cast<WindowsWindow*>(window);
+#else
+        auto* wnd = reinterpret_cast<LinuxWindow*>(window);
+#endif
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, static_cast<int>(wnd->m_Data.width), static_cast<int>(wnd->m_Data.height));
+    });
 }
 
-void OpenGLContext::Clear([[maybe_unused]] void* window, const glm::vec4& color)
-{
-    glClearColor(color.x, color.y, color.r, color.a);
-    glClear(GL_COLOR_BUFFER_BIT);
+void OpenGLContext::Clear([[maybe_unused]] Window* window, const glm::vec4& color) {
+    Renderer::Submit([color]() {
+        glClearColor(color.x, color.y, color.r, color.a);
+        glClear(GL_COLOR_BUFFER_BIT);
+    });
 }
 
 }

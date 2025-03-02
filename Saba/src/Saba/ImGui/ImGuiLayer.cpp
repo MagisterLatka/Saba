@@ -17,6 +17,8 @@
 
 #include "Saba/Core/Application.h"
 
+#include "Saba/Embed/Font.embed"
+
 namespace Saba {
 
 static void SetDarkThemeColors() {
@@ -57,9 +59,25 @@ void ImGuiLayer::OnAttach() {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+    ImFontConfig config;
+    config.FontDataOwnedByAtlas = false;
+    io.Fonts->AddFontFromMemoryTTF(reinterpret_cast<void*>(const_cast<uint8_t*>(s_FontData)), sizeof(s_FontData), 18.0f, &config);
+    io.FontDefault = io.Fonts->Fonts.back();
+
     ImGui::StyleColorsDark();
 
     ImGuiStyle& style = ImGui::GetStyle();
+    style.FrameRounding = 2.5f;
+    style.FrameBorderSize = 1.0f;
+    style.IndentSpacing = 11.0f;
+    style.WindowPadding = ImVec2(10.0f, 10.0f);
+    style.FramePadding = ImVec2(8.0f, 6.0f);
+    style.ItemSpacing = ImVec2(6.0f, 6.0f);
+    style.ChildRounding = 6.0f;
+    style.PopupRounding = 6.0f;
+    style.FrameRounding = 6.0f;
+    style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+
     if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0) {
         style.WindowRounding = 0.0f;
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;

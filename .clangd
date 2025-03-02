@@ -23,6 +23,7 @@ Diagnostics:
             - readability-simplify-boolean-expr
             - readability-math-missing-parentheses
             - readability-magic-numbers
+            - readability-enum-initial-value
     UnusedIncludes: Strict
 
 InlayHints:

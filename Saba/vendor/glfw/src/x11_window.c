@@ -46,6 +46,16 @@
 #define _NET_WM_STATE_ADD           1
 #define _NET_WM_STATE_TOGGLE        2
 
+#define _NET_WM_MOVERESIZE_SIZE_TOPLEFT     0
+#define _NET_WM_MOVERESIZE_SIZE_TOP         1
+#define _NET_WM_MOVERESIZE_SIZE_TOPRIGHT    2
+#define _NET_WM_MOVERESIZE_SIZE_RIGHT       3
+#define _NET_WM_MOVERESIZE_SIZE_BOTTOMRIGHT 4
+#define _NET_WM_MOVERESIZE_SIZE_BOTTOM      5
+#define _NET_WM_MOVERESIZE_SIZE_BOTTOMLEFT  6
+#define _NET_WM_MOVERESIZE_SIZE_LEFT        7
+#define _NET_WM_MOVERESIZE_MOVE             8
+
 // Additional mouse button names for XButtonEvent
 #define Button6            6
 #define Button7            7
@@ -921,6 +931,17 @@ static Atom writeTargetToProperty(const XSelectionRequestEvent* request)
     return None;
 }
 
+static void handleSelectionClear(XEvent* event) {
+    if (event->xselectionclear.selection == _glfw.x11.PRIMARY) {
+        _glfw_free(_glfw.x11.primarySelectionString);
+        _glfw.x11.primarySelectionString = NULL;
+    }
+    else {
+        _glfw_free(_glfw.x11.clipboardString);
+        _glfw.x11.clipboardString = NULL;
+    }
+}
+
 static void handleSelectionRequest(XEvent* event)
 {
     const XSelectionRequestEvent* request = &event->xselectionrequest;
@@ -1216,6 +1237,10 @@ static void processEvent(XEvent *event)
         return;
     }
 
+    if (event->type == SelectionClear) {
+        handleSelectionClear(event);
+        return;
+    }
     if (event->type == SelectionRequest)
     {
         handleSelectionRequest(event);
@@ -1488,9 +1513,6 @@ static void processEvent(XEvent *event)
             if (event->xconfigure.width != window->x11.width ||
                 event->xconfigure.height != window->x11.height)
             {
-                window->x11.width = event->xconfigure.width;
-                window->x11.height = event->xconfigure.height;
-
                 _glfwInputFramebufferSize(window,
                                           event->xconfigure.width,
                                           event->xconfigure.height);
@@ -1498,6 +1520,9 @@ static void processEvent(XEvent *event)
                 _glfwInputWindowSize(window,
                                      event->xconfigure.width,
                                      event->xconfigure.height);
+
+                window->x11.width = event->xconfigure.width;
+                window->x11.height = event->xconfigure.height;
             }
 
             int xpos = event->xconfigure.x;
@@ -1525,10 +1550,10 @@ static void processEvent(XEvent *event)
 
             if (xpos != window->x11.xpos || ypos != window->x11.ypos)
             {
+                _glfwInputWindowPos(window, xpos, ypos);
+                
                 window->x11.xpos = xpos;
                 window->x11.ypos = ypos;
-
-                _glfwInputWindowPos(window, xpos, ypos);
             }
 
             return;
@@ -2464,6 +2489,75 @@ void _glfwFocusWindowX11(_GLFWwindow* window)
     }
 
     XFlush(_glfw.x11.display);
+}
+
+void _glfwResizeWindowX11(_GLFWwindow* window, int border)
+{
+    int winXpos, winYpos;
+    double curXpos, curYpos;
+    XClientMessageEvent xclient;
+    memset(&xclient, 0, sizeof(XClientMessageEvent));
+    XUngrabPointer(_glfw.x11.display, 0);
+    XFlush(_glfw.x11.display);
+    _glfwGetCursorPosX11(window, &curXpos, &curYpos);
+    _glfwGetWindowPosX11(window, &winXpos, &winYpos);
+    xclient.type = ClientMessage;
+    xclient.window = window->x11.handle;
+    xclient.message_type = XInternAtom(_glfw.x11.display, "_NET_WM_MOVERESIZE", False);
+    xclient.format = 32;
+    xclient.data.l[0] = winXpos + curXpos;
+    xclient.data.l[1] = winYpos + curYpos;
+    switch (border)
+    {
+        case GLFW_WINDOW_LEFT:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_LEFT;
+            break;
+        case GLFW_WINDOW_TOP:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_TOP;
+            break;
+        case GLFW_WINDOW_RIGHT:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_RIGHT;
+            break;
+        case GLFW_WINDOW_BOTTOM:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_BOTTOM;
+            break;
+        case GLFW_WINDOW_LEFT_TOP:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_TOPLEFT;
+            break;
+        case GLFW_WINDOW_RIGHT_TOP:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_TOPRIGHT;
+            break;
+        case GLFW_WINDOW_LEFT_BOTTOM:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_BOTTOMLEFT;
+            break;
+        case GLFW_WINDOW_RIGHT_BOTTOM:
+            xclient.data.l[2] = _NET_WM_MOVERESIZE_SIZE_BOTTOMRIGHT;
+    }
+    xclient.data.l[3] = 0;
+    xclient.data.l[4] = 0;
+    XSendEvent(_glfw.x11.display, _glfw.x11.root, False, SubstructureRedirectMask | SubstructureNotifyMask, (XEvent *)&xclient);
+}
+
+void _glfwDragWindowX11(_GLFWwindow* window)
+{
+    int winXpos, winYpos;
+    double curXpos, curYpos;
+    XClientMessageEvent xclient;
+    memset(&xclient, 0, sizeof(XClientMessageEvent));
+    XUngrabPointer(_glfw.x11.display, 0);
+    XFlush(_glfw.x11.display);
+    _glfwGetCursorPosX11(window, &curXpos, &curYpos);
+    _glfwGetWindowPosX11(window, &winXpos, &winYpos);
+    xclient.type = ClientMessage;
+    xclient.window = window->x11.handle;
+    xclient.message_type = XInternAtom(_glfw.x11.display, "_NET_WM_MOVERESIZE", False);
+    xclient.format = 32;
+    xclient.data.l[0] = winXpos + curXpos;
+    xclient.data.l[1] = winYpos + curYpos;
+    xclient.data.l[2] = _NET_WM_MOVERESIZE_MOVE;
+    xclient.data.l[3] = 0;
+    xclient.data.l[4] = 0;
+    XSendEvent(_glfw.x11.display, _glfw.x11.root, False, SubstructureRedirectMask | SubstructureNotifyMask, (XEvent*)&xclient);
 }
 
 void _glfwSetWindowMonitorX11(_GLFWwindow* window,
