@@ -31,8 +31,7 @@ OpenGLRenderTarget::OpenGLRenderTarget(uint32_t width, uint32_t height, RenderTa
     Resize(m_Width, m_Height, true);
 }
 OpenGLRenderTarget::~OpenGLRenderTarget() {
-    glDeleteFramebuffers(1, &m_ID);
-    glDeleteTextures(1, &m_Texture);
+    glDeleteTextures(1, &m_ID);
 }
 void OpenGLRenderTarget::Resize(uint32_t width, uint32_t height, bool forceResize) {
     if (m_Width == width && m_Height == height && !forceResize) return;
@@ -43,39 +42,22 @@ void OpenGLRenderTarget::Resize(uint32_t width, uint32_t height, bool forceResiz
     Ref<OpenGLRenderTarget> instance = this;
     Renderer::Submit([instance]() mutable {
         if (instance->m_ID) {
-            glDeleteFramebuffers(1, &instance->m_ID);
-            glDeleteTextures(1, &instance->m_Texture);
+            glDeleteTextures(1, &instance->m_ID);
         }
 
-        glCreateFramebuffers(1, &instance->m_ID);
-        glCreateTextures(GL_TEXTURE_2D, 1, &instance->m_Texture);
-        glTextureStorage2D(instance->m_Texture, 1u, GetFormat(instance->m_Format), static_cast<int>(instance->m_Width), static_cast<int>(instance->m_Height));
-        glTextureParameteri(instance->m_Texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(instance->m_Texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTextureParameteri(instance->m_Texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(instance->m_Texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glNamedFramebufferTexture(instance->m_ID, GL_COLOR_ATTACHMENT0, instance->m_Texture, 0);
-    });
-}
-
-void OpenGLRenderTarget::Bind() const noexcept {
-    Ref<const OpenGLRenderTarget> instance = this;
-    Renderer::Submit([instance]() {
-        glBindFramebuffer(GL_FRAMEBUFFER, instance->m_ID);
-    });
-}
-
-void OpenGLRenderTarget::Clear(const glm::vec4& clearVal) noexcept {
-    Ref<OpenGLRenderTarget> instance = this;
-    Renderer::Submit([instance, clearVal]() {
-        glClearNamedFramebufferfv(instance->m_ID, GL_COLOR, 0, glm::value_ptr(clearVal));
+        glCreateTextures(GL_TEXTURE_2D, 1, &instance->m_ID);
+        glTextureStorage2D(instance->m_ID, 1u, GetFormat(instance->m_Format), static_cast<int>(instance->m_Width), static_cast<int>(instance->m_Height));
+        glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     });
 }
 
 void OpenGLRenderTarget::BindTexture(uint32_t slot) const noexcept {
     Ref<const OpenGLRenderTarget> instance = this;
     Renderer::Submit([instance, slot]() {
-        glBindTextureUnit(slot, instance->m_Texture);
+        glBindTextureUnit(slot, instance->m_ID);
     });
 }
 

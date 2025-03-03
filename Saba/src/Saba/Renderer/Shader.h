@@ -27,14 +27,14 @@ public:
     SB_CORE ShaderLibrary() = default;
     SB_CORE ~ShaderLibrary() = default;
 
-    SB_CORE void Add(Ref<Shader> shader);
-    SB_CORE void Add(const std::string& name, Ref<Shader> shader);
+    SB_CORE Ref<Shader> Add(Ref<Shader> shader);
+    SB_CORE Ref<Shader> Add(const std::string& name, Ref<Shader> shader);
 
-    SB_CORE void Load(std::filesystem::path vertexPath, std::filesystem::path fragmentPath);
-    SB_CORE void Load(std::filesystem::path path);
-    SB_CORE void Load(const std::string& name, std::filesystem::path vertexPath, std::filesystem::path fragmentPath);
-    SB_CORE void Load(const std::string& name, std::filesystem::path path);
-    SB_CORE void Load(const std::string& name, std::string vertexSource, std::string fragmentSource);
+    SB_CORE Ref<Shader> Load(std::filesystem::path vertexPath, std::filesystem::path fragmentPath);
+    SB_CORE Ref<Shader> Load(std::filesystem::path path);
+    SB_CORE Ref<Shader> Load(const std::string& name, std::filesystem::path vertexPath, std::filesystem::path fragmentPath);
+    SB_CORE Ref<Shader> Load(const std::string& name, std::filesystem::path path);
+    SB_CORE Ref<Shader> Load(const std::string& name, std::string vertexSource, std::string fragmentSource);
 
     SB_CORE Ref<Shader> Get(const std::string& name) const;
 private:

@@ -9,10 +9,8 @@
 
 namespace Saba {
 
-Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, void* data, uint32_t size, BufferUsage usage)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(layout, data, size, usage);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -28,10 +26,8 @@ Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, void* data, uint32_t
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const Buffer& buffer, BufferUsage usage)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const Buffer& buffer, BufferUsage usage) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(layout, buffer, usage);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -47,10 +43,8 @@ Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const Buffer& buffer
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, Buffer&& buffer, BufferUsage usage)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, Buffer&& buffer, BufferUsage usage) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(layout, std::move(buffer), usage);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -69,10 +63,8 @@ Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, Buffer&& buffer, Buf
 
 
 
-Ref<IndexBuffer> IndexBuffer::Create(uint32_t* data, uint32_t size, BufferUsage usage)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<IndexBuffer> IndexBuffer::Create(const uint32_t* data, uint32_t size, BufferUsage usage) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(data, size, usage);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -88,10 +80,8 @@ Ref<IndexBuffer> IndexBuffer::Create(uint32_t* data, uint32_t size, BufferUsage 
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<IndexBuffer> IndexBuffer::Create(const Buffer& buffer, BufferUsage usage)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<IndexBuffer> IndexBuffer::Create(const Buffer& buffer, BufferUsage usage) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(buffer, usage);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -107,10 +97,8 @@ Ref<IndexBuffer> IndexBuffer::Create(const Buffer& buffer, BufferUsage usage)
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<IndexBuffer> IndexBuffer::Create(Buffer&& buffer, BufferUsage usage)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<IndexBuffer> IndexBuffer::Create(Buffer&& buffer, BufferUsage usage) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(std::move(buffer), usage);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -129,10 +117,8 @@ Ref<IndexBuffer> IndexBuffer::Create(Buffer&& buffer, BufferUsage usage)
 
 
 
-Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, void* data, uint32_t size)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, const void* data, uint32_t size) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLConstantBuffer>::Create(binding, data, size);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -148,10 +134,8 @@ Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, void* da
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, const Buffer& buffer)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, const Buffer& buffer) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLConstantBuffer>::Create(binding, buffer);
 #if defined(SB_PLATFORM_WINDOWS)
@@ -167,10 +151,8 @@ Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, const Bu
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, Buffer&& buffer)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, Buffer&& buffer) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLConstantBuffer>::Create(binding, std::move(buffer));
 #if defined(SB_PLATFORM_WINDOWS)
@@ -186,10 +168,8 @@ Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, Buffer&&
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, const UniformBufferBase& buffer)
-{
-    switch (RendererAPI::GetAPI())
-    {
+Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, const UniformBufferBase& buffer) {
+    switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLConstantBuffer>::Create(binding, buffer);
 #if defined(SB_PLATFORM_WINDOWS)

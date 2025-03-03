@@ -20,7 +20,7 @@ static GLenum GetUsage(BufferUsage usage)
     return 0;
 }
 
-OpenGLVertexBuffer::OpenGLVertexBuffer(BufferLayout layout, void* data, uint32_t size, BufferUsage usage)
+OpenGLVertexBuffer::OpenGLVertexBuffer(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage)
     : m_Layout(std::move(layout)), m_Size(size), m_Usage(usage)
 {
     if (data != nullptr)
@@ -51,7 +51,7 @@ void OpenGLVertexBuffer::Create() {
     });
 }
 
-void OpenGLVertexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
+void OpenGLVertexBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
 {
     SB_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
     SB_CORE_ASSERT(size + offset <= m_Size, "Vertex buffer overflow");
@@ -96,7 +96,7 @@ void OpenGLVertexBuffer::Bind() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, uint32_t size, BufferUsage usage)
+OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* data, uint32_t size, BufferUsage usage)
     : m_Size(size), m_Usage(usage)
 {
     if (data != nullptr)
@@ -127,7 +127,7 @@ void OpenGLIndexBuffer::Create() {
     });
 }
 
-void OpenGLIndexBuffer::SetData(uint32_t* data, uint32_t size, uint32_t offset) {
+void OpenGLIndexBuffer::SetData(const uint32_t* data, uint32_t size, uint32_t offset) {
     SB_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
     SB_CORE_ASSERT(size + offset <= m_Size, "Index buffer overflow");
     m_Data = Buffer::Copy(data, size);
@@ -168,7 +168,7 @@ void OpenGLIndexBuffer::Bind() const {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-OpenGLConstantBuffer::OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding binding, void* data, uint32_t size)
+OpenGLConstantBuffer::OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding binding, const void* data, uint32_t size)
     : m_Size(size)
 {
     if (data != nullptr)
@@ -198,11 +198,11 @@ void OpenGLConstantBuffer::Create() {
     Ref<OpenGLConstantBuffer> instance = this;
     Renderer::Submit([instance]() mutable {
         glCreateBuffers(1, &instance->m_ID);
-        glNamedBufferData(instance->m_ID, instance->m_Size, instance->m_Data.Data, GL_STATIC_DRAW);
+        glNamedBufferStorage(instance->m_ID, instance->m_Size, instance->m_Data.Data, GL_DYNAMIC_STORAGE_BIT);
     });
 }
 
-void OpenGLConstantBuffer::SetData(void* data, uint32_t size) {
+void OpenGLConstantBuffer::SetData(const void* data, uint32_t size) {
     SB_CORE_ASSERT(size == m_Size, "Only updating whole constant buffer is possible");
     m_Data = Buffer::Copy(data, size);
     Update();

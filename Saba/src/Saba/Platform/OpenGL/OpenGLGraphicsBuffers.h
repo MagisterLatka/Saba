@@ -7,12 +7,12 @@ namespace Saba {
 class OpenGLVertexBuffer : public VertexBuffer {
     friend class OpenGLInputLayout;
 public:
-    SB_CORE OpenGLVertexBuffer(BufferLayout layout, void* data, uint32_t size, BufferUsage usage);
+    SB_CORE OpenGLVertexBuffer(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage);
     SB_CORE OpenGLVertexBuffer(BufferLayout layout, const Buffer& buffer, BufferUsage usage);
     SB_CORE OpenGLVertexBuffer(BufferLayout layout, Buffer&& buffer, BufferUsage usage);
     SB_CORE ~OpenGLVertexBuffer();
 
-    SB_CORE void SetData(void* data, uint32_t size, uint32_t offset = 0u) override;
+    SB_CORE void SetData(const void* data, uint32_t size, uint32_t offset = 0u) override;
     SB_CORE void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
     SB_CORE void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
 
@@ -32,12 +32,12 @@ private:
 class OpenGLIndexBuffer : public IndexBuffer {
     friend class OpenGLInputLayout;
 public:
-    SB_CORE OpenGLIndexBuffer(uint32_t* data, uint32_t size, BufferUsage usage);
+    SB_CORE OpenGLIndexBuffer(const uint32_t* data, uint32_t size, BufferUsage usage);
     SB_CORE OpenGLIndexBuffer(const Buffer& buffer, BufferUsage usage);
     SB_CORE OpenGLIndexBuffer(Buffer&& buffer, BufferUsage usage);
     SB_CORE ~OpenGLIndexBuffer();
 
-    SB_CORE void SetData(uint32_t* data, uint32_t size, uint32_t offset = 0u) override;
+    SB_CORE void SetData(const uint32_t* data, uint32_t size, uint32_t offset = 0u) override;
     SB_CORE void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
     SB_CORE void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
 
@@ -55,13 +55,13 @@ private:
 
 class OpenGLConstantBuffer : public ConstantBuffer {
 public:
-    SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, void* data, uint32_t size);
+    SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, const void* data, uint32_t size);
     SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, const Buffer& buffer);
     SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, Buffer&& buffer);
     SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer);
     SB_CORE ~OpenGLConstantBuffer();
 
-    SB_CORE void SetData(void* data, uint32_t size) override;
+    SB_CORE void SetData(const void* data, uint32_t size) override;
     SB_CORE void SetData(const Buffer& buffer) override;
     SB_CORE void SetData(Buffer&& buffer) override;
     SB_CORE void SetData(const UniformBufferBase& buffer) override;

@@ -3,6 +3,7 @@
 
 #include "Saba/Renderer/RendererAPI.h"
 #include "Saba/Renderer/RenderCommand.h"
+#include "Saba/Renderer/Renderer2D.h"
 
 namespace Saba {
 
@@ -14,11 +15,13 @@ static RendererData s_Data;
 
 void Renderer::Init() {
     s_Data.commandQueue = CreateScope<RenderCommandQueue>();
-    s_Data.shaderLibrary = CreateScope<ShaderLibrary>();
     RenderCommand::Init();
+    s_Data.shaderLibrary = CreateScope<ShaderLibrary>();
+    Renderer2D::Init();
     s_Data.commandQueue->Execute();
 }
 void Renderer::Shutdown() {
+    Renderer2D::Shutdown();
     s_Data.shaderLibrary.reset();
     RenderCommand::Shutdown();
     s_Data.commandQueue->Execute();

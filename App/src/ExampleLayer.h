@@ -12,9 +12,8 @@ public:
     void OnUpdate(Saba::Timestep ts) override;
     void OnUIRender() override;
 private:
-    Ref<Saba::Shader> m_Shader;
-    Ref<Saba::InputLayout> m_InputLayout;
-    Ref<Saba::RenderTarget> m_RenderTarget;
+    Ref<Saba::RenderPass> m_RenderPass;
+    Ref<Saba::Texture2D> m_Texture;
 
     glm::vec2 m_ViewportSize = { -1.0f, -1.0f }, m_ViewportPos;
     bool m_ViewportHovered = false, m_ViewportFocused = false;

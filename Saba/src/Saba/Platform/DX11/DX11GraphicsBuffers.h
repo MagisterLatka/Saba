@@ -9,12 +9,12 @@ namespace Saba {
 class DX11VertexBuffer : public VertexBuffer {
     friend class DX11InputLayout;
 public:
-    SB_CORE DX11VertexBuffer(BufferLayout layout, void* data, uint32_t size, BufferUsage usage);
+    SB_CORE DX11VertexBuffer(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage);
     SB_CORE DX11VertexBuffer(BufferLayout layout, const Buffer& buffer, BufferUsage usage);
     SB_CORE DX11VertexBuffer(BufferLayout layout, Buffer&& buffer, BufferUsage usage);
     SB_CORE ~DX11VertexBuffer() = default;
 
-    SB_CORE void SetData(void* data, uint32_t size, uint32_t offset = 0u) override;
+    SB_CORE void SetData(const void* data, uint32_t size, uint32_t offset = 0u) override;
     SB_CORE void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
     SB_CORE void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
 
@@ -34,12 +34,12 @@ private:
 class DX11IndexBuffer : public IndexBuffer {
     friend class DX11InputLayout;
 public:
-    SB_CORE DX11IndexBuffer(uint32_t* data, uint32_t size, BufferUsage usage);
+    SB_CORE DX11IndexBuffer(const uint32_t* data, uint32_t size, BufferUsage usage);
     SB_CORE DX11IndexBuffer(const Buffer& buffer, BufferUsage usage);
     SB_CORE DX11IndexBuffer(Buffer&& buffer, BufferUsage usage);
     SB_CORE virtual ~DX11IndexBuffer() = default;
 
-    SB_CORE void SetData(uint32_t* data, uint32_t size, uint32_t offset) override;
+    SB_CORE void SetData(const uint32_t* data, uint32_t size, uint32_t offset) override;
     SB_CORE void SetData(const Buffer& buffer, uint32_t offset) override;
     SB_CORE void SetData(Buffer&& buffer, uint32_t offset) override;
 
@@ -57,13 +57,13 @@ private:
 
 class DX11ConstantBuffer : public ConstantBuffer {
 public:
-    SB_CORE DX11ConstantBuffer(BufferShaderBinding binding, void* data, uint32_t size);
+    SB_CORE DX11ConstantBuffer(BufferShaderBinding binding, const void* data, uint32_t size);
     SB_CORE DX11ConstantBuffer(BufferShaderBinding binding, const Buffer& buffer);
     SB_CORE DX11ConstantBuffer(BufferShaderBinding binding, Buffer&& buffer);
     SB_CORE DX11ConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer);
     SB_CORE virtual ~DX11ConstantBuffer() = default;
 
-    SB_CORE void SetData(void* data, uint32_t size) override;
+    SB_CORE void SetData(const void* data, uint32_t size) override;
     SB_CORE void SetData(const Buffer& buffer) override;
     SB_CORE void SetData(Buffer&& buffer) override;
     SB_CORE void SetData(const UniformBufferBase& buffer) override;

@@ -25,6 +25,7 @@ private:
     Texture2DProps m_Props;
     Buffer m_Buffer;
     ComPtr<ID3D11ShaderResourceView> m_View;
+    ComPtr<ID3D11SamplerState> m_Sampler;
 };
 
 }

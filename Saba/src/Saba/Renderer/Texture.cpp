@@ -32,8 +32,8 @@ Ref<Texture2D> Texture2D::Create(Texture2DProps props)
 Ref<Texture2D> Texture2D::Create(uint32_t width, uint32_t height, void* data, TextureFormat format) {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
-        case RendererAPI::API::OpenGL:    return Ref<OpenGLTexture2D>::Create(width, height, data, format);
-        case RendererAPI::API::Vulkan:    SB_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+        case RendererAPI::API::OpenGL:  return Ref<OpenGLTexture2D>::Create(width, height, data, format);
+        case RendererAPI::API::Vulkan:  SB_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
 #if defined(SB_PLATFORM_WINDOWS)
         case RendererAPI::API::DX11:    return Ref<DX11Texture2D>::Create(width, height, data, format);
         case RendererAPI::API::DX12:    SB_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
@@ -65,7 +65,7 @@ uint32_t Texture2D::CalcNrMips(uint32_t width, uint32_t height) {
 }
 void* Texture2D::Decode(const void* data, uint32_t size, uint32_t& width, uint32_t& height) {
     int x, y, channels;
-    void* output = stbi_load_from_memory((uint8_t*)data, static_cast<int>(size), &x, &y, &channels, 4);
+    void* output = stbi_load_from_memory(reinterpret_cast<const uint8_t*>(data), static_cast<int>(size), &x, &y, &channels, 4);
     width = static_cast<uint32_t>(x);
     height = static_cast<uint32_t>(y);
     return output;

@@ -28,9 +28,9 @@ OpenGLShader::OpenGLShader(std::filesystem::path path)
     Reload();
 }
 OpenGLShader::OpenGLShader(std::string vertexSource, std::string fragmentSource, std::string debugName)
-    : m_Name(std::move(debugName)), m_VSource(std::move(vertexSource)), m_FSource(std::move(fragmentSource))
+    : m_Name(std::move(debugName))
 {
-    Reload();
+    Reload(std::move(vertexSource), std::move(fragmentSource));
 }
 OpenGLShader::~OpenGLShader() {
     glDeleteProgram(m_ID);

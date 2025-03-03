@@ -41,7 +41,7 @@ void RenderCommand::Draw(RendererAPI::Topology topology, uint32_t verticesCount)
     Renderer::Submit([topology, verticesCount]() { s_API->Draw(topology, verticesCount); });
 }
 void RenderCommand::DrawIndexed(RendererAPI::Topology topology, uint32_t indicesCount) {
-    Renderer::Submit([topology, indicesCount]() { s_API->Draw(topology, indicesCount); });
+    Renderer::Submit([topology, indicesCount]() { s_API->DrawIndexed(topology, indicesCount); });
 }
 
 }

@@ -8,15 +8,24 @@ enum class TextureFormat : uint8_t {
     None = 0,
     R8, R32F,
     RGB8, RGB32F,
-    RGBA8, RGBA32F,
+    RGBA8, RGBA_SRGB, RGBA32F,
     Last = RGBA32F
+};
+enum class TextureSampling : uint8_t {
+    None = 0, Point, MinPointMagLinear, MagPointMinLinear, Linear, Anisotropic
+};
+enum class TextureWrap : uint8_t {
+    None = 0, Repeat, Clamp, Mirror, Border
 };
 struct Texture2DProps {
     uint32_t Width = 0u, Height = 0u;
     std::filesystem::path Filepath;
-    TextureFormat Format;
+    TextureFormat Format = TextureFormat::RGBA8;
     bool GenerateMipMaps = false;
-    bool UseSRGB = false;
+    TextureSampling Sampling = TextureSampling::MinPointMagLinear;
+    uint32_t MaxAnisotropy = 1u; //for TextureSampling::Anisotropic
+    TextureWrap Wrap = TextureWrap::Clamp;
+    glm::vec4 BorderColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); //for TextureWrap::Border
 };
 
 class Texture2D : public RefCounted

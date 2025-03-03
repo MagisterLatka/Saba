@@ -31,9 +31,9 @@ DX11Shader::DX11Shader(std::filesystem::path path)
     Reload();
 }
 DX11Shader::DX11Shader(std::string vertexSource, std::string fragmentSource, std::string debugName)
-    : m_Name(std::move(debugName)), m_VsSource(std::move(vertexSource)), m_FsSource(std::move(fragmentSource))
+    : m_Name(std::move(debugName))
 {
-    Reload();
+    Reload(std::move(vertexSource), std::move(fragmentSource));
 }
 void DX11Shader::Reload() {
     Ref<DX11Shader> instance = this;

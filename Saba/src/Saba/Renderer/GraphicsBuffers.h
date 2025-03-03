@@ -101,14 +101,14 @@ class VertexBuffer : public RefCounted {
 public:
     SB_CORE virtual ~VertexBuffer() = default;
 
-    SB_CORE virtual void SetData(void* data, uint32_t size, uint32_t offset = 0u) = 0;
+    SB_CORE virtual void SetData(const void* data, uint32_t size, uint32_t offset = 0u) = 0;
     SB_CORE virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) = 0;
     SB_CORE virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) = 0;
 
     SB_CORE virtual const BufferLayout& GetLayout() const noexcept = 0;
     SB_CORE virtual uint32_t GetSize() const noexcept = 0;
 
-    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, void* data, uint32_t size, BufferUsage usage = BufferUsage::Default);
+    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage = BufferUsage::Default);
     SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, const Buffer& buffer, BufferUsage usage = BufferUsage::Default);
     SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, Buffer&& buffer, BufferUsage usage = BufferUsage::Default);
 };
@@ -116,14 +116,14 @@ class IndexBuffer : public RefCounted {
 public:
     SB_CORE virtual ~IndexBuffer() = default;
 
-    SB_CORE virtual void SetData(uint32_t* data, uint32_t size, uint32_t offset = 0u) = 0;
+    SB_CORE virtual void SetData(const uint32_t* data, uint32_t size, uint32_t offset = 0u) = 0;
     SB_CORE virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) = 0;
     SB_CORE virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) = 0;
 
     SB_CORE virtual uint32_t GetSize() const noexcept = 0;
     SB_CORE virtual uint32_t GetIndicesCount() const noexcept = 0;
 
-    SB_CORE static Ref<IndexBuffer> Create(uint32_t* data, uint32_t size, BufferUsage usage = BufferUsage::Default);
+    SB_CORE static Ref<IndexBuffer> Create(const uint32_t* data, uint32_t size, BufferUsage usage = BufferUsage::Default);
     SB_CORE static Ref<IndexBuffer> Create(const Buffer& buffer, BufferUsage usage = BufferUsage::Default);
     SB_CORE static Ref<IndexBuffer> Create(Buffer&& buffer, BufferUsage usage = BufferUsage::Default);
 };
@@ -251,7 +251,7 @@ class ConstantBuffer : public RefCounted {
 public:
     SB_CORE virtual ~ConstantBuffer() = default;
 
-    SB_CORE virtual void SetData(void* data, uint32_t size) = 0;
+    SB_CORE virtual void SetData(const void* data, uint32_t size) = 0;
     SB_CORE virtual void SetData(const Buffer& buffer) = 0;
     SB_CORE virtual void SetData(Buffer&& buffer) = 0;
     SB_CORE virtual void SetData(const UniformBufferBase& buffer) = 0;
@@ -260,7 +260,7 @@ public:
 
     SB_CORE virtual uint32_t GetSize() const noexcept = 0;
 
-    SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, void* data, uint32_t size);
+    SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, const void* data, uint32_t size);
     SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, const Buffer& buffer);
     SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, Buffer&& buffer);
     SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, const UniformBufferBase& buffer);

@@ -17,7 +17,7 @@ static D3D11_USAGE GetUsage(BufferUsage usage) {
     return D3D11_USAGE_DEFAULT;
 }
 
-DX11VertexBuffer::DX11VertexBuffer(BufferLayout layout, void* data, uint32_t size, BufferUsage usage)
+DX11VertexBuffer::DX11VertexBuffer(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage)
     : m_Layout(std::move(layout)), m_Size(size), m_Usage(usage)
 {
     if (data != nullptr)
@@ -48,11 +48,12 @@ void DX11VertexBuffer::Create() {
         bufferDesc.Usage = GetUsage(instance->m_Usage);
         D3D11_SUBRESOURCE_DATA data = { 0 };
         data.pSysMem = instance->m_Data.Data;
-        SB_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+        SB_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+            &instance->m_Buffer));
     });
 }
 
-void DX11VertexBuffer::SetData(void* data, uint32_t size, uint32_t offset) {
+void DX11VertexBuffer::SetData(const void* data, uint32_t size, uint32_t offset) {
     SB_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
     if (m_Usage == BufferUsage::Dynamic) SB_CORE_ASSERT(size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
     SB_CORE_ASSERT(size + offset <= m_Size, "Vertex buffer overflow");
@@ -99,7 +100,7 @@ void DX11VertexBuffer::Update(uint32_t offset) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DX11IndexBuffer::DX11IndexBuffer(uint32_t* data, uint32_t size, BufferUsage usage)
+DX11IndexBuffer::DX11IndexBuffer(const uint32_t* data, uint32_t size, BufferUsage usage)
     : m_Size(size), m_Usage(usage)
 {
     if (data != nullptr)
@@ -130,11 +131,12 @@ void DX11IndexBuffer::Create() {
         bufferDesc.Usage = GetUsage(instance->m_Usage);
         D3D11_SUBRESOURCE_DATA data = { 0 };
         data.pSysMem = instance->m_Data.Data;
-        SB_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+        SB_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+            &instance->m_Buffer));
     });
 }
 
-void DX11IndexBuffer::SetData(uint32_t* data, uint32_t size, uint32_t offset) {
+void DX11IndexBuffer::SetData(const uint32_t* data, uint32_t size, uint32_t offset) {
     SB_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
     if (m_Usage == BufferUsage::Dynamic) SB_CORE_ASSERT(size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
     SB_CORE_ASSERT(size + offset <= m_Size, "Vertex buffer overflow");
@@ -182,7 +184,7 @@ void DX11IndexBuffer::Update(uint32_t offset) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, void* data, uint32_t size)
+DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, const void* data, uint32_t size)
     : m_Size(size), m_Binding(binding)
 {
     if (data != nullptr)
@@ -218,11 +220,12 @@ void DX11ConstantBuffer::Create() {
         bufferDesc.Usage = D3D11_USAGE_DEFAULT;
         D3D11_SUBRESOURCE_DATA data = { 0 };
         data.pSysMem = instance->m_Data.Data;
-        SB_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+        SB_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+            &instance->m_Buffer));
     });
 }
 
-void DX11ConstantBuffer::SetData(void* data, uint32_t size) {
+void DX11ConstantBuffer::SetData(const void* data, uint32_t size) {
     SB_CORE_ASSERT(size == m_Size, "Only updating whole constant buffer is possible");
     m_Data = Buffer::Copy(data, size);
     Update();

@@ -61,42 +61,42 @@ Ref<Shader> Shader::Create(std::string vertexSource, std::string fragmentSource,
     return nullptr;
 }
 
-void ShaderLibrary::Add(Ref<Shader> shader) {
+Ref<Shader> ShaderLibrary::Add(Ref<Shader> shader) {
     const auto& name = shader->GetName();
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
-    m_Shaders.emplace(name, std::move(shader));
+    SB_CORE_ASSERT(!m_Shaders.contains(name), "Shader {0} already exists", name);
+    return m_Shaders.emplace(name, std::move(shader)).first->second;
 }
-void ShaderLibrary::Add(const std::string& name, Ref<Shader> shader) {
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
-    m_Shaders.emplace(name, std::move(shader));
+Ref<Shader> ShaderLibrary::Add(const std::string& name, Ref<Shader> shader) {
+    SB_CORE_ASSERT(!m_Shaders.contains(name), "Shader {0} already exists", name);
+    return m_Shaders.emplace(name, std::move(shader)).first->second;
 }
 
-void ShaderLibrary::Load(std::filesystem::path vertexPath, std::filesystem::path fragmentPath) {
+Ref<Shader> ShaderLibrary::Load(std::filesystem::path vertexPath, std::filesystem::path fragmentPath) {
     Ref<Shader> shader = Shader::Create(std::move(vertexPath), std::move(fragmentPath));
     const auto& name = shader->GetName();
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
-    m_Shaders.emplace(name, std::move(shader));
+    SB_CORE_ASSERT(!m_Shaders.contains(name), "Shader {0} already exists", name);
+    return m_Shaders.emplace(name, std::move(shader)).first->second;
 }
-void ShaderLibrary::Load(std::filesystem::path path) {
+Ref<Shader> ShaderLibrary::Load(std::filesystem::path path) {
     Ref<Shader> shader = Shader::Create(std::move(path));
     const auto& name = shader->GetName();
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
-    m_Shaders.emplace(name, std::move(shader));
+    SB_CORE_ASSERT(!m_Shaders.contains(name), "Shader {0} already exists", name);
+    return m_Shaders.emplace(name, std::move(shader)).first->second;
 }
-void ShaderLibrary::Load(const std::string& name, std::filesystem::path vertexPath, std::filesystem::path fragmentPath) {
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
+Ref<Shader> ShaderLibrary::Load(const std::string& name, std::filesystem::path vertexPath, std::filesystem::path fragmentPath) {
+    SB_CORE_ASSERT(!m_Shaders.contains(name), "Shader {0} already exists", name);
     Ref<Shader> shader = Shader::Create(std::move(vertexPath), std::move(fragmentPath));
-    m_Shaders.emplace(name, std::move(shader));
+    return m_Shaders.emplace(name, std::move(shader)).first->second;
 }
-void ShaderLibrary::Load(const std::string& name, std::filesystem::path path) {
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
+Ref<Shader> ShaderLibrary::Load(const std::string& name, std::filesystem::path path) {
+    SB_CORE_ASSERT(!m_Shaders.contains(name), "Shader {0} already exists", name);
     Ref<Shader> shader = Shader::Create(std::move(path));
-    m_Shaders.emplace(name, std::move(shader));
+    return m_Shaders.emplace(name, std::move(shader)).first->second;
 }
-void ShaderLibrary::Load(const std::string& name, std::string vertexSource, std::string fragmentSource) {
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
+Ref<Shader> ShaderLibrary::Load(const std::string& name, std::string vertexSource, std::string fragmentSource) {
+    SB_CORE_ASSERT(!m_Shaders.contains(name), "Shader {0} already exists", name);
     Ref<Shader> shader = Shader::Create(std::move(vertexSource), std::move(fragmentSource), name);
-    m_Shaders.emplace(name, std::move(shader));
+    return m_Shaders.emplace(name, std::move(shader)).first->second;
 }
 
 Ref<Shader> ShaderLibrary::Get(const std::string& name) const {
