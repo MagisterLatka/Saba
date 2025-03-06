@@ -82,7 +82,7 @@ OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, void* data, Te
     m_Props.Width = width;
     m_Props.Height = height;
     m_Props.Format = format;
-    m_Buffer = Buffer(data, width * height * GetBPP(format));
+    m_Buffer = Buffer::Copy(data, width * height * GetBPP(format), Buffer::Allocator::Malloc);
     Init();
 }
 void OpenGLTexture2D::Init() {

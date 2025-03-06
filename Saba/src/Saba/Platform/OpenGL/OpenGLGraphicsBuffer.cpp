@@ -33,7 +33,7 @@ OpenGLVertexBuffer::OpenGLVertexBuffer(BufferLayout layout, const Buffer& buffer
     Create();
 }
 OpenGLVertexBuffer::OpenGLVertexBuffer(BufferLayout layout, Buffer&& buffer, BufferUsage usage)
-    : m_Layout(std::move(layout)), m_Data(std::move(buffer)), m_Size(buffer.Size), m_Usage(usage)
+    : m_Layout(std::move(layout)), m_Data(std::move(buffer)), m_Size(m_Data.Size), m_Usage(usage)
 {
     Create();
 }
@@ -72,6 +72,13 @@ void OpenGLVertexBuffer::SetData(Buffer&& buffer, uint32_t offset)
     m_Data = std::move(buffer);
     Update(offset);
 }
+
+void OpenGLVertexBuffer::UploadCurrent(uint32_t offset) {
+    SB_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
+    SB_CORE_ASSERT(m_Data.Size + offset <= m_Size, "Uploading data of invalid size to vertex buffer");
+    Update(offset);
+}
+
 void OpenGLVertexBuffer::Update(uint32_t offset)
 {
     Ref<OpenGLVertexBuffer> instance = this;
@@ -109,7 +116,7 @@ OpenGLIndexBuffer::OpenGLIndexBuffer(const Buffer& buffer, BufferUsage usage)
     Create();
 }
 OpenGLIndexBuffer::OpenGLIndexBuffer(Buffer&& buffer, BufferUsage usage)
-    : m_Data(std::move(buffer)), m_Size(buffer.Size), m_Usage(usage)
+    : m_Data(std::move(buffer)), m_Size(m_Data.Size), m_Usage(usage)
 {
     Create();
 }
@@ -181,7 +188,7 @@ OpenGLConstantBuffer::OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding 
     Create();
 }
 OpenGLConstantBuffer::OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding binding, Buffer&& buffer)
-    : m_Data(std::move(buffer)), m_Size(buffer.Size)
+    : m_Data(std::move(buffer)), m_Size(m_Data.Size)
 {
     Create();
 }
@@ -222,6 +229,12 @@ void OpenGLConstantBuffer::SetData(const UniformBufferBase& buffer) {
     m_Data = Buffer::Copy(buffer.GetBuffer(), buffer.GetBufferSize());
     Update();
 }
+
+void OpenGLConstantBuffer::UploadCurrent() {
+    SB_CORE_ASSERT(m_Data.Size == m_Size, "Uploading data of invalid size to contant buffer");
+    Update();
+}
+
 void OpenGLConstantBuffer::Update() {
     Ref<OpenGLConstantBuffer> instance = this;
     Renderer::Submit([instance]() {

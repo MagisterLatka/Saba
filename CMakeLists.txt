@@ -39,7 +39,6 @@ elseif(${USE_COMPILER} STREQUAL "clang")
     add_compile_definitions(SB_COMPILER_CLANG)
 endif()
 
-add_compile_definitions(GLM_FORCE_CXX11)
 add_compile_definitions(GLM_FORCE_SILENT_WARNINGS)
 add_compile_definitions(IMGUI_API=SB_CORE)
 

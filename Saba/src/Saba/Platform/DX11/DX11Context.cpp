@@ -22,6 +22,22 @@ void DX11Context::Init() {
     HRESULT hr;
     SB_DX_GRAPHICS_CALL_INFO(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, deviceCreateFlags, nullptr, 0, D3D11_SDK_VERSION,
         &m_Device, nullptr, &m_Context));
+
+    ComPtr<ID3D11Debug> debug;
+    hr = m_Device.As(&debug);
+    if (SUCCEEDED(hr)) {
+        ComPtr<ID3D11InfoQueue> queue;
+        hr = debug.As(&queue);
+        if (SUCCEEDED(hr)) {
+            D3D11_MESSAGE_ID hide[] = {
+                D3D11_MESSAGE_ID_DEVICE_DRAW_SAMPLER_NOT_SET
+            };
+            D3D11_INFO_QUEUE_FILTER filter = { 0 };
+            filter.DenyList.NumIDs = _countof(hide);
+            filter.DenyList.pIDList = hide;
+            queue->AddStorageFilterEntries(&filter);
+        }
+    }
 }
 
 void DX11Context::InitForWindow(Window* window) {

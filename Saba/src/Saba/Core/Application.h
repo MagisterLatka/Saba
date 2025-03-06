@@ -17,7 +17,7 @@ namespace Saba {
 struct ApplicationSpecifications
 {
     std::string Name = "Saba Engine";
-    uint32_t Width = 1280u, Height = 900u;
+    uint32_t Width = 1280u, Height = 720u;
     std::filesystem::path WindowIconPath;
     Buffer TitleBarIconData;
     bool ResizableWindow = true, CustomTitleBar = false;

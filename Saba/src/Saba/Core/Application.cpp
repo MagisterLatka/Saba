@@ -144,7 +144,6 @@ bool Application::OnWindowClose([[maybe_unused]] WindowCloseEvent& e) noexcept {
     return false;
 }
 bool Application::OnWindowResize(WindowResizeEvent& e) noexcept {
-    SB_CORE_TRACE("{0}, {1}", e.GetXSize(), e.GetYSize());
     m_Minimized = e.GetXSize() == 0 || e.GetYSize() == 0;
     return false;
 }

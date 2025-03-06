@@ -105,6 +105,9 @@ public:
     SB_CORE virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) = 0;
     SB_CORE virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) = 0;
 
+    SB_CORE virtual Buffer& GetLocalData() = 0;
+    SB_CORE virtual void UploadCurrent(uint32_t offset = 0u) = 0;
+
     SB_CORE virtual const BufferLayout& GetLayout() const noexcept = 0;
     SB_CORE virtual uint32_t GetSize() const noexcept = 0;
 
@@ -255,6 +258,9 @@ public:
     SB_CORE virtual void SetData(const Buffer& buffer) = 0;
     SB_CORE virtual void SetData(Buffer&& buffer) = 0;
     SB_CORE virtual void SetData(const UniformBufferBase& buffer) = 0;
+
+    SB_CORE virtual Buffer& GetLocalData() = 0;
+    SB_CORE virtual void UploadCurrent() = 0;
 
     SB_CORE virtual void Bind(uint32_t slot = 0) const = 0;
 

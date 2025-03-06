@@ -38,11 +38,17 @@ void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
 
     m_RenderPass->Bind();
     m_RenderPass->Clear();
+    Saba::Renderer2D::ResetStats();
 
     static float time = 0.0f;
     time += static_cast<float>(ts);
     time = glm::mod(time, glm::two_pi<float>());
     Saba::Renderer2D::SubmitQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, time, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture);
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 100; ++j) {
+            Saba::Renderer2D::SubmitQuad({ -0.5f + static_cast<float>(j) * 0.01f, -0.5f + static_cast<float>(i) * 0.01f }, { 0.005f, 0.005f }, 0.0f, {1.0f, 0.0f, 0.0f, 1.0f });
+        }
+    }
     Saba::Renderer2D::Draw();
 
     Saba::Application::Get().GetWindow()->BindToRender();
@@ -53,6 +59,8 @@ void ExampleLayer::OnUIRender() {
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Begin("Settings");
     ImGui::Text("Frame time: %.3fms (%.1f fps)", static_cast<double>(1000.0f / io.Framerate), static_cast<double>(io.Framerate));
+    ImGui::Text("Draw calls: %d", Saba::Renderer2D::GetStats().DrawCalls);
+    ImGui::Text("QuadCount: %d", Saba::Renderer2D::GetStats().QuadCount);
     ImGui::End();
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });

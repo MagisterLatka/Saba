@@ -30,7 +30,7 @@ DX11VertexBuffer::DX11VertexBuffer(BufferLayout layout, const Buffer& buffer, Bu
     Create();
 }
 DX11VertexBuffer::DX11VertexBuffer(BufferLayout layout, Buffer&& buffer, BufferUsage usage)
-    : m_Data(std::move(buffer)), m_Layout(std::move(layout)), m_Size(buffer.Size), m_Usage(usage)
+    : m_Data(std::move(buffer)), m_Layout(std::move(layout)), m_Size(m_Data.Size), m_Usage(usage)
 {
     Create();
 }
@@ -74,6 +74,13 @@ void DX11VertexBuffer::SetData(Buffer&& buffer, uint32_t offset) {
     m_Data = std::move(buffer);
     Update(offset);
 }
+
+void DX11VertexBuffer::UploadCurrent(uint32_t offset) {
+    SB_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
+    SB_CORE_ASSERT(m_Data.Size + offset <= m_Size, "Uploading data of invalid size to vertex buffer");
+    Update(offset);
+}
+
 void DX11VertexBuffer::Update(uint32_t offset) {
     Ref<DX11VertexBuffer> instance = this;
     Renderer::Submit([instance, offset]() {
@@ -113,7 +120,7 @@ DX11IndexBuffer::DX11IndexBuffer(const Buffer& buffer, BufferUsage usage)
     Create();
 }
 DX11IndexBuffer::DX11IndexBuffer(Buffer&& buffer, BufferUsage usage)
-    : m_Data(std::move(buffer)), m_Size(buffer.Size), m_Usage(usage)
+    : m_Data(std::move(buffer)), m_Size(m_Data.Size), m_Usage(usage)
 {
     Create();
 }
@@ -197,7 +204,7 @@ DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, const Buffer
     Create();
 }
 DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, Buffer&& buffer)
-    : m_Data(std::move(buffer)), m_Size(buffer.Size), m_Binding(binding)
+    : m_Data(std::move(buffer)), m_Size(m_Data.Size), m_Binding(binding)
 {
     Create();
 }
@@ -245,6 +252,12 @@ void DX11ConstantBuffer::SetData(const UniformBufferBase& buffer) {
     m_Data = Buffer::Copy(buffer.GetBuffer(), buffer.GetBufferSize());
     Update();
 }
+
+void DX11ConstantBuffer::UploadCurrent() {
+    SB_CORE_ASSERT(m_Data.Size == m_Size, "Uploading data of invalid size to constant buffer");
+    Update();
+}
+
 void DX11ConstantBuffer::Update() {
     Ref<DX11ConstantBuffer> instance = this;
     Renderer::Submit([instance]() mutable {

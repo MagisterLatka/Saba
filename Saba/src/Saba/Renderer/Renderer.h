@@ -12,9 +12,9 @@ public:
     requires std::is_invocable_v<T>
     static void Submit(T&& fn) {
         auto renderCommand = [](void* ptr) {
-            auto fn = reinterpret_cast<T*>(ptr);
-            (*fn)();
-            fn->~T();
+            auto func = reinterpret_cast<T*>(ptr);
+            (*func)();
+            func->~T();
         };
         auto buffer = GetRenderCommandQueue().Allocate(renderCommand, sizeof(fn));
         new (buffer) T(std::forward<T>(fn));

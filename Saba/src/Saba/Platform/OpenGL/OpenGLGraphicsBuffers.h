@@ -16,6 +16,9 @@ public:
     SB_CORE void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
     SB_CORE void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
 
+    SB_CORE Buffer& GetLocalData() override { return m_Data; }
+    SB_CORE void UploadCurrent(uint32_t offset = 0u) override;
+
     SB_CORE const BufferLayout& GetLayout() const noexcept override { return m_Layout; }
     SB_CORE uint32_t GetSize() const noexcept override { return m_Size; }
 private:
@@ -65,6 +68,9 @@ public:
     SB_CORE void SetData(const Buffer& buffer) override;
     SB_CORE void SetData(Buffer&& buffer) override;
     SB_CORE void SetData(const UniformBufferBase& buffer) override;
+
+    SB_CORE Buffer& GetLocalData() override { return m_Data; }
+    SB_CORE void UploadCurrent() override;
 
     SB_CORE void Bind(uint32_t slot) const override;
 
