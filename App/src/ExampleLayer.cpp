@@ -21,8 +21,24 @@ void ExampleLayer::OnAttach() {
     textureProps.Sampling = Saba::TextureSampling::Point;
     m_Texture = Saba::Texture2D::Create(std::move(textureProps));
 
-    float aspectRatio = static_cast<float>(window->GetWidth()) /static_cast<float>(window->GetHeight());
+    float aspectRatio = static_cast<float>(window->GetWidth()) / static_cast<float>(window->GetHeight());
     Saba::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
+
+    m_Scene = Ref<Saba::Scene>::Create("App scene");
+
+    const int count = 150;
+    for (int i = 0; i < count; ++i) {
+        for (int j = 0; j < count; ++j) {
+            auto entity = m_Scene->CreateEntity();
+            entity.GetTransformComponent().Position = glm::vec3(-0.5f + static_cast<float>(j) * (1.0f / count), -0.5f + static_cast<float>(i) * (1.0f / count), -0.1f);
+            entity.GetTransformComponent().Size = { (0.5f / count), (0.5f / count), 1.0f };
+            entity.AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        }
+    }
+
+    m_Quad = m_Scene->CreateEntity("Textured quad");
+    m_Quad.AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
+
 }
 void ExampleLayer::OnDetach() {
 
@@ -43,17 +59,11 @@ void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
     static float time = 0.0f;
     time += static_cast<float>(ts);
     time = glm::mod(time, glm::two_pi<float>());
-    Saba::Renderer2D::SubmitQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, time, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture);
-    for (int i = 0; i < 100; ++i) {
-        for (int j = 0; j < 100; ++j) {
-            Saba::Renderer2D::SubmitQuad({ -0.5f + static_cast<float>(j) * 0.01f, -0.5f + static_cast<float>(i) * 0.01f }, { 0.005f, 0.005f }, 0.0f, {1.0f, 0.0f, 0.0f, 1.0f });
-        }
-    }
-    Saba::Renderer2D::Draw();
+    m_Quad.GetTransformComponent().Orientation.z = time;
+    m_Scene->OnUpdate(ts);
 
     Saba::Application::Get().GetWindow()->BindToRender();
     Saba::Application::Get().GetWindow()->Clear();
-    Saba::Renderer::Render();
 }
 void ExampleLayer::OnUIRender() {
     ImGuiIO& io = ImGui::GetIO();

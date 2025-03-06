@@ -24,5 +24,4 @@ esac
 
 pushd $(dirname "$0")/../ > /dev/null
 cmake . --preset $option
-echo "${option}" > .cmake-option
 popd > /dev/null

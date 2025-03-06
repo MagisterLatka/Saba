@@ -48,6 +48,7 @@ include_directories(Saba/vendor/glfw/include)
 include_directories(Saba/vendor/glad/include)
 include_directories(Saba/vendor/ImGui)
 include_directories(Saba/vendor/stb_image)
+include_directories(Saba/vendor/entt)
 include_directories(Saba/vendor)
 include_directories(Saba/src)
 

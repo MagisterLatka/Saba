@@ -13,6 +13,7 @@ public:
     SB_CORE void DrawIndexed(Topology topology, uint32_t indicesCount) override;
 private:
     SB_CORE static int GetTopology(Topology topology);
+    SB_CORE void InitShaders();
 };
 
 }

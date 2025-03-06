@@ -95,9 +95,7 @@ public:
         return *this;
     }
 
-    operator bool() noexcept { return m_Instance != nullptr; }
     operator bool() const noexcept { return m_Instance != nullptr; }
-    bool operator==(const Ref<T>& other) noexcept { return m_Instance == other.m_Instance; }
     bool operator==(const Ref<T>& other) const noexcept { return m_Instance == other.m_Instance; }
     T* operator->() noexcept { return m_Instance; }
     const T* operator->() const noexcept { return m_Instance; }

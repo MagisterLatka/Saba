@@ -16,6 +16,7 @@ public:
     SB_CORE void DrawIndexed(Topology topology, uint32_t indicesCount) override;
 private:
     SB_CORE static void SetTopology(ComPtr<ID3D11DeviceContext> context, Topology topology);
+    SB_CORE void InitShaders();
 };
 
 }

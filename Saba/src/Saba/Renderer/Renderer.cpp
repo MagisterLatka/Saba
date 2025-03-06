@@ -15,8 +15,9 @@ static RendererData s_Data;
 
 void Renderer::Init() {
     s_Data.commandQueue = CreateScope<RenderCommandQueue>();
-    RenderCommand::Init();
     s_Data.shaderLibrary = CreateScope<ShaderLibrary>();
+    RenderCommand::Init();
+    s_Data.commandQueue->Execute();
     Renderer2D::Init();
     s_Data.commandQueue->Execute();
 }

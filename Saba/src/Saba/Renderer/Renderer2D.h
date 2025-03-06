@@ -16,11 +16,13 @@ public:
     SB_CORE static void SetViewProjectionMatrix(const glm::mat4& viewProjMat);
 
     SB_CORE static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation = 0.0f, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
-        const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f);
+     Ref<Texture2D> texture = {}, float tillingFactor = 1.0f);
     SB_CORE static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float rotation = 0.0f, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
-        const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f);
+        Ref<Texture2D> texture = {}, float tillingFactor = 1.0f);
+    SB_CORE static void SubmitQuad(const glm::mat4& transform, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, Ref<Texture2D> texture = {},
+        float tillingFactor = 1.0f);
 
-    SB_CORE static void Draw();
+    SB_CORE static void DrawQuads();
 
     SB_CORE static Stats GetStats() noexcept;
     SB_CORE static void ResetStats() noexcept;

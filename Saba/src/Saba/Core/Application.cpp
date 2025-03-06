@@ -106,6 +106,8 @@ int Application::Run() {
         }
         { auto e = AppUpdateEvent(); OnEvent(e); }
 
+        Renderer::Render();
+
         //update ui
         m_ImGuiLayer->Begin();
         ImGuiRender();
