@@ -29,9 +29,14 @@ public:
         m_Scene->m_Registry.erase<T>(m_Handle);
     }
     template<Component T>
-    SB_CORE T& GetComponent() const {
+    SB_CORE T& GetComponent() {
         SB_CORE_ASSERT(HasComponent<T>(), "Entity does not have this component");
         return m_Scene->m_Registry.get<T>(m_Handle);
+    }
+    template<Component T>
+    SB_CORE const T& GetComponent() const {
+        SB_CORE_ASSERT(HasComponent<T>(), "Entity does not have this component");
+        return m_Scene->m_Registry.get<const T>(m_Handle);
     }
 
     SB_CORE const Scene* GetScene() const noexcept { return m_Scene; }

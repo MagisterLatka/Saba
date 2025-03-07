@@ -356,7 +356,7 @@ LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPA
         case WM_MOUSEWHEEL: {
             const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
             m_Mouse.OnWheelDelta(delta);
-            MouseScrolledEvent e(0, static_cast<float>(delta));
+            MouseScrolledEvent e(0, static_cast<float>(delta) / static_cast<float>(WHEEL_DELTA));
             m_Data.eventCallback(e);
             break;
         }

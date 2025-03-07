@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Saba/Renderer/Texture.h"
+#include "Saba/Renderer/Camera.h"
 
 namespace Saba {
 
@@ -68,7 +69,45 @@ struct SpriteComponent {
     SB_CORE SpriteComponent& operator=(SpriteComponent&&) noexcept = default;
 };
 
+struct CameraComponent {
+    Ref<Saba::Camera> Camera;
+
+    SB_CORE CameraComponent() noexcept = default;
+    SB_CORE CameraComponent(const CameraComponent&) noexcept = default;
+    SB_CORE CameraComponent(CameraComponent&&) noexcept = default;
+    SB_CORE CameraComponent(Ref<Saba::Camera> camera) noexcept : Camera(std::move(camera)) {}
+
+    SB_CORE CameraComponent& operator=(const CameraComponent&) noexcept = default;
+    SB_CORE CameraComponent& operator=(CameraComponent&&) noexcept = default;
+};
+
+class ScriptableEntity;
+struct NativeScriptComponent {
+    ScriptableEntity* Instance = nullptr;
+
+    ScriptableEntity* (*InstantiateScript)();
+    void (*DestroyScript)(NativeScriptComponent*);
+
+    template<typename T>
+    requires(std::is_base_of_v<ScriptableEntity, T>)
+    void Bind() {
+        InstantiateScript = []() { return reinterpret_cast<ScriptableEntity*>(new T()); };
+        DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+    }
+    template<typename T>
+    requires(std::is_base_of_v<ScriptableEntity, T>)
+    T* GetInstance() {
+        return dynamic_cast<T*>(Instance);
+    }
+    template<typename T>
+    requires(std::is_base_of_v<ScriptableEntity, T>)
+    const T* GetInstance() const {
+        return dynamic_cast<T*>(Instance);
+    }
+};
+
 template<typename T>
-concept Component = std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent> || std::is_same_v<T, SpriteComponent>;
+concept Component = std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent> || std::is_same_v<T, SpriteComponent>
+    || std::is_same_v<T, CameraComponent> || std::is_same_v<T, NativeScriptComponent>;
 
 }

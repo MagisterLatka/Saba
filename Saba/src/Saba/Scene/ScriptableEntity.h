@@ -1,0 +1,44 @@
+#pragma once
+
+#include "Saba/Scene/Entity.h"
+#include "Saba/Events/Event.h"
+
+namespace Saba {
+
+class ScriptableEntity {
+    friend class Scene;
+public:
+    SB_CORE virtual ~ScriptableEntity() noexcept = default;
+protected:
+    template<Component T>
+    SB_CORE bool HasComponent() {
+        return m_Entity.HasComponent<T>();
+    }
+    template<Component T, typename ...Args>
+    SB_CORE T& AddComponent(Args&& ...args) {
+        return  m_Entity.AddComponent<T>(std::forward<Args>(args)...);
+    }
+    template<Component T>
+    SB_CORE void RemoveComponent() {
+        m_Entity.RemoveComponent<T>();
+    }
+    template<Component T>
+    SB_CORE T& GetComponent() {
+        return m_Entity.GetComponent<T>();
+    }
+
+    SB_CORE const Scene* GetScene() { return m_Entity.GetScene(); }
+    SB_CORE glm::mat4& GetTransform() { return m_Entity.GetTransform(); }
+
+    SB_CORE TransformComponent& GetTransformComponent() { return m_Entity.GetTransformComponent(); }
+
+    SB_CORE virtual void OnCreate() {}
+    SB_CORE virtual void OnDestroy() {}
+    SB_CORE virtual void OnEvent([[maybe_unused]] Event& e) {}
+    SB_CORE virtual void OnUpdate([[maybe_unused]] Timestep ts) {}
+    SB_CORE virtual void OnViewportResize([[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height) {}
+private:
+    Entity m_Entity;
+};
+
+}

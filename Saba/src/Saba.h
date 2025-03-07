@@ -14,4 +14,4 @@
 #include <Saba/Renderer/RenderPass.h>
 
 #include <Saba/Scene/Scene.h>
-#include <Saba/Scene/Entity.h>
+#include <Saba/Scene/ScriptableEntity.h>

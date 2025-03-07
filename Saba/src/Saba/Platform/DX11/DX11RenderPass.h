@@ -22,6 +22,9 @@ public:
     SB_CORE void Bind() const noexcept override;
     SB_CORE void Clear(const glm::vec4& clearVal, float depth, uint8_t stencil) noexcept override;
     SB_CORE void Resize(uint32_t width, uint32_t height) override;
+
+    SB_CORE uint32_t GetWidth() const noexcept override { return m_Width; }
+    SB_CORE uint32_t GetHeight() const noexcept override { return m_Height; }
 private:
     std::array<Ref<DX11RenderTarget>, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> m_RenderTargets;
     Ref<DX11RenderTarget> m_DepthStencilTarget;

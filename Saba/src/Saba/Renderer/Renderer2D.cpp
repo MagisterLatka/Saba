@@ -95,7 +95,21 @@ void Renderer2D::Shutdown() {
 }
 
 void Renderer2D::SetViewProjectionMatrix(const glm::mat4& viewProjMat) {
-    s_Data.viewProj->SetData(glm::value_ptr(viewProjMat), sizeof(glm::mat4));
+    switch (RendererAPI::GetAPI()) {
+        default: break;
+        case RendererAPI::API::None:
+            SB_CORE_THROW_INFO("None API is not supported");
+            break;
+        case RendererAPI::API::OpenGL:
+        case RendererAPI::API::Vulkan:
+            s_Data.viewProj->SetData(glm::value_ptr(viewProjMat), sizeof(glm::mat4));
+            break;
+        case RendererAPI::API::DX11:
+        case RendererAPI::API::DX12:
+            glm::mat4 transposed = glm::transpose(viewProjMat);
+            s_Data.viewProj->SetData(glm::value_ptr(transposed), sizeof(glm::mat4));
+            break;
+    }
 }
 void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor) {
     SubmitQuad(glm::vec3(pos, 0.0f), size, rotation, color, texture, tillingFactor);
