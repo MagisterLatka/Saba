@@ -8,6 +8,8 @@
 Saba::Application* Saba::CreateApplication()
 {
     ApplicationSpecifications spec;
+    spec.Width = 1600u;
+    spec.Height = 900u;
     spec.WindowIconPath = "assets/Icon.png";
     spec.CustomTitleBar = true;
     auto* app = new Application(spec);

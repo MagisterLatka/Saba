@@ -13,9 +13,9 @@ namespace Saba {
 class Entity;
 class Scene : public RefCounted {
     friend class Entity;
+    friend class SceneHierarchyPanel;
 public:
-    SB_CORE Scene(std::string name = "Scene") noexcept
-        : m_Name(std::move(name)) {}
+    SB_CORE Scene(std::string name = "Scene") noexcept;
     SB_CORE ~Scene();
 
     SB_CORE Entity CreateEntity(std::string name = {});
@@ -33,11 +33,16 @@ private:
     void OnComponentAdd(Entity entity, T& component);
 private:
     std::string m_Name;
+    uint32_t m_ID = std::numeric_limits<uint32_t>::max();
 
     entt::registry m_Registry;
-    entt::entity m_Camera = entt::null;
+    entt::entity m_SceneEntity = entt::null, m_Camera = entt::null;
 
     glm::uvec2 m_ViewportSize = { 0u, 0u };
+
+    struct SceneComponent {
+        uint32_t sceneID;
+    };
 };
 
 }

@@ -18,8 +18,9 @@ private:
 
     Ref<Saba::Scene> m_Scene;
     Saba::Entity m_Quad, m_Camera;
+    Scope<Saba::SceneHierarchyPanel> m_SceneHierarchyPanel;
 
     glm::uvec2 m_ViewportSize = { 0, 0 };
-    glm::ivec2 m_ViewportPos;
+    glm::ivec2 m_ViewportPos = { 0, 0};
     bool m_ViewportHovered = false, m_ViewportFocused = false;
 };

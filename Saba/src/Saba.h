@@ -15,3 +15,5 @@
 
 #include <Saba/Scene/Scene.h>
 #include <Saba/Scene/ScriptableEntity.h>
+
+#include <Saba/Panels/SceneHierarchyPanel.h>

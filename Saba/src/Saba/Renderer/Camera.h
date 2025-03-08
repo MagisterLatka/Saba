@@ -19,6 +19,7 @@ protected:
 };
 
 class OrthographicCamera : public Camera {
+    friend class SceneHierarchyPanel;
 public:
     SB_CORE OrthographicCamera() = default;
     SB_CORE OrthographicCamera(glm::mat4 projectionMatrix) noexcept

@@ -74,22 +74,16 @@ void ExampleLayer::OnAttach() {
     m_Camera.GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>()->SetSize(2.0f);
     m_Camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
 
-    const int count = 150;
-    for (int i = 0; i < count; ++i) {
-        for (int j = 0; j < count; ++j) {
-            auto entity = m_Scene->CreateEntity();
-            entity.GetTransformComponent().Position = glm::vec3(-0.5f + static_cast<float>(j) * (1.0f / count), -0.5f + static_cast<float>(i) * (1.0f / count), -0.1f);
-            entity.GetTransformComponent().Size = { (0.5f / count), (0.5f / count), 1.0f };
-            entity.AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-        }
-    }
-
     m_Quad = m_Scene->CreateEntity("Textured quad");
     m_Quad.AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
+    m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_Scene);
 }
 void ExampleLayer::OnDetach() {
-
+    m_SceneHierarchyPanel.reset();
+    m_Scene.Reset();
+    m_RenderPass.Reset();
+    m_Texture.Reset();
 }
 void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
     Saba::Application::Get().GetWindow()->BindWindow();
@@ -118,10 +112,6 @@ void ExampleLayer::OnUIRender() {
     ImGui::Text("Frame time: %.3fms (%.1f fps)", static_cast<double>(1000.0f / io.Framerate), static_cast<double>(io.Framerate));
     ImGui::Text("Draw calls: %d", Saba::Renderer2D::GetStats().DrawCalls);
     ImGui::Text("QuadCount: %d", Saba::Renderer2D::GetStats().QuadCount);
-    auto camera = m_Camera.GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>();
-    float cameraSize = camera->GetSize();
-    if (ImGui::DragFloat("Camera size", &cameraSize))
-        camera->SetSize(cameraSize);
     ImGui::End();
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
@@ -149,6 +139,8 @@ void ExampleLayer::OnUIRender() {
 
     ImGui::End();
     ImGui::PopStyleVar();
+
+    m_SceneHierarchyPanel->OnUIRender();
 }
 void ExampleLayer::OnEvent(Saba::Event& e) {
     m_Scene->OnEvent(e);
