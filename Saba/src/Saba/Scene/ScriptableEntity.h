@@ -11,19 +11,19 @@ public:
     SB_CORE virtual ~ScriptableEntity() noexcept = default;
 protected:
     template<Component T>
-    SB_CORE bool HasComponent() {
+    bool HasComponent() {
         return m_Entity.HasComponent<T>();
     }
     template<Component T, typename ...Args>
-    SB_CORE T& AddComponent(Args&& ...args) {
+    T& AddComponent(Args&& ...args) {
         return  m_Entity.AddComponent<T>(std::forward<Args>(args)...);
     }
     template<Component T>
-    SB_CORE void RemoveComponent() {
+    void RemoveComponent() {
         m_Entity.RemoveComponent<T>();
     }
     template<Component T>
-    SB_CORE T& GetComponent() {
+    T& GetComponent() {
         return m_Entity.GetComponent<T>();
     }
 

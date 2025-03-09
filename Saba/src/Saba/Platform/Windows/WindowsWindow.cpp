@@ -264,16 +264,34 @@ LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPA
         }
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN: {
+            uint8_t key = static_cast<uint8_t>(wParam);
+            const bool extended = (lParam & 0x01000000u) != 0;
+            if (key == VK_CONTROL)
+                key = extended ? VK_RCONTROL : VK_LCONTROL;
+            else if (key == VK_SHIFT)
+                key = MapVirtualKeyA((lParam & 0x00ff0000) >> 16u, MAPVK_VSC_TO_VK_EX);
+            else if (key == VK_MENU)
+                key = extended ? VK_RMENU : VK_LMENU;
+
             if (!(lParam & 0x40000000) || m_Keyboard.IsAutorepeatEnabled())
-                m_Keyboard.OnKeyPressed(static_cast<uint8_t>(wParam));
-            KeyPressedEvent e(KeyCode(static_cast<uint8_t>(wParam)), LOWORD(lParam));
+                m_Keyboard.OnKeyPressed(key);
+            KeyPressedEvent e(KeyCode(key), LOWORD(lParam));
             m_Data.eventCallback(e);
             break;
         }
         case WM_KEYUP:
         case WM_SYSKEYUP: {
-            m_Keyboard.OnKeyReleased(static_cast<uint8_t>(wParam));
-            KeyReleasedEvent e(KeyCode(static_cast<uint8_t>(wParam)));
+            uint8_t key = static_cast<uint8_t>(wParam);
+            const bool extended = (lParam & 0x01000000u) != 0;
+            if (key == VK_CONTROL)
+                key = extended ? VK_RCONTROL : VK_LCONTROL;
+            else if (key == VK_SHIFT)
+                key = MapVirtualKeyA((lParam & 0x00ff0000) >> 16u, MAPVK_VSC_TO_VK_EX);
+            else if (key == VK_MENU)
+                key = extended ? VK_RMENU : VK_LMENU;
+
+            m_Keyboard.OnKeyReleased(key);
+            KeyReleasedEvent e = { KeyCode(key) };
             m_Data.eventCallback(e);
             break;
         }

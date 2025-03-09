@@ -21,4 +21,29 @@ std::string FileProcessing::ReadFromFile(const std::filesystem::path& filepath) 
     return result;
 }
 
+#if defined(SB_PLATFORM_WINDOWS)
+extern std::filesystem::path WindowsOpen();
+extern std::filesystem::path WindowsSave();
+
+std::filesystem::path FileProcessing::ChooseFileToOpenFrom() {
+    return WindowsOpen();
+}
+std::filesystem::path FileProcessing::ChooseFileToSaveTo() {
+    return WindowsSave();
+}
+#else
+std::filesystem::path FileProcessing::ChooseFileToOpenFrom() {
+    SB_CORE_INFO("Choose file to open from:");
+    std::filesystem::path path;
+    std::cin >> path;
+    return path;
+}
+std::filesystem::path FileProcessing::ChooseFileToSaveTo() {
+    SB_CORE_INFO("Choose file to save to:");
+    std::filesystem::path path;
+    std::cin >> path;
+    return path;
+}
+#endif
+
 }

@@ -14,6 +14,7 @@ class Entity;
 class Scene : public RefCounted {
     friend class Entity;
     friend class SceneHierarchyPanel;
+    friend class SceneSerializer;
 public:
     SB_CORE Scene(std::string name = "Scene") noexcept;
     SB_CORE ~Scene();

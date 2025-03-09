@@ -14,27 +14,27 @@ public:
     SB_CORE ~Entity() noexcept = default;
 
     template<Component T>
-    SB_CORE bool HasComponent() const {
+    bool HasComponent() const {
         return m_Scene->m_Registry.all_of<T>(m_Handle);
     }
     template<Component T, typename ...Args>
     requires(std::is_constructible_v<T, Args...>)
-    SB_CORE T& AddComponent(Args&& ...args) {
+    T& AddComponent(Args&& ...args) {
         SB_CORE_ASSERT(!HasComponent<T>(), "Entity already has this component");
         return m_Scene->m_Registry.emplace<T>(m_Handle, std::forward<Args>(args)...);
     }
     template<Component T>
-    SB_CORE void RemoveComponent() {
+    void RemoveComponent() {
         SB_CORE_ASSERT(HasComponent<T>(), "Entity does not have this component");
         m_Scene->m_Registry.erase<T>(m_Handle);
     }
     template<Component T>
-    SB_CORE T& GetComponent() {
+    T& GetComponent() {
         SB_CORE_ASSERT(HasComponent<T>(), "Entity does not have this component");
         return m_Scene->m_Registry.get<T>(m_Handle);
     }
     template<Component T>
-    SB_CORE const T& GetComponent() const {
+    const T& GetComponent() const {
         SB_CORE_ASSERT(HasComponent<T>(), "Entity does not have this component");
         return m_Scene->m_Registry.get<const T>(m_Handle);
     }
