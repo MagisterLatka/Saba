@@ -30,14 +30,14 @@ public:
             deltaSpeed *= glm::pow(1.01f, cameraSize) - 0.01f;
 
         auto delta = glm::vec3(0.0f);
-        if (Saba::Application::Get().GetWindow()->GetKeyboard().IsKeyPressed(static_cast<uint8_t>(SB_KEY_UP)))
+        if (Saba::Input::IsKeyPressed(SB_KEY_UP))
             delta.y = deltaSpeed;
-        else if (Saba::Application::Get().GetWindow()->GetKeyboard().IsKeyPressed(static_cast<uint8_t>(SB_KEY_DOWN)))
+        else if (Saba::Input::IsKeyPressed(SB_KEY_DOWN))
             delta.y = -deltaSpeed;
 
-        if (Saba::Application::Get().GetWindow()->GetKeyboard().IsKeyPressed(static_cast<uint8_t>(SB_KEY_LEFT)))
+        if (Saba::Input::IsKeyPressed(SB_KEY_LEFT))
             delta.x = -deltaSpeed;
-        else if (Saba::Application::Get().GetWindow()->GetKeyboard().IsKeyPressed(static_cast<uint8_t>(SB_KEY_RIGHT)))
+        else if (Saba::Input::IsKeyPressed(SB_KEY_RIGHT))
             delta.x = deltaSpeed;
 
         GetTransformComponent().Position += delta;
@@ -70,12 +70,11 @@ void ExampleLayer::OnAttach() {
 
     m_Scene = Ref<Saba::Scene>::Create("App scene");
     m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-    m_Camera = m_Scene->CreateAndSetCameraEntity();
-    m_Camera.GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>()->SetSize(2.0f);
-    m_Camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
+    auto camera = m_Scene->CreateAndSetCameraEntity();
+    camera.GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>()->SetSize(2.0f);
+    camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
 
-    m_Quad = m_Scene->CreateEntity("Textured quad");
-    m_Quad.AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
+    m_Scene->CreateEntity("Textured quad").AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
     m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_Scene);
 }
@@ -97,10 +96,6 @@ void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
     m_RenderPass->Clear();
     Saba::Renderer2D::ResetStats();
 
-    static float time = 0.0f;
-    time += static_cast<float>(ts);
-    time = glm::mod(time, glm::two_pi<float>());
-    m_Quad.GetTransformComponent().Orientation.z = time;
     m_Scene->OnUpdate(ts);
 
     Saba::Application::Get().GetWindow()->BindToRender();
@@ -143,5 +138,54 @@ void ExampleLayer::OnUIRender() {
     m_SceneHierarchyPanel->OnUIRender();
 }
 void ExampleLayer::OnEvent(Saba::Event& e) {
+    Saba::Dispatcher dispatcher(e);
+    dispatcher.Dispatch<Saba::KeyPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
+
     m_Scene->OnEvent(e);
+}
+bool ExampleLayer::OnKeyPressed(Saba::KeyPressedEvent& e) {
+    const bool shift = Saba::Input::IsKeyPressed(Saba::KeyCode::LeftShift);
+    const bool control = Saba::Input::IsKeyPressed(Saba::KeyCode::LeftControl);
+
+    switch (e.GetKeyCode()) {
+        default:
+            break;
+        case Saba::KeyCode::N:
+            if (control)
+                NewScene();
+            break;
+        case Saba::KeyCode::O:
+            if (control)
+                OpenScene();
+            break;
+        case Saba::KeyCode::S:
+            if (control && shift)
+                SaveScene();
+            break;
+    }
+    return false;
+}
+
+void ExampleLayer::NewScene() {
+    m_Scene = Ref<Saba::Scene>::Create();
+    m_Scene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+    m_SceneHierarchyPanel->SetScene(m_Scene);
+}
+void ExampleLayer::OpenScene() {
+    std::filesystem::path filepath = Saba::FileProcessing::ChooseFileToOpenFrom();
+    if (filepath.empty())
+        return;
+
+    NewScene();
+
+    Saba::SceneSerializer serializer(m_Scene);
+    serializer.Deserialize(filepath);
+}
+void ExampleLayer::SaveScene() {
+    std::filesystem::path filepath = Saba::FileProcessing::ChooseFileToSaveTo();
+    if (filepath.empty())
+        return;
+
+    Saba::SceneSerializer serializer(m_Scene);
+    serializer.Serialize(filepath);
 }
