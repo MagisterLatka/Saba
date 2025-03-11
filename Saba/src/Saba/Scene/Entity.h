@@ -21,7 +21,9 @@ public:
     requires(std::is_constructible_v<T, Args...>)
     T& AddComponent(Args&& ...args) {
         SB_CORE_ASSERT(!HasComponent<T>(), "Entity already has this component");
-        return m_Scene->m_Registry.emplace<T>(m_Handle, std::forward<Args>(args)...);
+        auto& component = m_Scene->m_Registry.emplace<T>(m_Handle, std::forward<Args>(args)...);
+        m_Scene->OnComponentAdd<T>(*this, component);
+        return component;
     }
     template<Component T>
     void RemoveComponent() {

@@ -2,6 +2,7 @@
 #include "SceneHierarchyPanel.h"
 
 #include "Saba/ImGui/ImGui.h"
+#include "Saba/Panels/ContentBrowserPanel.h"
 
 namespace Saba {
 
@@ -156,6 +157,18 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
     }, false);
     DrawComponent<SpriteComponent>("Sprite component", entity, [](SpriteComponent& component) {
         UI::ColorEdit4("Color", component.Color, columnWidth);
+
+        ImGui::Button("Texture", ImVec2(ImGui::GetColumnWidth(), 0.0f));
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_PANEL")) {
+                const char* path = reinterpret_cast<const char*>(payload->Data);
+                Texture2DProps props;
+                props.Filepath = g_AssetsPath / path;
+                component.Texture = Texture2D::Create(props);
+            }
+            ImGui::EndDragDropTarget();
+        }
+
         UI::DragFloat("Tilling factor", component.TillingFactor, 1.0f, 0.01f, 10.0f, 0.01f, columnWidth);
     });
     DrawComponent<CameraComponent>("Camera component", entity, [](CameraComponent& component) {

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <Saba/Panels/SceneHierarchyPanel.h>
+#include <Saba/Panels/ContentBrowserPanel.h>
+
 class ExampleLayer : public Saba::Layer
 {
     friend Saba::Application* Saba::CreateApplication();
@@ -18,6 +21,7 @@ private:
 
     void NewScene();
     void OpenScene();
+    void OpenScene(const std::filesystem::path& path);
     void SaveScene();
 private:
     Ref<Saba::RenderPass> m_RenderPass;
@@ -26,6 +30,7 @@ private:
     Ref<Saba::Scene> m_Scene;
     Saba::Entity m_Camera;
     Scope<Saba::SceneHierarchyPanel> m_SceneHierarchyPanel;
+    Scope<Saba::ContentBrowserPanel> m_ContentBrowserPanel;
     Saba::Entity m_HoveredEntity;
 
     glm::uvec2 m_ViewportSize = { 0, 0 };

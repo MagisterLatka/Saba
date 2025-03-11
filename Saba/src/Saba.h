@@ -18,6 +18,4 @@
 #include <Saba/Scene/ScriptableEntity.h>
 #include <Saba/Scene/SceneSerializer.h>
 
-#include <Saba/Panels/SceneHierarchyPanel.h>
-
 #include <Saba/Utils/FileProcessing.h>

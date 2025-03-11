@@ -80,8 +80,10 @@ void ExampleLayer::OnAttach() {
     m_Scene->CreateEntity("Textured quad").AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
     m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_Scene);
+    m_ContentBrowserPanel = CreateScope<Saba::ContentBrowserPanel>();
 }
 void ExampleLayer::OnDetach() {
+    m_ContentBrowserPanel.reset();
     m_SceneHierarchyPanel.reset();
     m_Scene.Reset();
     m_RenderPass.Reset();
@@ -146,6 +148,14 @@ void ExampleLayer::OnUIRender() {
 
     Saba::UI::DrawImage(m_RenderPass->GetRenderTarget(), viewportSize);
 
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
+            const char* path = reinterpret_cast<const char*>(payload->Data);
+            OpenScene(Saba::g_AssetsPath / path);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
     if (Saba::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GuizmoType != -1 && selected) {
         const bool snap = Saba::Input::IsKeyPressed(Saba::KeyCode::LeftControl);
         const float snapValue = m_GuizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : m_GuizmoType == ImGuizmo::OPERATION::SCALE ? 0.5f : 0.1f;
@@ -178,6 +188,7 @@ void ExampleLayer::OnUIRender() {
     ImGui::PopStyleVar();
 
     m_SceneHierarchyPanel->OnUIRender();
+    m_ContentBrowserPanel->OnUIRender();
 }
 void ExampleLayer::OnEvent(Saba::Event& e) {
     Saba::Dispatcher dispatcher(e);
@@ -244,11 +255,16 @@ void ExampleLayer::OpenScene() {
     std::filesystem::path filepath = Saba::FileProcessing::ChooseFileToOpenFrom();
     if (filepath.empty())
         return;
+    OpenScene(filepath);
+}
+void ExampleLayer::OpenScene(const std::filesystem::path& path) {
+    if (!std::filesystem::exists(path))
+        return;
 
     NewScene();
 
     Saba::SceneSerializer serializer(m_Scene);
-    serializer.Deserialize(filepath);
+    serializer.Deserialize(path);
 }
 void ExampleLayer::SaveScene() {
     std::filesystem::path filepath = Saba::FileProcessing::ChooseFileToSaveTo();
