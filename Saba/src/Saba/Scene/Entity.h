@@ -43,6 +43,8 @@ public:
 
     SB_CORE const Scene* GetScene() const noexcept { return m_Scene; }
 
+    SB_CORE UUID GetID() const noexcept { return GetComponent<IDComponent>().ID; }
+
     SB_CORE glm::mat4& GetTransform() { return m_Scene->m_Registry.get<TransformComponent>(m_Handle).Transform; }
     SB_CORE const glm::mat4& GetTransform() const { return m_Scene->m_Registry.get<TransformComponent>(m_Handle).Transform; }
     SB_CORE TransformComponent& GetTransformComponent() { return m_Scene->m_Registry.get<TransformComponent>(m_Handle); }

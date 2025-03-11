@@ -1,9 +1,22 @@
 #pragma once
 
+#include "Saba/Core/UUID.h"
 #include "Saba/Renderer/Texture.h"
 #include "Saba/Renderer/Camera.h"
 
 namespace Saba {
+
+struct IDComponent {
+    UUID ID;
+
+    SB_CORE IDComponent() noexcept = default;
+    SB_CORE IDComponent(UUID id) noexcept : ID(id) {}
+    SB_CORE IDComponent(const IDComponent&) noexcept = default;
+    SB_CORE IDComponent(IDComponent&&) noexcept = default;
+
+    SB_CORE IDComponent& operator=(const IDComponent&) noexcept = default;
+    SB_CORE IDComponent& operator=(IDComponent&&) noexcept = default;
+};
 
 struct TagComponent {
     std::string Tag;
@@ -52,6 +65,20 @@ struct TransformComponent {
 
     SB_CORE operator glm::mat4&() noexcept { return Transform; }
     SB_CORE operator const glm::mat4&() const noexcept { return Transform; }
+};
+
+struct CircleComponent {
+    glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    float Thickness = 1.0f, Fade = 0.005f;
+
+    SB_CORE CircleComponent() noexcept = default;
+    SB_CORE CircleComponent(const CircleComponent&) noexcept = default;
+    SB_CORE CircleComponent(CircleComponent&&) noexcept = default;
+    SB_CORE CircleComponent(glm::vec4 color, float thickness = 1.0f, float fade = 0.005f) noexcept
+        : Color(color), Thickness(thickness), Fade(fade) {}
+
+    SB_CORE CircleComponent& operator=(const CircleComponent&) noexcept = default;
+    SB_CORE CircleComponent& operator=(CircleComponent&&) noexcept = default;
 };
 
 struct SpriteComponent {
@@ -107,7 +134,8 @@ struct NativeScriptComponent {
 };
 
 template<typename T>
-concept Component = std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent> || std::is_same_v<T, SpriteComponent>
-    || std::is_same_v<T, CameraComponent> || std::is_same_v<T, NativeScriptComponent>;
+concept Component = std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent>
+    || std::is_same_v<T, CircleComponent> || std::is_same_v<T, SpriteComponent> || std::is_same_v<T, CameraComponent>
+    || std::is_same_v<T, NativeScriptComponent>;
 
 }

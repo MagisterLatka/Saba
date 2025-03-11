@@ -98,7 +98,7 @@ void OpenGLShader::Compile() {
             glGetShaderInfoLog(vertexID, maxLength, &maxLength, infoLog.data());
 
             glDeleteShader(vertexID);
-            SB_CORE_THROW(std::string("Shader compilation failed (" + instance->m_VPath.string() + "):\n" + infoLog.data()));
+            SB_CORE_THROW_INFO(std::string("Shader compilation failed (" + instance->m_VPath.string() + "):\n" + infoLog.data()));
         }
         glAttachShader(instance->m_ID, vertexID);
 
@@ -115,7 +115,7 @@ void OpenGLShader::Compile() {
             glGetShaderInfoLog(fragmentID, maxLength, &maxLength, infoLog.data());
 
             glDeleteShader(fragmentID);
-            SB_CORE_THROW(std::string("Shader compilation failed (" +
+            SB_CORE_THROW_INFO(std::string("Shader compilation failed (" +
                 (instance->m_FPath.empty() ? instance->m_VPath.string() : instance->m_FPath.string()) +
                 "):\n" + infoLog.data()));
         }

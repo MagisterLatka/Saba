@@ -130,7 +130,7 @@ void DX11RenderTarget::BindTexture(uint32_t slot) const {
     });
 }
 
-void DX11RenderTarget::ReadPixel(void* data. uint32_t xCoord, uint32_t yCoord) {
+void DX11RenderTarget::ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) {
     Ref<DX11RenderTarget> instance = this;
     Renderer::Submit([instance, data, xCoord, yCoord]() {
         auto context = DX11Context::GetContextFromApplication()->GetContext();
@@ -143,17 +143,17 @@ void DX11RenderTarget::ReadPixel(void* data. uint32_t xCoord, uint32_t yCoord) {
         box.bottom = yCoord + 1u;
         box.back = 1u;
         box.front = 0u;
-        device->CopySubresourceRegion1(instance->m_ReadBuffer, 0u, 0u, 0u, 0u, instance->m_Texture.Get(), 0u, &box, D3D11_COPY_DISCARD);
+        context->CopySubresourceRegion1(instance->m_ReadBuffer.Get(), 0u, 0u, 0u, 0u, instance->m_Texture.Get(), 0u, &box, D3D11_COPY_DISCARD);
         D3D11_MAPPED_SUBRESOURCE map;
         SB_DX_GRAPHICS_CALL_INFO(context->Map(instance->m_ReadBuffer.Get(), 0u, D3D11_MAP_READ, 0u, &map));
-        memcpy(data, map.Data, sizeof(glm::vec4));
+        memcpy(data, map.pData, sizeof(glm::vec4));
         context->Unmap(instance->m_Texture.Get(), 0u);
     });
 }
 
 void DX11RenderTarget::Clear() const noexcept {
     Ref<const DX11RenderTarget> instance = this;
-    Renderer::Submit([instance, clearVal, depth, stencil]() {
+    Renderer::Submit([instance]() {
         if (static_cast<uint32_t>(instance->m_Format) & 0x30u)
             DX11Context::GetContextFromApplication()->GetContext()->ClearDepthStencilView(instance->m_DepthStencil.Get(),
                 instance->m_Format == RenderTargetFormat::Depth32F ? D3D11_CLEAR_DEPTH : D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,

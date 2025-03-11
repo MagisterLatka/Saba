@@ -65,8 +65,10 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec4& value) {
 }
 
 static void SerializeEntity(YAML::Emitter& out, Entity entity) {
+    SB_CORE_ASSERT(entity.HasComponent<IDComponent>());
+
     out << YAML::BeginMap; // Entity
-    out << YAML::Key << "Entity" << YAML::Value << (uint32_t)entity; //TODO: UUID
+    out << YAML::Key << "Entity" << YAML::Value << entity.GetID();
 
     if (entity.HasComponent<TagComponent>()) {
         out << YAML::Key << "Tag component";
@@ -106,6 +108,18 @@ static void SerializeEntity(YAML::Emitter& out, Entity entity) {
         out << YAML::EndMap; // CameraComponent
     }
 
+    if (entity.HasComponent<CircleComponent>()) {
+        out << YAML::Key << "Circle component";
+        out << YAML::BeginMap; //CircleComponent
+
+        const auto& cc = entity.GetComponent<CircleComponent>();
+        out << YAML::Key << "Color" << YAML::Value << cc.Color;
+        out << YAML::Key << "Thickness" << YAML::Value << cc.Thickness;
+        out << YAML::Key << "Fade" << YAML::Value << cc.Fade;
+
+        out << YAML::EndMap; //CircleComponent
+    }
+
     if (entity.HasComponent<SpriteComponent>()) {
         out << YAML::Key << "Sprite component";
         out << YAML::BeginMap; // SpriteRendererComponent
@@ -126,7 +140,7 @@ void SceneSerializer::Serialize(const std::filesystem::path& filepath)
     out << YAML::BeginMap;
     out << YAML::Key << "Scene" << YAML::Value << m_Scene->m_Name;
     out << YAML::Key << "Scene ID" << YAML::Value << m_Scene->m_ID;
-    out << YAML::Key << "Scene camera" << YAML::Value << static_cast<uint32_t>(m_Scene->m_Camera);
+    out << YAML::Key << "Scene camera" << YAML::Value << Entity(m_Scene->m_Camera, m_Scene.Raw()).GetID();
     out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
     for (auto [id] : m_Scene->m_Registry.view<entt::entity>().each()) {
@@ -153,11 +167,10 @@ bool SceneSerializer::Deserialize(const std::filesystem::path& filepath) {
     SB_CORE_TRACE("Deserializing scene '{0}'", sceneName);
     m_Scene->m_Name = sceneName;
     m_Scene->m_ID = data["Scene ID"].as<uint32_t>();
-    const auto sceneCamera = data["Scene camera"].as<uint32_t>();
+    const auto sceneCamera = data["Scene camera"].as<uint64_t>();
 
     for (const auto entity : data["Entities"]) {
-        const auto id = entity["Entity"].as<uint32_t>();
-        //uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
+        const auto id = entity["Entity"].as<uint64_t>();
 
         std::string name;
         const auto tagComponent = entity["Tag component"];
@@ -166,7 +179,7 @@ bool SceneSerializer::Deserialize(const std::filesystem::path& filepath) {
 
         SB_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", id, name);
 
-        Entity deserializedEntity = m_Scene->CreateEntity(name);
+        Entity deserializedEntity = m_Scene->CreateEntityWithID(id, name);
 
         const auto transformComponent = entity["Transform component"];
         if (transformComponent) {
@@ -188,6 +201,14 @@ bool SceneSerializer::Deserialize(const std::filesystem::path& filepath) {
                 camera->SetSize(size);
                 deserializedEntity.AddComponent<CameraComponent>(camera);
             }
+        }
+
+        const auto circleComponent = entity["Circle component"];
+        if (circleComponent) {
+            auto& cc = deserializedEntity.AddComponent<CircleComponent>();
+            cc.Color = circleComponent["Color"].as<glm::vec4>();
+            cc.Thickness = circleComponent["Thickness"].as<float>();
+            cc.Fade = circleComponent["Fade"].as<float>();
         }
 
         const auto spriteComponent = entity["Sprite component"];

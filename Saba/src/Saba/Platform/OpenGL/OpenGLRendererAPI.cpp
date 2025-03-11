@@ -65,7 +65,7 @@ int OpenGLRendererAPI::GetTopology(Topology topology) {
 }
 
 void OpenGLRendererAPI::InitShaders() {
-    const std::string vertex2D = R"(
+    const std::string vertexQuad = R"(
         #version 460 core
 
         layout(location = 0) in vec4 i_Pos;
@@ -98,7 +98,7 @@ void OpenGLRendererAPI::InitShaders() {
         }
     )";
 
-    const std::string fragment2D = R"(
+    const std::string fragmentQuad = R"(
         #version 460 core
 
         layout(location = 0) out vec4 o_Color;
@@ -155,7 +155,70 @@ void OpenGLRendererAPI::InitShaders() {
         }
     )";
 
-    Renderer::GetShaderLibrary().Load("2D", vertex2D, fragment2D);
+    Renderer::GetShaderLibrary().Load("quadShader", vertexQuad, fragmentQuad);
+
+    std::string vertexCircle = R"(
+        #version 460 core
+
+        layout(location = 0) in vec4 i_Pos;
+        layout(location = 1) in vec4 i_Color;
+        layout(location = 2) in float i_Thickness;
+        layout(location = 3) in float i_Fade;
+        layout(location = 4) in uvec2 i_ID;
+
+        layout(std140, binding = 0) uniform RendererData {
+            mat4 u_ViewProjMat;
+        };
+
+        out Data {
+            vec4 localPos;
+            vec4 color;
+            flat float thickness;
+            flat float fade;
+            flat uint id;
+        } vs_out;
+
+        const vec4 localPos[4] = {
+            { -1.0f,  1.0f, 0.0f, 0.0f },
+            {  1.0f,  1.0f, 0.0f, 0.0f },
+            {  1.0f, -1.0f, 0.0f, 0.0f },
+            { -1.0f, -1.0f, 0.0f, 0.0f }
+        };
+
+        void main() {
+            gl_Position = u_ViewProjMat * i_Pos;
+            vs_out.localPos = localPos[gl_VertexID % 4];
+            vs_out.color = i_Color;
+            vs_out.thickness = i_Thickness;
+            vs_out.fade = i_Fade;
+            vs_out.id = i_ID.x;
+        }
+    )";
+
+    std::string fragmentCircle = R"(
+        #version 460 core
+
+        layout(location = 0) out vec4 o_Color;
+        layout(location = 1) out uint o_ID;
+
+        in Data {
+            vec4 localPos;
+            vec4 color;
+            flat float thickness;
+            flat float fade;
+            flat uint id;
+        } fs_in;
+
+        void main() {
+            const float distance = 1.0f - length(fs_in.localPos);
+            const float alpha = smoothstep(0.0f, fs_in.fade, distance) * smoothstep(fs_in.thickness + fs_in.fade, fs_in.thickness, distance);
+            if (alpha == 0.0f)
+                discard;
+            o_Color = fs_in.color * vec4(1.0f, 1.0f, 1.0f, alpha);
+            o_ID = fs_in.id;
+        }
+    )";
+    Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
 }
 
 }

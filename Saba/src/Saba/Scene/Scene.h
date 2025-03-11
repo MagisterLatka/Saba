@@ -20,6 +20,7 @@ public:
     SB_CORE ~Scene();
 
     SB_CORE Entity CreateEntity(std::string name = {});
+    SB_CORE Entity CreateEntityWithID(UUID id, std::string name = {});
     SB_CORE void DestroyEntity(Entity entity);
 
     SB_CORE Entity SetCameraEntity(Entity entity);

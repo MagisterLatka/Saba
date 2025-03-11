@@ -25,7 +25,7 @@ void SceneHierarchyPanel::OnUIRender() {
 
     std::string buffer = m_Scene->m_Name;
     buffer.reserve(256);
-    if (ImGui::InputText("Scene name###Tag", buffer.data(), buffer.size() - 1))
+    if (ImGui::InputText("Scene name###Tag", buffer.data(), buffer.capacity() + 1))
         m_Scene->m_Name = buffer;
 
     for (auto [id] : m_Scene->m_Registry.view<entt::entity>().each()) {
@@ -115,10 +115,9 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
     if (entity.HasComponent<TagComponent>()) {
         auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-        static std::array<char, 256> buffer;
-        buffer.fill(0);
-        memcpy(buffer.data(), tag.c_str(), std::min(tag.length(), buffer.size() - 1));
-        if (ImGui::InputText("###Tag", buffer.data(), buffer.size() - 1))
+        std::string buffer = tag;
+        buffer.reserve(256);
+        if (ImGui::InputText("###Tag", buffer.data(), buffer.capacity() + 1))
             tag = buffer.data();
     }
 
@@ -129,15 +128,21 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
         ImGui::OpenPopup("add");
 
     if (ImGui::BeginPopup("add")) {
-        if (!entity.HasComponent<CameraComponent>()) {
+        if (!entity.HasComponent<CameraComponent>() && !entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CircleComponent>()) {
             if (ImGui::MenuItem("Camera")) {
                 entity.AddComponent<CameraComponent>();
                 ImGui::CloseCurrentPopup();
             }
         }
-        if (!entity.HasComponent<SpriteComponent>()) {
+        if (!entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CameraComponent>() && !entity.HasComponent<CircleComponent>()) {
             if (ImGui::MenuItem("Sprite")) {
                 entity.AddComponent<SpriteComponent>();
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        if (!entity.HasComponent<CircleComponent>() && !entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CameraComponent>()) {
+            if (ImGui::MenuItem("Circle")) {
+                entity.AddComponent<CircleComponent>();
                 ImGui::CloseCurrentPopup();
             }
         }
@@ -155,12 +160,17 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
 
         UI::DragFloat3("Scale", component.Size, 1.0f, 0.01f, 10.0f, 0.01f, columnWidth);
     }, false);
+    DrawComponent<CircleComponent>("Circle component", entity, [](CircleComponent& component) {
+        UI::ColorEdit4("Color", component.Color, columnWidth);
+        UI::DragFloat("Thickness", component.Thickness, 1.0f, 0.01f, 1.0f, 0.01f, columnWidth);
+        UI::DragFloat("Fade", component.Fade, 0.005f, 0.001f, 0.1f, 0.001f, columnWidth);
+    });
     DrawComponent<SpriteComponent>("Sprite component", entity, [](SpriteComponent& component) {
         UI::ColorEdit4("Color", component.Color, columnWidth);
 
         ImGui::Button("Texture", ImVec2(ImGui::GetColumnWidth(), 0.0f));
         if (ImGui::BeginDragDropTarget()) {
-            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_PANEL")) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
                 const char* path = reinterpret_cast<const char*>(payload->Data);
                 Texture2DProps props;
                 props.Filepath = g_AssetsPath / path;

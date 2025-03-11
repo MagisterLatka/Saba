@@ -109,7 +109,7 @@ void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
         static uint32_t data = 0u;
         m_RenderPass->GetRenderTarget(1u)->ReadPixel(&data, static_cast<uint32_t>(mousePos.x), static_cast<uint32_t>(mousePos.y));
         Saba::Renderer::Submit([this]() {
-            m_HoveredEntity = (data == 0 ? Saba::Entity() : Saba::Entity(static_cast<entt::entity>(data), m_Scene.Raw()));
+            m_HoveredEntity = (data == 0 || data == std::numeric_limits<uint32_t>::max()) ? Saba::Entity() : Saba::Entity(static_cast<entt::entity>(data), m_Scene.Raw());
         });
     }
 
@@ -121,7 +121,8 @@ void ExampleLayer::OnUIRender() {
     ImGui::Begin("Settings");
     ImGui::Text("Frame time: %.3fms (%.1f fps)", static_cast<double>(1000.0f / io.Framerate), static_cast<double>(io.Framerate));
     ImGui::Text("Draw calls: %d", Saba::Renderer2D::GetStats().DrawCalls);
-    ImGui::Text("QuadCount: %d", Saba::Renderer2D::GetStats().QuadCount);
+    ImGui::Text("Quad count: %d", Saba::Renderer2D::GetStats().QuadCount);
+    ImGui::Text("Circle count: %d", Saba::Renderer2D::GetStats().CircleCount);
     std::string name = "None";
     if (m_HoveredEntity)
         name = m_HoveredEntity.GetComponent<Saba::TagComponent>().Tag;

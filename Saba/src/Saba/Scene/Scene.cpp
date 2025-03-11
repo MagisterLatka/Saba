@@ -19,14 +19,15 @@ Scene::~Scene() {
 }
 
 Entity Scene::CreateEntity(std::string name) {
+    return CreateEntityWithID(UUID(), std::move(name));
+}
+Entity Scene::CreateEntityWithID(UUID id, std::string name) {
     auto entity = Entity(m_Registry.create(), this);
-
-    if (name.empty())
-        entity.AddComponent<TagComponent>("Entity");
-    else
-        entity.AddComponent<TagComponent>(std::move(name));
     
+    entity.AddComponent<IDComponent>(id);
     entity.AddComponent<TransformComponent>();
+    auto& tag = entity.AddComponent<TagComponent>(std::move(name)).Tag;
+    if (tag.empty()) tag = "Entity";
     return entity;
 }
 void Scene::DestroyEntity(Entity entity) {
@@ -80,12 +81,19 @@ void Scene::OnUpdate([[maybe_unused]] Timestep ts) {
         const auto& transform = m_Registry.get<TransformComponent>(m_Camera).Transform;
         Renderer2D::SetViewProjectionMatrix(camera->GetProjectionMatrix() * glm::inverse(transform));
 
-        auto group = m_Registry.group<const SpriteComponent>(entt::get<const TransformComponent>);
-        for (auto entity : group) {
-            const auto& [tc, sc] = group.get<TransformComponent, SpriteComponent>(entity);
+        auto groupQuads = m_Registry.group<const SpriteComponent>(entt::get<const TransformComponent>);
+        for (auto entity : groupQuads) {
+            const auto& [tc, sc] = groupQuads.get<TransformComponent, SpriteComponent>(entity);
             Renderer2D::SubmitQuad(tc.Position, tc.Size, tc.Orientation.z, sc.Color, sc.Texture, sc.TillingFactor, static_cast<uint32_t>(entity));
         }
         Renderer2D::DrawQuads();
+
+        auto groupCircles = m_Registry.group<const CircleComponent>(entt::get<const TransformComponent>);
+        for (auto entity : groupCircles) {
+            const auto& [tc, cc] = groupCircles.get<TransformComponent, CircleComponent>(entity);
+            Renderer2D::SubmitCircle(tc.Position, tc.Size.x, cc.Color, cc.Thickness, cc.Fade, static_cast<uint32_t>(entity));
+        }
+        Renderer2D::DrawCircles();
     }
 }
 void Scene::OnViewportResize(uint32_t width, uint32_t height) {
@@ -106,9 +114,13 @@ void Scene::OnViewportResize(uint32_t width, uint32_t height) {
 }
 
 template<>
+SB_CORE void Scene::OnComponentAdd<IDComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] IDComponent& component) {}
+template<>
 SB_CORE void Scene::OnComponentAdd<TagComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TagComponent& component) {}
 template<>
 SB_CORE void Scene::OnComponentAdd<TransformComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TransformComponent& component) {}
+template<>
+SB_CORE void Scene::OnComponentAdd<CircleComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CircleComponent& component) {}
 template<>
 SB_CORE void Scene::OnComponentAdd<SpriteComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SpriteComponent& component) {}
 template<>
