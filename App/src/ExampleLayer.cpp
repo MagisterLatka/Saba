@@ -2,7 +2,8 @@
 #include <Saba.h>
 #include "ExampleLayer.h"
 
-#include <imgui.h>
+#include <Saba/ImGui/ImGui.h>
+#include <Saba/ImGui/ImGuizmo.h>
 
 class CameraController : public Saba::ScriptableEntity {
 public:
@@ -62,6 +63,8 @@ void ExampleLayer::OnAttach() {
     auto window = Saba::Application::Get().GetWindow();
     m_RenderPass = Saba::RenderPass::Create();
     m_RenderPass->SetRenderTarget(0u, Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
+    m_RenderPass->SetRenderTarget(1u, Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::R32_UINT));
+    m_RenderPass->SetDepthStencilTarget(Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::Depth32F));
 
     Saba::Texture2DProps textureProps;
     textureProps.Filepath = "assets/textures/checkerboard.png";
@@ -70,9 +73,9 @@ void ExampleLayer::OnAttach() {
 
     m_Scene = Ref<Saba::Scene>::Create("App scene");
     m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-    auto camera = m_Scene->CreateAndSetCameraEntity();
-    camera.GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>()->SetSize(2.0f);
-    camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
+    m_Camera = m_Scene->CreateAndSetCameraEntity();
+    m_Camera.GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>()->SetSize(2.0f);
+    m_Camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
 
     m_Scene->CreateEntity("Textured quad").AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
@@ -98,6 +101,16 @@ void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
 
     m_Scene->OnUpdate(ts);
 
+    glm::ivec2 mousePos = Saba::Input::GetMousePos();
+    mousePos -= m_ViewportPos;
+    if (mousePos.x > 0 && mousePos.y >= 0 && mousePos.x < static_cast<int>(m_ViewportSize.x) && mousePos.y < static_cast<int>(m_ViewportSize.y)) {
+        static uint32_t data = 0u;
+        m_RenderPass->GetRenderTarget(1u)->ReadPixel(&data, static_cast<uint32_t>(mousePos.x), static_cast<uint32_t>(mousePos.y));
+        Saba::Renderer::Submit([this]() {
+            m_HoveredEntity = (data == 0 ? Saba::Entity() : Saba::Entity(static_cast<entt::entity>(data), m_Scene.Raw()));
+        });
+    }
+
     Saba::Application::Get().GetWindow()->BindToRender();
     Saba::Application::Get().GetWindow()->Clear();
 }
@@ -107,6 +120,10 @@ void ExampleLayer::OnUIRender() {
     ImGui::Text("Frame time: %.3fms (%.1f fps)", static_cast<double>(1000.0f / io.Framerate), static_cast<double>(io.Framerate));
     ImGui::Text("Draw calls: %d", Saba::Renderer2D::GetStats().DrawCalls);
     ImGui::Text("QuadCount: %d", Saba::Renderer2D::GetStats().QuadCount);
+    std::string name = "None";
+    if (m_HoveredEntity)
+        name = m_HoveredEntity.GetComponent<Saba::TagComponent>().Tag;
+    ImGui::Text("Hovered entity: %s", name.c_str());
     ImGui::End();
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
@@ -127,10 +144,35 @@ void ExampleLayer::OnUIRender() {
     m_ViewportPos = { static_cast<int>(viewportPos.x) - application.GetWindow()->GetXClientPos(),
         static_cast<int>(viewportPos.y) - application.GetWindow()->GetYClientPos() };
 
-    if (Saba::RendererAPI::GetAPI() == Saba::RendererAPI::API::OpenGL)
-        ImGui::Image((uint64_t)m_RenderPass->GetRenderTarget()->GetRawTexturePointer(), viewportSize, { 0, 1 }, { 1, 0 });
-    else
-        ImGui::Image((uint64_t)m_RenderPass->GetRenderTarget()->GetRawTexturePointer(), viewportSize);
+    Saba::UI::DrawImage(m_RenderPass->GetRenderTarget(), viewportSize);
+
+    if (Saba::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GuizmoType != -1 && selected) {
+        const bool snap = Saba::Input::IsKeyPressed(Saba::KeyCode::LeftControl);
+        const float snapValue = m_GuizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : m_GuizmoType == ImGuizmo::OPERATION::SCALE ? 0.5f : 0.1f;
+        const float snapValues[3] = { snapValue, snapValue, snapValue };
+
+        ImGuizmo::SetOrthographic(true);
+        ImGuizmo::SetDrawlist();
+        ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+
+        const glm::mat4 viewMat = glm::inverse(m_Camera.GetTransform());
+        const glm::mat4& projMat = m_Camera.GetComponent<Saba::CameraComponent>().Camera->GetProjectionMatrix();
+        glm::mat4 transform = selected.GetTransform();
+
+        ImGuizmo::Manipulate(glm::value_ptr(viewMat), glm::value_ptr(projMat), static_cast<ImGuizmo::OPERATION>(m_GuizmoType), ImGuizmo::LOCAL,
+            glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+        if (ImGuizmo::IsUsing()) {
+            auto& tc = selected.GetTransformComponent();
+            glm::vec3 pos, size, skew;
+            glm::quat orientation;
+            glm::vec4 perspective;
+            glm::decompose(transform, size, orientation, pos, skew, perspective);
+            tc.Position = pos;
+            tc.Orientation += glm::eulerAngles(orientation) - tc.Orientation;
+            tc.Size = size;
+        }
+    }
 
     ImGui::End();
     ImGui::PopStyleVar();
@@ -140,6 +182,7 @@ void ExampleLayer::OnUIRender() {
 void ExampleLayer::OnEvent(Saba::Event& e) {
     Saba::Dispatcher dispatcher(e);
     dispatcher.Dispatch<Saba::KeyPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
+    dispatcher.Dispatch<Saba::MouseButtonPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
 
     m_Scene->OnEvent(e);
 }
@@ -162,6 +205,32 @@ bool ExampleLayer::OnKeyPressed(Saba::KeyPressedEvent& e) {
             if (control && shift)
                 SaveScene();
             break;
+        case Saba::KeyCode::Q:
+            if (!ImGuizmo::IsUsing())
+                m_GuizmoType = -1;
+            break;
+        case Saba::KeyCode::W:
+            if (!ImGuizmo::IsUsing())
+                m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+            break;
+        case Saba::KeyCode::E:
+            if (!ImGuizmo::IsUsing())
+                m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
+            break;
+        case Saba::KeyCode::R:
+            if (!ImGuizmo::IsUsing())
+                m_GuizmoType = ImGuizmo::OPERATION::SCALE;
+            break;
+    }
+    return false;
+}
+bool ExampleLayer::OnMouseButtonPressed(Saba::MouseButtonPressedEvent& e) {
+    switch (e.GetButton()) {
+        default:
+            break;
+        case Saba::MouseCode::ButtonLeft:
+            if (m_ViewportHovered && !ImGuizmo::IsOver())
+                m_SceneHierarchyPanel->SetSelected(m_HoveredEntity);
     }
     return false;
 }

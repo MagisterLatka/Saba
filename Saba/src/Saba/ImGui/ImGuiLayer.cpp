@@ -15,6 +15,8 @@
 #include <backends/imgui_impl_opengl3.h>
 //#include <backends/imgui_impl_vulkan.h>
 
+#include "Saba/ImGui/ImGuizmo.h"
+
 #include "Saba/Core/Application.h"
 
 #include "Saba/Embed/Font.embed"
@@ -181,6 +183,7 @@ void ImGuiLayer::Begin() {
 #endif
     }
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 }
 void ImGuiLayer::End() {
     ImGuiIO& io = ImGui::GetIO();

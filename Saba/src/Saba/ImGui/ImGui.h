@@ -2,11 +2,15 @@
 
 #include "Saba/Core/Core.h"
 #include "Saba/Renderer/Texture.h"
+#include "Saba/Renderer/RenderTarget.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
 
 namespace Saba::UI {
+
+SB_CORE void DrawImage(Ref<Texture2D> texture, ImVec2 size);
+SB_CORE void DrawImage(Ref<RenderTarget> renderTarget, ImVec2 size);
 
 SB_CORE bool DragFloat(const std::string& label, float& value, float resetValue = 0.0f, float minVal = 0.0f, float maxVal = 0.0f, float speed = 0.0f,
     float columnWidth = 100.0f);

@@ -40,13 +40,13 @@ void DX11RenderPass::Bind() const noexcept {
     });
 }
 
-void DX11RenderPass::Clear(const glm::vec4& clearVal, float depth, uint8_t stencil) noexcept {
+void DX11RenderPass::Clear() noexcept {
     for (const auto& renderTarget : m_RenderTargets) {
         if (renderTarget)
-            renderTarget->Clear(clearVal);
+            renderTarget->Clear();
     }
     if (m_DepthStencilTarget)
-        m_DepthStencilTarget->Clear(glm::vec4(0.0f), depth, stencil);
+        m_DepthStencilTarget->Clear();
 }
 
 void DX11RenderPass::Resize(uint32_t width, uint32_t height) {

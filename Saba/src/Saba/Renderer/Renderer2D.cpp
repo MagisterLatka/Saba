@@ -13,6 +13,8 @@ struct VertexData {
     glm::vec2 uv;
     uint32_t tid;
     float tillingFactor;
+    uint32_t id;
+    glm::ivec3 padding;
 };
 
 static constexpr uint32_t c_MaxQuads = 50000u;
@@ -59,7 +61,8 @@ void Renderer2D::Init() {
         { "Color", BufferLayoutElementDataType::Float4 },
         { "UV", BufferLayoutElementDataType::Float2 },
         { "TID", BufferLayoutElementDataType::UInt },
-        { "TillingFactor", BufferLayoutElementDataType::Float }
+        { "TillingFactor", BufferLayoutElementDataType::Float },
+        { "EntityID", BufferLayoutElementDataType::UInt4 }
     };
     Buffer quadVertexDataBuffer = Buffer(new VertexData[static_cast<uint64_t>(c_MaxQuads) * 4], c_QuadBufferSize, true);
     Ref<VertexBuffer> quadVBO = VertexBuffer::Create(layout, std::move(quadVertexDataBuffer), BufferUsage::Dynamic);
@@ -111,10 +114,14 @@ void Renderer2D::SetViewProjectionMatrix(const glm::mat4& viewProjMat) {
             break;
     }
 }
-void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor) {
-    SubmitQuad(glm::vec3(pos, 0.0f), size, rotation, color, texture, tillingFactor);
+void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation,
+    const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor, uint32_t entityID)
+{
+    SubmitQuad(glm::vec3(pos, 0.0f), size, rotation, color, texture, tillingFactor, entityID);
 }
-void Renderer2D::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float rotation, const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor) {
+void Renderer2D::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float rotation,
+    const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor, uint32_t entityID)
+{
     if (s_Data.quadCount >= c_MaxQuads) {
         DrawQuads();
         Renderer::Render();
@@ -152,13 +159,14 @@ void Renderer2D::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float r
         s_Data.quadInsert->color = color;
         s_Data.quadInsert->tid = tid;
         s_Data.quadInsert->tillingFactor = tillingFactor;
+        s_Data.quadInsert->id = entityID;
         ++s_Data.quadInsert;
     }
 
     ++s_Data.quadCount;
     ++s_Data.stats.QuadCount;
 }
-void Renderer2D::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor) {
+void Renderer2D::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor, uint32_t entityID) {
     if (s_Data.quadCount >= c_MaxQuads) {
         DrawQuads();
         Renderer::Render();
@@ -194,6 +202,7 @@ void Renderer2D::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, 
         s_Data.quadInsert->color = color;
         s_Data.quadInsert->tid = tid;
         s_Data.quadInsert->tillingFactor = tillingFactor;
+        s_Data.quadInsert->id = entityID;
         ++s_Data.quadInsert;
     }
 

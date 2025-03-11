@@ -10,6 +10,8 @@ void SceneHierarchyPanel::SetScene(Ref<Scene> scene) noexcept {
     m_Selected = {};
 }
 void SceneHierarchyPanel::SetSelected(Entity entity) noexcept {
+    if (!entity)
+        m_Selected = {};
     if (m_Scene.Raw() == entity.GetScene())
         m_Selected = entity;
 }

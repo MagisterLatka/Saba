@@ -16,8 +16,23 @@
 
 #include "ImGui.h"
 
+#include "Saba/Renderer/RendererAPI.h"
+
 namespace Saba::UI {
-    
+
+void DrawImage(Ref<Texture2D> texture, ImVec2 size) {
+    if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+        ImGui::Image((uint64_t)texture->GetRawPointer(), size, { 0, 1 }, { 1, 0 });
+    else
+        ImGui::Image((uint64_t)texture->GetRawPointer(), size);
+}
+void DrawImage(Ref<RenderTarget> renderTarget, ImVec2 size) {
+    if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+        ImGui::Image((uint64_t)renderTarget->GetRawTexturePointer(), size, { 0, 1 }, { 1, 0 });
+    else
+        ImGui::Image((uint64_t)renderTarget->GetRawTexturePointer(), size);
+}
+
 bool DragFloat(const std::string& label, float& value, float resetValue, float minVal, float maxVal, float speed, float columnWidth)
 {
     bool changed = false;

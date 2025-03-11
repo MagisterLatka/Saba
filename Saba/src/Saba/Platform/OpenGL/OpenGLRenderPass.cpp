@@ -47,23 +47,38 @@ void OpenGLRenderPass::Bind() const noexcept {
 
         if (instance->m_DepthStencilTarget) {
             if (instance->m_DepthStencilTarget->m_Format == RenderTargetFormat::Depth32F)
-                glNamedFramebufferTexture(instance->m_ID, GL_DEPTH_ATTACHMENT, instance->m_DepthStencilTarget->m_ID, 0);
+                glNamedFramebufferRenderbuffer(instance->m_ID, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, instance->m_DepthStencilTarget->m_ID);
             else
-                glNamedFramebufferTexture(instance->m_ID, GL_DEPTH_STENCIL_ATTACHMENT, instance->m_DepthStencilTarget->m_ID, 0);
+                glNamedFramebufferRenderbuffer(instance->m_ID, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, instance->m_DepthStencilTarget->m_ID);
         }
 
+        static auto buffers = std::to_array<GLenum>({
+            GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+            GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7
+        });
+        glNamedFramebufferDrawBuffers(instance->m_ID, 8u, buffers.data());
         glBindFramebuffer(GL_FRAMEBUFFER, instance->m_ID);
         glViewport(0, 0, static_cast<int>(instance->m_Width), static_cast<int>(instance->m_Height));
     });
 }
-void OpenGLRenderPass::Clear(const glm::vec4& clearVal, float depth, uint8_t stencil) noexcept {
+void OpenGLRenderPass::Clear() noexcept {
     Ref<OpenGLRenderPass> instance = this;
-    Renderer::Submit([instance, clearVal, depth, stencil]() {
-        for (const auto& renderTarget : instance->m_RenderTargets) {
-            if (renderTarget)
-                glClearNamedFramebufferfv(instance->m_ID, GL_COLOR, 0, glm::value_ptr(clearVal));
+    Renderer::Submit([instance]() {
+        for (const auto& [index, renderTarget] : instance->m_RenderTargets | std::views::enumerate) {
+            if (renderTarget) {
+                if (renderTarget->m_Format == RenderTargetFormat::R32_UINT || renderTarget->m_Format == RenderTargetFormat::RG32_UINT ||
+                    renderTarget->m_Format == RenderTargetFormat::RGB32_UINT || renderTarget->m_Format == RenderTargetFormat::RGBA32_UINT)
+                {
+                    const glm::uvec4 clear = renderTarget->m_ClearValue;
+                    glClearNamedFramebufferuiv(instance->m_ID, GL_COLOR, static_cast<int>(index), glm::value_ptr(clear));
+                }
+                else
+                    glClearNamedFramebufferfv(instance->m_ID, GL_COLOR, static_cast<int>(index), glm::value_ptr(renderTarget->m_ClearValue));
+            }
         }
         if (instance->m_DepthStencilTarget) {
+            const float depth = instance->m_DepthStencilTarget->m_DepthClearValue;
+            const uint8_t stencil = instance->m_DepthStencilTarget->m_StencilClearValue;
             if (instance->m_DepthStencilTarget->m_Format == RenderTargetFormat::Depth32F)
                 glClearNamedFramebufferfv(instance->m_ID, GL_DEPTH, 0, &depth);
             else

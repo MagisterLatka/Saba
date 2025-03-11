@@ -53,18 +53,20 @@ void DX11RendererAPI::InitShaders() {
             int tid : TID;
             float tillingFactor : TillingFactor;
             float4 pos : SV_Position;
+            uint id : ID;
         };
         cbuffer ConstBuf {
             matrix<float, 4, 4> u_ViewProjMat;
         }
 
-        VSOut main(float4 pos : Position, float4 color : Color, float2 uv : UV, int tid : TID, float tillingFactor : TillingFactor) {
+        VSOut main(float4 pos : Position, float4 color : Color, float2 uv : UV, int tid : TID, float tillingFactor : TillingFactor, uint4 id : EntityID) {
             VSOut output;
             output.color = color;
             output.uv = uv;
             output.tid = tid;
             output.tillingFactor = tillingFactor;
             output.pos = mul(pos, u_ViewProjMat);
+            output.id = id.x;
             return output;
         }
     )";
@@ -75,6 +77,12 @@ void DX11RendererAPI::InitShaders() {
             float2 uv : UV;
             int tid : TID;
             float tillingFactor : TillingFactor;
+            float4 pos : SV_Position;
+            uint id : ID;
+        };
+        struct FSOut {
+            float4 color : SV_Target0;
+            uint id : SV_Target1;
         };
         Texture2D<float4> u_Textures[16];
         SamplerState u_Samplers[16];
@@ -99,8 +107,10 @@ void DX11RendererAPI::InitShaders() {
             return output;
         }
 
-        float4 main(FSIn input) : SV_Target {
-            float4 output = input.color * GetDataFromTexture(input.tid, input.uv, input.tillingFactor);
+        FSOut main(FSIn input) {
+            FSOut output;
+            output.color = input.color * GetDataFromTexture(input.tid, input.uv, input.tillingFactor);
+            output.id = input.id;
             return output;
         }
     )";

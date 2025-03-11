@@ -4,7 +4,7 @@
 #include "Saba/Platform/DX11/DXGIInfoManager.h"
 #include "Saba/Core/Application.h"
 
-#include <d3d11.h>
+#include <d3d11_4.h>
 
 namespace Saba {
 
@@ -42,13 +42,13 @@ public:
     SB_CORE void BindToRender(Window *window) override;
     SB_CORE void Clear(Window *window, const glm::vec4 &color) override;
 
-    SB_CORE ComPtr<ID3D11Device> GetDevice() { SB_CORE_ASSERT(m_Device, "No DX11Device created"); return m_Device; }
-    SB_CORE ComPtr<ID3D11DeviceContext> GetContext() { SB_CORE_ASSERT(m_Context, "No DX11DeviceContext created"); return m_Context; }
+    SB_CORE ComPtr<ID3D11Device5> GetDevice() { SB_CORE_ASSERT(m_Device, "No DX11Device created"); return m_Device; }
+    SB_CORE ComPtr<ID3D11DeviceContext4> GetContext() { SB_CORE_ASSERT(m_Context, "No DX11DeviceContext created"); return m_Context; }
 
     SB_CORE static Ref<DX11Context> GetContextFromApplication() { return Application::Get().GetGraphicsContext().As<DX11Context>(); }
 private:
-    ComPtr<ID3D11Device> m_Device;
-    ComPtr<ID3D11DeviceContext> m_Context;
+    ComPtr<ID3D11Device5> m_Device;
+    ComPtr<ID3D11DeviceContext4> m_Context;
 
     std::unordered_map<HWND, std::pair<ComPtr<IDXGISwapChain>, ComPtr<ID3D11RenderTargetView>>> m_WindowData;
 };

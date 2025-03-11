@@ -417,10 +417,11 @@ LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPA
             return 0;
         }
         case WM_MOVE: {
-            int xpos = LOWORD(lParam);
-            int ypos = HIWORD(lParam);
+            int xpos = static_cast<int>(static_cast<short>(LOWORD(lParam)));
+            int ypos = static_cast<int>(static_cast<short>(HIWORD(lParam)));
             m_Data.pos = { xpos, ypos };
             WindowMovedEvent e(xpos, ypos);
+            m_Data.eventCallback(e);
             return 0;
         }
 

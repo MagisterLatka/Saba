@@ -73,6 +73,7 @@ void OpenGLRendererAPI::InitShaders() {
         layout(location = 2) in vec2 i_UV;
         layout(location = 3) in int i_TID;
         layout(location = 4) in float i_TillingFactor;
+        layout(location = 5) in uvec4 i_ID;
 
         layout(std140, binding = 0) uniform RendererData {
             mat4 u_ViewProjMat;
@@ -83,6 +84,7 @@ void OpenGLRendererAPI::InitShaders() {
             vec2 uv;
             flat int tid;
             flat float tillingFactor;
+            flat uint id;
         } vs_out;
 
         void main()
@@ -92,6 +94,7 @@ void OpenGLRendererAPI::InitShaders() {
             vs_out.uv = i_UV;
             vs_out.tid = i_TID;
             vs_out.tillingFactor = i_TillingFactor;
+            vs_out.id = i_ID.x;
         }
     )";
 
@@ -99,12 +102,14 @@ void OpenGLRendererAPI::InitShaders() {
         #version 460 core
 
         layout(location = 0) out vec4 o_Color;
+        layout(location = 1) out uint o_ID;
 
         in Data {
             vec4 color;
             vec2 uv;
             flat int tid;
             flat float tillingFactor;
+            flat uint id;
         } fs_in;
 
         layout(binding = 0) uniform sampler2D u_Tex0;
@@ -146,6 +151,7 @@ void OpenGLRendererAPI::InitShaders() {
 
         void main() {
             o_Color = fs_in.color * GetDataFromTexture(fs_in.tid, fs_in.uv, fs_in.tillingFactor);
+            o_ID = fs_in.id;
         }
     )";
 

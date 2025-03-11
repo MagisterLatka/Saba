@@ -52,7 +52,7 @@ Entity Scene::CreateAndSetCameraEntity(Ref<Camera> camera) {
 
 void Scene::OnEvent(Event& e) {
     for (auto [entity, nsc] : m_Registry.view<NativeScriptComponent>().each()) {
-        if (!nsc.Instance) {
+        if (nsc.Instance == nullptr) {
             nsc.Instance = nsc.InstantiateScript();
             nsc.Instance->m_Entity = Entity(entity, this);
             nsc.Instance->OnCreate();
@@ -62,7 +62,7 @@ void Scene::OnEvent(Event& e) {
 }
 void Scene::OnUpdate([[maybe_unused]] Timestep ts) {
     for (auto [entity, nsc] : m_Registry.view<NativeScriptComponent>().each()) {
-        if (!nsc.Instance) {
+        if (nsc.Instance == nullptr) {
             nsc.Instance = nsc.InstantiateScript();
             nsc.Instance->m_Entity = Entity(entity, this);
             nsc.Instance->OnCreate();
@@ -83,7 +83,7 @@ void Scene::OnUpdate([[maybe_unused]] Timestep ts) {
         auto group = m_Registry.group<const SpriteComponent>(entt::get<const TransformComponent>);
         for (auto entity : group) {
             const auto& [tc, sc] = group.get<TransformComponent, SpriteComponent>(entity);
-            Renderer2D::SubmitQuad(tc.Position, tc.Size, tc.Orientation.z, sc.Color, sc.Texture, sc.TillingFactor);
+            Renderer2D::SubmitQuad(tc.Position, tc.Size, tc.Orientation.z, sc.Color, sc.Texture, sc.TillingFactor, static_cast<uint32_t>(entity));
         }
         Renderer2D::DrawQuads();
     }
@@ -92,7 +92,7 @@ void Scene::OnViewportResize(uint32_t width, uint32_t height) {
     m_ViewportSize = { width, height };
 
     for (auto [entity, nsc] : m_Registry.view<NativeScriptComponent>().each()) {
-        if (!nsc.Instance) {
+        if (nsc.Instance == nullptr) {
             nsc.Instance = nsc.InstantiateScript();
             nsc.Instance->m_Entity = Entity(entity, this);
             nsc.Instance->OnCreate();
