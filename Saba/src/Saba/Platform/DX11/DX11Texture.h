@@ -19,6 +19,8 @@ public:
     SB_CORE uint32_t GetWidth() const noexcept override { return m_Props.Width; }
     SB_CORE uint32_t GetHeight() const noexcept override { return m_Props.Height; }
     SB_CORE void* GetRawPointer() const noexcept override { return m_View.Get(); }
+
+    SB_CORE bool IsLoaded() const noexcept override { return m_Loaded; }
 private:
     SB_CORE void Init();
 private:
@@ -26,6 +28,7 @@ private:
     Buffer m_Buffer;
     ComPtr<ID3D11ShaderResourceView> m_View;
     ComPtr<ID3D11SamplerState> m_Sampler;
+    bool m_Loaded;
 };
 
 }

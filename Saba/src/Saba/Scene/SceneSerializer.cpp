@@ -9,6 +9,40 @@
 namespace YAML {
 
 template<>
+struct convert<glm::vec2> {
+    static Node encode(const glm::vec2& value) {
+        Node node;
+        node.push_back(value.x);
+        node.push_back(value.y);
+        return node;
+    }
+    static bool decode(const Node& node, glm::vec2& value) {
+        if (!node.IsSequence() || node.size() != 2)
+            return false;
+
+        value.x = node[0].as<float>();
+        value.y = node[1].as<float>();
+        return true;
+    }
+};
+template<>
+struct convert<glm::uvec2> {
+    static Node encode(const glm::uvec2& value) {
+        Node node;
+        node.push_back(value.x);
+        node.push_back(value.y);
+        return node;
+    }
+    static bool decode(const Node& node, glm::uvec2& value) {
+        if (!node.IsSequence() || node.size() != 2)
+            return false;
+
+        value.x = node[0].as<uint32_t>();
+        value.y = node[1].as<uint32_t>();
+        return true;
+    }
+};
+template<>
 struct convert<glm::vec3> {
     static Node encode(const glm::vec3& value) {
         Node node;
@@ -53,6 +87,16 @@ struct convert<glm::vec4> {
 
 namespace Saba {
 
+YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& value) {
+    out << YAML::Flow;
+    out << YAML::BeginSeq << value.x << value.y << YAML::EndSeq;
+    return out;
+}
+YAML::Emitter& operator<<(YAML::Emitter& out, const glm::uvec2& value) {
+    out << YAML::Flow;
+    out << YAML::BeginSeq << value.x << value.y << YAML::EndSeq;
+    return out;
+}
 YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& value) {
     out << YAML::Flow;
     out << YAML::BeginSeq << value.x << value.y << value.z << YAML::EndSeq;
@@ -124,10 +168,27 @@ static void SerializeEntity(YAML::Emitter& out, Entity entity) {
         out << YAML::Key << "Sprite component";
         out << YAML::BeginMap; // SpriteRendererComponent
 
-        auto& src = entity.GetComponent<SpriteComponent>();
-        out << YAML::Key << "Color" << YAML::Value << src.Color;
-        //TODO texture
-        out << YAML::Key << "Tilling factor" << YAML::Value << src.TillingFactor;
+        auto& sc = entity.GetComponent<SpriteComponent>();
+        out << YAML::Key << "Color" << YAML::Value << sc.Color;
+
+        if (sc.Texture) {
+            out << YAML::Key << "Texture";
+            out << YAML::BeginMap; //Texture
+
+            const auto& props = sc.Texture->GetProps();
+            out << YAML::Key << "Path" << YAML::Value << (props.Filepath.empty() ? std::string() : props.Filepath.string());
+            out << YAML::Key << "Size" << YAML::Value << glm::uvec2(props.Width, props.Height);
+            out << YAML::Key << "Format" << YAML::Value << static_cast<uint8_t>(props.Format);
+            out << YAML::Key << "GenerateMips" << YAML::Value << props.GenerateMipMaps;
+            out << YAML::Key << "Sampling" << YAML::Value << static_cast<uint8_t>(props.Sampling);
+            out << YAML::Key << "MaxAnisotropy" << YAML::Value << props.MaxAnisotropy;
+            out << YAML::Key << "Wrap" << YAML::Value << static_cast<uint8_t>(props.Wrap);
+            out << YAML::Key << "BorderColor" << YAML::Value << props.BorderColor;
+
+            out << YAML::EndMap; //Texture
+        }
+
+        out << YAML::Key << "Tilling factor" << YAML::Value << sc.TillingFactor;
 
         out << YAML::EndMap; // SpriteRendererComponent
     }
@@ -181,16 +242,14 @@ bool SceneSerializer::Deserialize(const std::filesystem::path& filepath) {
 
         Entity deserializedEntity = m_Scene->CreateEntityWithID(id, name);
 
-        const auto transformComponent = entity["Transform component"];
-        if (transformComponent) {
+        if (const auto transformComponent = entity["Transform component"]) {
             auto& tc = deserializedEntity.GetComponent<TransformComponent>();
             tc.Position = transformComponent["Position"].as<glm::vec3>();
             tc.Orientation = transformComponent["Orientation"].as<glm::vec3>();
             tc.Size = transformComponent["Size"].as<glm::vec3>();
         }
 
-        const auto cameraComponent = entity["Camera component"];
-        if (cameraComponent) {
+        if (const auto cameraComponent = entity["Camera component"]) {
             auto cameraType = cameraComponent["Type"].as<std::string>();
             if (cameraType == "Orthographic") {
                 const auto size = cameraComponent["Size"].as<float>();
@@ -203,19 +262,31 @@ bool SceneSerializer::Deserialize(const std::filesystem::path& filepath) {
             }
         }
 
-        const auto circleComponent = entity["Circle component"];
-        if (circleComponent) {
+        if (const auto circleComponent = entity["Circle component"]) {
             auto& cc = deserializedEntity.AddComponent<CircleComponent>();
             cc.Color = circleComponent["Color"].as<glm::vec4>();
             cc.Thickness = circleComponent["Thickness"].as<float>();
             cc.Fade = circleComponent["Fade"].as<float>();
         }
 
-        const auto spriteComponent = entity["Sprite component"];
-        if (spriteComponent) {
-            auto& src = deserializedEntity.AddComponent<SpriteComponent>();
-            src.Color = spriteComponent["Color"].as<glm::vec4>();
-            src.TillingFactor = spriteComponent["Tilling factor"].as<float>();
+        if (const auto spriteComponent = entity["Sprite component"]) {
+            auto& sc = deserializedEntity.AddComponent<SpriteComponent>();
+            sc.Color = spriteComponent["Color"].as<glm::vec4>();
+            if (auto texture = spriteComponent["Texture"]) {
+                Texture2DProps props;
+                props.Filepath = texture["Path"].as<std::string>();
+                const auto size = texture["Size"].as<glm::uvec2>();
+                props.Width = size.x;
+                props.Height = size.y;
+                props.Format = static_cast<TextureFormat>(texture["Format"].as<uint8_t>());
+                props.GenerateMipMaps = texture["GenerateMips"].as<bool>();
+                props.Sampling = static_cast<TextureSampling>(texture["Sampling"].as<uint8_t>());
+                props.MaxAnisotropy = texture["MaxAnisotropy"].as<uint32_t>();
+                props.Wrap = static_cast<TextureWrap>(texture["Wrap"].as<uint8_t>());
+                props.BorderColor = texture["BorderColor"].as<glm::vec4>();
+                sc.Texture = Texture2D::Create(props);
+            }
+            sc.TillingFactor = spriteComponent["Tilling factor"].as<float>();
         }
 
         if (id == sceneCamera)

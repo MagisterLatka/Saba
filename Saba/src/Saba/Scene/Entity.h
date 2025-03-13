@@ -25,6 +25,13 @@ public:
         m_Scene->OnComponentAdd<T>(*this, component);
         return component;
     }
+    template<Component T, typename ...Args>
+    requires(std::is_constructible_v<T, Args...>)
+    T& AddOrReplaceComponent(Args&& ...args) {
+        T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_Handle, std::forward<Args>(args)...);
+        m_Scene->OnComponentAdd<T>(*this, component);
+        return component;
+    }
     template<Component T>
     void RemoveComponent() {
         SB_CORE_ASSERT(HasComponent<T>(), "Entity does not have this component");

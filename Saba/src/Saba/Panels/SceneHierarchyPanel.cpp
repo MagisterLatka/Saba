@@ -18,35 +18,35 @@ void SceneHierarchyPanel::SetSelected(Entity entity) noexcept {
 }
 
 void SceneHierarchyPanel::OnUIRender() {
-    if (!m_Scene)
-        return;
-
     ImGui::Begin("Scene hierarchy");
 
-    std::string buffer = m_Scene->m_Name;
-    buffer.reserve(256);
-    if (ImGui::InputText("Scene name###Tag", buffer.data(), buffer.capacity() + 1))
-        m_Scene->m_Name = buffer;
+    if (m_Scene) {
+        std::string buffer = m_Scene->m_Name;
+        buffer.reserve(256);
+        if (ImGui::InputText("Scene name###Tag", buffer.data(), buffer.capacity() + 1))
+            m_Scene->m_Name = buffer;
 
-    for (auto [id] : m_Scene->m_Registry.view<entt::entity>().each()) {
-        Entity entity(id, m_Scene.Raw());
-        DrawEntityNode(entity);
-    }
+        for (auto [id] : m_Scene->m_Registry.view<entt::entity>().each()) {
+            Entity entity(id, m_Scene.Raw());
+            DrawEntityNode(entity);
+        }
 
-    if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-        m_Selected = {};
+        if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+            m_Selected = {};
 
-    if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverExistingPopup)) {
-        if (ImGui::MenuItem("Create entity"))
-            m_Selected = m_Scene->CreateEntity();
+        if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverExistingPopup)) {
+            if (ImGui::MenuItem("Create entity"))
+                m_Selected = m_Scene->CreateEntity();
 
-        ImGui::EndPopup();
+            ImGui::EndPopup();
+        }
     }
 
     ImGui::End();
 
     ImGui::Begin("Properties");
-    DrawComponents(m_Selected);
+    if (m_Scene)
+        DrawComponents(m_Selected);
     ImGui::End();
 }
 
@@ -118,7 +118,7 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
         std::string buffer = tag;
         buffer.reserve(256);
         if (ImGui::InputText("###Tag", buffer.data(), buffer.capacity() + 1))
-            tag = buffer.data();
+            tag = buffer;
     }
 
     ImGui::SameLine();
@@ -163,7 +163,7 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
     DrawComponent<CircleComponent>("Circle component", entity, [](CircleComponent& component) {
         UI::ColorEdit4("Color", component.Color, columnWidth);
         UI::DragFloat("Thickness", component.Thickness, 1.0f, 0.01f, 1.0f, 0.01f, columnWidth);
-        UI::DragFloat("Fade", component.Fade, 0.005f, 0.001f, 0.1f, 0.001f, columnWidth);
+        UI::DragFloat("Fade", component.Fade, 0.005f, 0.001f, 1.0f, 0.001f, columnWidth);
     });
     DrawComponent<SpriteComponent>("Sprite component", entity, [](SpriteComponent& component) {
         UI::ColorEdit4("Color", component.Color, columnWidth);
@@ -174,7 +174,11 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
                 const char* path = reinterpret_cast<const char*>(payload->Data);
                 Texture2DProps props;
                 props.Filepath = g_AssetsPath / path;
-                component.Texture = Texture2D::Create(props);
+                auto texture = Texture2D::Create(props);
+                if (texture->IsLoaded())
+                    component.Texture = texture;
+                else
+                    SB_CORE_WARN("Loading texture {0} failed", props.Filepath.string());
             }
             ImGui::EndDragDropTarget();
         }
@@ -189,6 +193,7 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
             auto camera = component.Camera.As<OrthographicCamera>();
 
             bool changed = false;
+            changed |= UI::DragFloat("Aspect ratio", camera->m_AspectRatio, 16.0f / 9.0f, 0.01f, 5.0f, 0.01f, columnWidth);
             changed |= UI::DragFloat("Size", camera->m_Size, 1.0f, 0.5f, 20.0f, 0.1f, columnWidth);
             changed |= UI::DragFloat("Near clip", camera->m_NearClip, -1.0f, -10.0f, -1.0f, 0.1f, columnWidth);
             changed |= UI::DragFloat("Far clip", camera->m_FarClip, 1.0f, 1.0f, 10.0f, 0.1f, columnWidth);
