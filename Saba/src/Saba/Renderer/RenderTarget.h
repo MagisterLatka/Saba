@@ -21,7 +21,7 @@ public:
 
     SB_CORE virtual void BindTexture(uint32_t slot = 0u) const = 0;
     SB_CORE virtual void* GetRawTexturePointer() const noexcept = 0;
-    SB_CORE virtual void ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) = 0;
+    SB_CORE virtual void ReadPixel(void* data, uint32_t bufferSize, uint32_t xCoord, uint32_t yCoord) = 0;
 
     SB_CORE virtual uint32_t GetWidth() const noexcept = 0;
     SB_CORE virtual uint32_t GetHeight() const noexcept = 0;

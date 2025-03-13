@@ -65,51 +65,68 @@ void ExampleLayer::OnAttach() {
     m_RenderPass->SetRenderTarget(0u, Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
     m_RenderPass->SetRenderTarget(1u, Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::R32_UINT));
     m_RenderPass->SetDepthStencilTarget(Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::Depth32F));
+    Saba::RenderCommand::SetBlendOptions(0u, true, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert,
+        Saba::RendererAPI::BlendOperation::Add, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert);
+    Saba::RenderCommand::SetBlendOptions(1u, false);
 
     Saba::Texture2DProps textureProps;
-    textureProps.Filepath = "assets/textures/checkerboard.png";
+    textureProps.Filepath = "assets/textures/PlayButton.png";
     textureProps.Sampling = Saba::TextureSampling::Point;
-    m_Texture = Saba::Texture2D::Create(std::move(textureProps));
+    m_PlayButton = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/StopButton.png";
+    m_StopButton = Saba::Texture2D::Create(std::move(textureProps));
 
-    m_Scene = Ref<Saba::Scene>::Create("App scene");
-    m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-    m_Camera = m_Scene->CreateAndSetCameraEntity();
-    m_Camera.GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>()->SetSize(2.0f);
-    m_Camera.AddComponent<Saba::NativeScriptComponent>().Bind<CameraController>();
+    m_ActiveScene = Ref<Saba::Scene>::Create();
+    m_ActiveScene->OnViewportResize(window->GetWidth(), window->GetHeight());
+    m_EditorScene = m_ActiveScene;
 
-    m_Scene->CreateEntity("Textured quad").AddComponent<Saba::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
-
-    m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_Scene);
+    m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_ActiveScene);
     m_ContentBrowserPanel = CreateScope<Saba::ContentBrowserPanel>();
+
+    m_EditorCamera = Saba::EditorCamera(glm::half_pi<float>(), static_cast<float>(window->GetWidth()) / static_cast<float>(window->GetHeight()));
 }
 void ExampleLayer::OnDetach() {
     m_ContentBrowserPanel.reset();
     m_SceneHierarchyPanel.reset();
-    m_Scene.Reset();
+    m_EditorScene.Reset();
+    m_ActiveScene.Reset();
     m_RenderPass.Reset();
-    m_Texture.Reset();
+    m_PlayButton.Reset();
+    m_StopButton.Reset();
 }
 void ExampleLayer::OnUpdate([[maybe_unused]] Saba::Timestep ts) {
     Saba::Application::Get().GetWindow()->BindWindow();
 
     if (m_ViewportSize.x > 0 && m_ViewportSize.y > 0 && (m_ViewportSize.x != m_RenderPass->GetWidth() || m_ViewportSize.y != m_RenderPass->GetHeight())) {
         m_RenderPass->Resize(m_ViewportSize.x, m_ViewportSize.y);
-        m_Scene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+        m_ActiveScene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+        m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
     }
 
     m_RenderPass->Bind();
     m_RenderPass->Clear();
     Saba::Renderer2D::ResetStats();
 
-    m_Scene->OnUpdate(ts);
+    switch (m_SceneState) {
+        case SceneState::Edit: {
+            m_EditorCamera.OnUpdate();
+            m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+            break;
+        }
+        case SceneState::Play: {
+            m_ActiveScene->OnUpdateRuntime(ts);
+            break;
+        }
+    }
 
     glm::ivec2 mousePos = Saba::Input::GetMousePos();
     mousePos -= m_ViewportPos;
     if (mousePos.x > 0 && mousePos.y >= 0 && mousePos.x < static_cast<int>(m_ViewportSize.x) && mousePos.y < static_cast<int>(m_ViewportSize.y)) {
         static uint32_t data = 0u;
-        m_RenderPass->GetRenderTarget(1u)->ReadPixel(&data, static_cast<uint32_t>(mousePos.x), static_cast<uint32_t>(mousePos.y));
+        m_RenderPass->GetRenderTarget(1u)->ReadPixel(&data, static_cast<uint32_t>(sizeof(uint32_t)), static_cast<uint32_t>(mousePos.x), static_cast<uint32_t>(mousePos.y));
         Saba::Renderer::Submit([this]() {
-            m_HoveredEntity = (data == 0 || data == std::numeric_limits<uint32_t>::max()) ? Saba::Entity() : Saba::Entity(static_cast<entt::entity>(data), m_Scene.Raw());
+            m_HoveredEntity = (data == 0 || data == std::numeric_limits<uint32_t>::max())
+                ? Saba::Entity() : Saba::Entity(static_cast<entt::entity>(data), m_ActiveScene.Raw());
         });
     }
 
@@ -157,7 +174,7 @@ void ExampleLayer::OnUIRender() {
         ImGui::EndDragDropTarget();
     }
 
-    if (Saba::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GuizmoType != -1 && selected) {
+    if (Saba::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GuizmoType != -1 && selected && m_SceneState == SceneState::Edit) {
         const bool snap = Saba::Input::IsKeyPressed(Saba::KeyCode::LeftControl);
         const float snapValue = m_GuizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : m_GuizmoType == ImGuizmo::OPERATION::SCALE ? 0.5f : 0.1f;
         const float snapValues[3] = { snapValue, snapValue, snapValue };
@@ -166,8 +183,8 @@ void ExampleLayer::OnUIRender() {
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
-        const glm::mat4 viewMat = glm::inverse(m_Camera.GetTransform());
-        const glm::mat4& projMat = m_Camera.GetComponent<Saba::CameraComponent>().Camera->GetProjectionMatrix();
+        const glm::mat4 viewMat = glm::inverse(m_EditorCamera.GetViewMatrix());
+        const glm::mat4& projMat = m_EditorCamera.GetProjectionMatrix();
         glm::mat4 transform = selected.GetTransform();
 
         ImGuizmo::Manipulate(glm::value_ptr(viewMat), glm::value_ptr(projMat), static_cast<ImGuizmo::OPERATION>(m_GuizmoType), ImGuizmo::LOCAL,
@@ -190,13 +207,45 @@ void ExampleLayer::OnUIRender() {
 
     m_SceneHierarchyPanel->OnUIRender();
     m_ContentBrowserPanel->OnUIRender();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+    auto& colors = ImGui::GetStyle().Colors;
+    const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+    const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
+
+    ImGui::Begin("###toolbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse);
+
+    float size = ImGui::GetWindowHeight() - 16.0f;
+    Ref<Saba::Texture2D> icon = m_SceneState == SceneState::Edit ? m_PlayButton : m_StopButton;
+    ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
+    if (ImGui::ImageButton("###button", (uint64_t)icon->GetRawPointer(), ImVec2(size, size))) {
+        switch (m_SceneState) {
+            case ExampleLayer::SceneState::Edit:
+                OnScenePlay();
+                break;
+            case ExampleLayer::SceneState::Play:
+                OnSceneStop();
+                break;
+        }
+    }
+
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(3);
+    ImGui::End();
 }
 void ExampleLayer::OnEvent(Saba::Event& e) {
     Saba::Dispatcher dispatcher(e);
     dispatcher.Dispatch<Saba::KeyPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
     dispatcher.Dispatch<Saba::MouseButtonPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
 
-    m_Scene->OnEvent(e);
+    if (m_SceneState == SceneState::Play)
+        m_ActiveScene->OnEvent(e);
+    else
+        m_EditorCamera.OnEvent(e);
 }
 bool ExampleLayer::OnKeyPressed(Saba::KeyPressedEvent& e) {
     const bool shift = Saba::Input::IsKeyPressed(Saba::KeyCode::LeftShift);
@@ -214,8 +263,16 @@ bool ExampleLayer::OnKeyPressed(Saba::KeyPressedEvent& e) {
                 OpenScene();
             break;
         case Saba::KeyCode::S:
-            if (control && shift)
-                SaveScene();
+            if (control) {
+                if (shift)
+                    SaveSceneAs();
+                else
+                    SaveScene();
+            }
+            break;
+        case Saba::KeyCode::D:
+            if (control)
+                OnDuplicateEntity();
             break;
         case Saba::KeyCode::Q:
             if (!ImGuizmo::IsUsing())
@@ -241,16 +298,41 @@ bool ExampleLayer::OnMouseButtonPressed(Saba::MouseButtonPressedEvent& e) {
         default:
             break;
         case Saba::MouseCode::ButtonLeft:
-            if (m_ViewportHovered && !ImGuizmo::IsOver())
+            if (m_ViewportHovered && !ImGuizmo::IsOver() && !Saba::Input::IsKeyPressed(Saba::KeyCode::LeftAlt))
                 m_SceneHierarchyPanel->SetSelected(m_HoveredEntity);
     }
     return false;
 }
 
+
+void ExampleLayer::OnScenePlay() {
+    if (!m_EditorScene)
+        return;
+
+    m_SceneState = SceneState::Play;
+    m_ActiveScene = Saba::Scene::Copy(m_EditorScene);
+    m_ActiveScene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+    m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+}
+void ExampleLayer::OnSceneStop() {
+    m_SceneState = SceneState::Edit;
+    m_ActiveScene = m_EditorScene;
+    m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+}
+void ExampleLayer::OnDuplicateEntity() {
+    if (m_SceneState != SceneState::Edit)
+        return;
+
+    Saba::Entity entity = m_SceneHierarchyPanel->GetSelected();
+    if (entity)
+        m_EditorScene->DuplicateEntity(entity);
+}
+
 void ExampleLayer::NewScene() {
-    m_Scene = Ref<Saba::Scene>::Create();
-    m_Scene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
-    m_SceneHierarchyPanel->SetScene(m_Scene);
+    m_ActiveScene = Ref<Saba::Scene>::Create();
+    m_ActiveScene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+    m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+    m_EditorScenePath = std::filesystem::path();
 }
 void ExampleLayer::OpenScene() {
     std::filesystem::path filepath = Saba::FileProcessing::ChooseFileToOpenFrom();
@@ -259,19 +341,38 @@ void ExampleLayer::OpenScene() {
     OpenScene(filepath);
 }
 void ExampleLayer::OpenScene(const std::filesystem::path& path) {
-    if (!std::filesystem::exists(path))
+    if (m_SceneState != SceneState::Edit)
+        OnSceneStop();
+
+    if (!std::filesystem::exists(path)) {
+        SB_WARN("Could not open scene from {0}", path.string());
         return;
+    }
 
-    NewScene();
-
-    Saba::SceneSerializer serializer(m_Scene);
-    serializer.Deserialize(path);
+    Ref<Saba::Scene> scene = Ref<Saba::Scene>::Create();
+    Saba::SceneSerializer serializer(scene);
+    if (serializer.Deserialize(path)) {
+        m_EditorScene = scene;
+        m_EditorScene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+        m_SceneHierarchyPanel->SetScene(m_EditorScene);
+        m_ActiveScene = m_EditorScene;
+        m_EditorScenePath = path;
+    }
 }
 void ExampleLayer::SaveScene() {
+    if (m_EditorScenePath.empty())
+        SaveSceneAs();
+    else {
+        Saba::SceneSerializer serializer(m_ActiveScene);
+        serializer.Serialize(m_EditorScenePath);
+    }
+}
+void ExampleLayer::SaveSceneAs() {
     std::filesystem::path filepath = Saba::FileProcessing::ChooseFileToSaveTo();
     if (filepath.empty())
         return;
 
-    Saba::SceneSerializer serializer(m_Scene);
+    Saba::SceneSerializer serializer(m_ActiveScene);
     serializer.Serialize(filepath);
+    m_EditorScenePath = filepath;
 }

@@ -34,6 +34,20 @@ void Scene::DestroyEntity(Entity entity) {
     m_Registry.destroy(entity.m_Handle);
 }
 
+template<Component T>
+static void CopyComponent(Entity src, Entity dst) {
+    if (src.HasComponent<T>())
+        dst.AddOrReplaceComponent<T>(src.GetComponent<T>());
+}
+void Scene::DuplicateEntity(Entity entity) {
+    Entity e = CreateEntity(entity.GetComponent<TagComponent>().Tag);
+    CopyComponent<TransformComponent>(entity, e);
+    CopyComponent<SpriteComponent>(entity, e);
+    CopyComponent<CameraComponent>(entity, e);
+    CopyComponent<CameraComponent>(entity, e);
+    CopyComponent<NativeScriptComponent>(entity, e);
+}
+
 Entity Scene::SetCameraEntity(Entity entity) {
     m_Camera = entity;
     return entity;
@@ -61,7 +75,30 @@ void Scene::OnEvent(Event& e) {
         nsc.Instance->OnEvent(e);
     }
 }
-void Scene::OnUpdate([[maybe_unused]] Timestep ts) {
+
+void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const EditorCamera& camera) {
+    for (auto [entity, tc] : m_Registry.view<TransformComponent>(entt::exclude<SpriteComponent>).each()) {
+        tc.Orientation = glm::mod(tc.Orientation, glm::two_pi<float>());
+        const auto rotation = glm::quat(tc.Orientation);
+        tc.Transform = glm::translate(glm::mat4(1.0f), tc.Position) * glm::scale(glm::toMat4(rotation), tc.Size);
+    }
+
+    Renderer2D::SetViewProjectionMatrix(camera.GetProjectionViewMatrix());
+    auto groupQuads = m_Registry.group<const SpriteComponent>(entt::get<const TransformComponent>);
+    for (auto entity : groupQuads) {
+        const auto& [tc, sc] = groupQuads.get<TransformComponent, SpriteComponent>(entity);
+        Renderer2D::SubmitQuad(tc.Position, tc.Size, tc.Orientation.z, sc.Color, sc.Texture, sc.TillingFactor, static_cast<uint32_t>(entity));
+    }
+    Renderer2D::DrawQuads();
+
+    auto groupCircles = m_Registry.group<const CircleComponent>(entt::get<const TransformComponent>);
+    for (auto entity : groupCircles) {
+        const auto& [tc, cc] = groupCircles.get<TransformComponent, CircleComponent>(entity);
+        Renderer2D::SubmitCircle(tc.Position, tc.Size.x, cc.Color, cc.Thickness, cc.Fade, static_cast<uint32_t>(entity));
+    }
+    Renderer2D::DrawCircles();
+}
+void Scene::OnUpdateRuntime(Timestep ts) {
     for (auto [entity, nsc] : m_Registry.view<NativeScriptComponent>().each()) {
         if (nsc.Instance == nullptr) {
             nsc.Instance = nsc.InstantiateScript();
@@ -111,6 +148,39 @@ void Scene::OnViewportResize(uint32_t width, uint32_t height) {
         if (cc.Camera)
             cc.Camera->SetViewportSize(width, height);
     }
+}
+
+template<Component T>
+static void CopyComponent(entt::registry& src, entt::registry& dst, const std::unordered_map<UUID, entt::entity>& entities) {
+    for (auto e : src.view<T>()) {
+        UUID uuid = src.get<IDComponent>(e).ID;
+        SB_CORE_ASSERT(entities.contains(uuid));
+        entt::entity id = entities.at(uuid);
+        T& component = src.get<T>(e);
+        dst.emplace_or_replace<T>(id, component);
+    }
+}
+Ref<Scene> Scene::Copy(Ref<Scene> scene) {
+    Ref<Scene> newScene = Ref<Scene>::Create(scene->m_Name);
+    newScene->m_ViewportSize = scene->m_ViewportSize;
+
+    std::unordered_map<UUID, entt::entity> entities;
+    for (auto e : scene->m_Registry.view<IDComponent>() | std::views::reverse) {
+        UUID uuid = scene->m_Registry.get<IDComponent>(e).ID;
+        Entity entity = newScene->CreateEntityWithID(uuid, scene->m_Registry.get<TagComponent>(e).Tag);
+        entities[uuid] = entity;
+    }
+
+    CopyComponent<TransformComponent>(scene->m_Registry, newScene->m_Registry, entities);
+    CopyComponent<SpriteComponent>(scene->m_Registry, newScene->m_Registry, entities);
+    CopyComponent<CircleComponent>(scene->m_Registry, newScene->m_Registry, entities);
+    CopyComponent<CameraComponent>(scene->m_Registry, newScene->m_Registry, entities);
+    CopyComponent<NativeScriptComponent>(scene->m_Registry, newScene->m_Registry, entities);
+
+    if (scene->m_Camera != entt::null)
+        newScene->m_Camera = entities.at(scene->m_Registry.get<IDComponent>(scene->m_Camera).ID);
+
+    return newScene;
 }
 
 template<>

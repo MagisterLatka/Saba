@@ -17,12 +17,15 @@ public:
     SB_CORE uint32_t GetWidth() const noexcept override { return m_Props.Width; }
     SB_CORE uint32_t GetHeight() const noexcept override { return m_Props.Height; }
     SB_CORE void* GetRawPointer() const noexcept override { return (void*)(static_cast<uint64_t>(m_ID)); }
+
+    SB_CORE bool IsLoaded() const noexcept override { return m_Loaded; }
 private:
     SB_CORE void Init();
 private:
     Texture2DProps m_Props;
     Buffer m_Buffer;
     uint32_t m_ID;
+    bool m_Loaded;
 };
 
 }

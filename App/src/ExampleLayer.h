@@ -23,15 +23,23 @@ private:
     void OpenScene();
     void OpenScene(const std::filesystem::path& path);
     void SaveScene();
+    void SaveSceneAs();
+
+    void OnScenePlay();
+    void OnSceneStop();
+    void OnDuplicateEntity();
 private:
     Ref<Saba::RenderPass> m_RenderPass;
-    Ref<Saba::Texture2D> m_Texture;
 
-    Ref<Saba::Scene> m_Scene;
-    Saba::Entity m_Camera;
+    enum class SceneState : uint8_t { Edit, Play };
+    Ref<Saba::Scene> m_ActiveScene, m_EditorScene;
+    Ref<Saba::Texture2D> m_PlayButton, m_StopButton;
+    SceneState m_SceneState = SceneState::Edit;
+    std::filesystem::path m_EditorScenePath;
+    Saba::EditorCamera m_EditorCamera;
+    Saba::Entity m_HoveredEntity;
     Scope<Saba::SceneHierarchyPanel> m_SceneHierarchyPanel;
     Scope<Saba::ContentBrowserPanel> m_ContentBrowserPanel;
-    Saba::Entity m_HoveredEntity;
 
     glm::uvec2 m_ViewportSize = { 0, 0 };
     glm::ivec2 m_ViewportPos = { 0, 0 };

@@ -8,6 +8,67 @@
 
 namespace Saba {
 
+static GLenum GetComparisonFunc(RendererAPI::ComparisonFunc func) {
+    switch (func) {
+        case RendererAPI::ComparisonFunc::Never:             return GL_NEVER;
+        case RendererAPI::ComparisonFunc::Less:              return GL_LESS;
+        case RendererAPI::ComparisonFunc::Equal:             return GL_EQUAL;
+        case RendererAPI::ComparisonFunc::LessOrEqual:       return GL_LEQUAL;
+        case RendererAPI::ComparisonFunc::Greater:           return GL_GREATER;
+        case RendererAPI::ComparisonFunc::GreaterOrEqual:    return GL_GEQUAL;
+        case RendererAPI::ComparisonFunc::NotEqual:          return GL_NOTEQUAL;
+        case RendererAPI::ComparisonFunc::Always:            return GL_ALWAYS;
+        default: break;
+    }
+    SB_CORE_THROW_INFO("Invalid comparison function");
+    return GL_LESS;
+}
+static GLenum GetStencilOp(RendererAPI::StencilOperation op) {
+    switch (op) {
+        case RendererAPI::StencilOperation::Keep:            return GL_KEEP;
+        case RendererAPI::StencilOperation::Zero:            return GL_ZERO;
+        case RendererAPI::StencilOperation::Replace:         return GL_REPLACE;
+        case RendererAPI::StencilOperation::Increment:       return GL_INCR;
+        case RendererAPI::StencilOperation::IncrementClamp:  return GL_INCR_WRAP;
+        case RendererAPI::StencilOperation::Decrement:       return GL_DECR;
+        case RendererAPI::StencilOperation::DecrementClamp:  return GL_DECR_WRAP;
+        case RendererAPI::StencilOperation::Invert:          return GL_INVERT;
+        default: break;
+    }
+    SB_CORE_THROW_INFO("Invalid stencil operation");
+    return GL_KEEP;
+}
+static GLenum GetBlendOption(RendererAPI::BlendOption op) {
+    switch (op) {
+        case RendererAPI::BlendOption::Zero:                     return GL_ZERO;
+        case RendererAPI::BlendOption::One:                      return GL_ONE;
+        case RendererAPI::BlendOption::SourceColor:              return GL_SRC_COLOR;
+        case RendererAPI::BlendOption::SourceColorInvert:        return GL_ONE_MINUS_SRC_COLOR;
+        case RendererAPI::BlendOption::SourceAlpha:              return GL_SRC_ALPHA;
+        case RendererAPI::BlendOption::SourceAlphaInvert:        return GL_ONE_MINUS_SRC_ALPHA;
+        case RendererAPI::BlendOption::DestinationColor:         return GL_DST_COLOR;
+        case RendererAPI::BlendOption::DestinationColorInvert:   return GL_ONE_MINUS_DST_COLOR;
+        case RendererAPI::BlendOption::DestinationAlpha:         return GL_DST_ALPHA;
+        case RendererAPI::BlendOption::DestinationAlphaInvert:   return GL_ONE_MINUS_DST_ALPHA;
+        case RendererAPI::BlendOption::BlendFactor:              return GL_CONSTANT_COLOR;
+        case RendererAPI::BlendOption::BlendFactorInvert:        return GL_ONE_MINUS_CONSTANT_COLOR;
+        default: break;
+    }
+    SB_CORE_THROW_INFO("Invalid blend option");
+    return GL_ONE;
+}
+static GLenum GetBlendOp(RendererAPI::BlendOperation op) {
+    switch (op) {
+        case RendererAPI::BlendOperation::Add:                return GL_FUNC_ADD;
+        case RendererAPI::BlendOperation::Subtract:           return GL_FUNC_SUBTRACT;
+        case RendererAPI::BlendOperation::ReverseSubtract:    return GL_FUNC_REVERSE_SUBTRACT;
+        case RendererAPI::BlendOperation::Min:                return GL_MIN;
+        case RendererAPI::BlendOperation::Max:                return GL_MAX;
+        default: break;
+    }
+    SB_CORE_THROW_INFO("Invalid blend operation");
+    return GL_FUNC_ADD;
+}
 static void OpenGLMessageCallback(GLenum source, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id,
     GLenum severity, [[maybe_unused]] GLsizei length, const GLchar* message, [[maybe_unused]] const void* userParam)
 {
@@ -71,7 +132,7 @@ void OpenGLRendererAPI::InitShaders() {
         layout(location = 0) in vec4 i_Pos;
         layout(location = 1) in vec4 i_Color;
         layout(location = 2) in vec2 i_UV;
-        layout(location = 3) in int i_TID;
+        layout(location = 3) in uint i_TID;
         layout(location = 4) in float i_TillingFactor;
         layout(location = 5) in uvec4 i_ID;
 
@@ -82,7 +143,7 @@ void OpenGLRendererAPI::InitShaders() {
         out Data {
             vec4 color;
             vec2 uv;
-            flat int tid;
+            flat uint tid;
             flat float tillingFactor;
             flat uint id;
         } vs_out;
@@ -107,7 +168,7 @@ void OpenGLRendererAPI::InitShaders() {
         in Data {
             vec4 color;
             vec2 uv;
-            flat int tid;
+            flat uint tid;
             flat float tillingFactor;
             flat uint id;
         } fs_in;
@@ -129,7 +190,7 @@ void OpenGLRendererAPI::InitShaders() {
         layout(binding = 14) uniform sampler2D u_Tex14;
         layout(binding = 15) uniform sampler2D u_Tex15;
 
-        vec4 GetDataFromTexture(int tid, vec2 uv, float tillingFactor) {
+        vec4 GetDataFromTexture(uint tid, vec2 uv, float tillingFactor) {
             vec4 color = texture(u_Tex0, uv * tillingFactor) * (1 - abs(sign(tid - 0)));
             color += texture(u_Tex1, uv * tillingFactor) * (1 - abs(sign(tid - 1)));
             color += texture(u_Tex2, uv * tillingFactor) * (1 - abs(sign(tid - 2)));
@@ -219,6 +280,83 @@ void OpenGLRendererAPI::InitShaders() {
         }
     )";
     Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
+}
+
+void OpenGLRendererAPI::SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) {
+    if (enable)
+        glEnable(GL_DEPTH_TEST);
+    else
+        glDisable(GL_DEPTH_TEST);
+
+    glDepthMask(static_cast<uint8_t>(writeMask));
+    glDepthFunc(GetComparisonFunc(compFunc));
+}
+void OpenGLRendererAPI::SetStencilTestOptions(bool enable, uint8_t writeMask, uint8_t readMask, ComparisonFunc frontFaceFunc,
+    ComparisonFunc backFaceFunc, uint32_t stencilRefVal)
+{
+    if (enable)
+        glEnable(GL_STENCIL_TEST);
+    else
+        glDisable(GL_STENCIL_TEST);
+
+    glStencilMask(writeMask);
+    glStencilFuncSeparate(GL_FRONT, GetComparisonFunc(frontFaceFunc), static_cast<int>(stencilRefVal), readMask);
+    glStencilFuncSeparate(GL_BACK, GetComparisonFunc(backFaceFunc), static_cast<int>(stencilRefVal), readMask);
+}
+void OpenGLRendererAPI::SetFrontFaceStencilOperations(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) {
+    glStencilOpSeparate(GL_FRONT, GetStencilOp(stencilFail), GetStencilOp(depthFail), GetStencilOp(pass));
+}
+void OpenGLRendererAPI::SetBackFaceStencilOperations(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) {
+    glStencilOpSeparate(GL_BACK, GetStencilOp(stencilFail), GetStencilOp(depthFail), GetStencilOp(pass));
+}
+void OpenGLRendererAPI::SetRasterizerOptions(TriangleFillMode fillMode, TriangleCullMode cullMode, bool isFrontFaceCounterClockwise) {
+    GLenum fill = 0;
+    switch (fillMode) {
+        case Saba::RendererAPI::TriangleFillMode::Full:
+            fill = GL_FILL;
+            break;
+        case Saba::RendererAPI::TriangleFillMode::Wireframe:
+            fill = GL_LINE;
+            break;
+        default:
+            SB_CORE_THROW_INFO("Invalid triangle fill mode");
+            break;
+    }
+    glPolygonMode(GL_FRONT_AND_BACK, fill);
+
+    switch (cullMode) {
+        case Saba::RendererAPI::TriangleCullMode::DrawAll:
+            glDisable(GL_CULL_FACE);
+            break;
+        case Saba::RendererAPI::TriangleCullMode::DrawFrontFace:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case Saba::RendererAPI::TriangleCullMode::DrawBackFace:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            break;
+        default:
+            SB_CORE_THROW_INFO("Invalid triangle cull mode");
+            break;
+    }
+
+    if (isFrontFaceCounterClockwise)
+        glFrontFace(GL_CCW);
+    else
+        glFrontFace(GL_CW);
+}
+void OpenGLRendererAPI::SetBlendOptions(uint32_t i, bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation,
+    BlendOption sourceAlphaBlend, BlendOption destinationAlphaBlend, BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
+{
+    if (enable)
+        glEnablei(GL_BLEND, i);
+    else
+        glDisablei(GL_BLEND, i);
+
+    glBlendFuncSeparatei(i, GetBlendOption(sourceBlend), GetBlendOption(destinationBlend), GetBlendOption(sourceAlphaBlend), GetBlendOption(destinationAlphaBlend));
+    glBlendEquationSeparatei(i, GetBlendOp(operation), GetBlendOp(alphaOperation));
+    glBlendColor(blendFactor.r, blendFactor.g, blendFactor.b, blendFactor.a);
 }
 
 }

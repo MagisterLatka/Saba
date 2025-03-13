@@ -16,7 +16,7 @@ public:
 
     SB_CORE void BindTexture(uint32_t slot = 0u) const override;
     SB_CORE void* GetRawTexturePointer() const noexcept override { return m_View.Get(); }
-    SB_CORE void ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) override;
+    SB_CORE void ReadPixel(void* data, uint32_t bufferSize, uint32_t xCoord, uint32_t yCoord) override;
 
     SB_CORE uint32_t GetWidth() const noexcept override { return m_Width; }
     SB_CORE uint32_t GetHeight() const noexcept override { return m_Height; }

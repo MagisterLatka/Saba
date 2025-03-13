@@ -44,4 +44,33 @@ void RenderCommand::DrawIndexed(RendererAPI::Topology topology, uint32_t indices
     Renderer::Submit([topology, indicesCount]() { s_API->DrawIndexed(topology, indicesCount); });
 }
 
+void RenderCommand::SetDepthTestOptions(bool enable, bool writeMask, RendererAPI::ComparisonFunc compFunc) {
+    Renderer::Submit([enable, writeMask, compFunc]() { s_API->SetDepthTestOptions(enable, writeMask, compFunc); });
+}
+void RenderCommand::SetStencilTestOptions(bool enable, uint8_t writeMask, uint8_t readMask, RendererAPI::ComparisonFunc frontFaceFunc,
+    RendererAPI::ComparisonFunc backFaceFunc, uint32_t stencilRefVal)
+{
+    Renderer::Submit([enable, writeMask, readMask, frontFaceFunc, backFaceFunc, stencilRefVal]() {
+        s_API->SetStencilTestOptions(enable, writeMask, readMask, frontFaceFunc, backFaceFunc, stencilRefVal);
+    });
+}
+void RenderCommand::SetFrontFaceStencilOperations(RendererAPI::StencilOperation stencilFail, RendererAPI::StencilOperation depthFail,
+    RendererAPI::StencilOperation pass)
+{
+    Renderer::Submit([stencilFail, depthFail, pass]() { s_API->SetFrontFaceStencilOperations(stencilFail, depthFail, pass); });
+}
+void RenderCommand::SetBackFaceStencilOperations(RendererAPI::StencilOperation stencilFail, RendererAPI::StencilOperation depthFail,
+    RendererAPI::StencilOperation pass)
+{
+    Renderer::Submit([stencilFail, depthFail, pass]() { s_API->SetBackFaceStencilOperations(stencilFail, depthFail, pass); });
+}
+void RenderCommand::SetBlendOptions(uint32_t i, bool enable, RendererAPI::BlendOption sourceBlend, RendererAPI::BlendOption destinationBlend,
+    RendererAPI::BlendOperation operation, RendererAPI::BlendOption sourceAlphaBlend, RendererAPI::BlendOption destinationAlphaBlend,
+    RendererAPI::BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
+{
+    Renderer::Submit([i, enable, sourceBlend, destinationBlend, operation, sourceAlphaBlend, destinationAlphaBlend, alphaOperation, writeMask, blendFactor]() {
+        s_API->SetBlendOptions(i, enable, sourceBlend, destinationBlend, operation, sourceAlphaBlend, destinationAlphaBlend, alphaOperation, writeMask, blendFactor);
+    });
+}
+
 }

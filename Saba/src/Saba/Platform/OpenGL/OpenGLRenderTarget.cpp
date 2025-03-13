@@ -79,10 +79,10 @@ void OpenGLRenderTarget::BindTexture(uint32_t slot) const {
     });
 }
 
-void OpenGLRenderTarget::ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) {
+void OpenGLRenderTarget::ReadPixel(void* data, uint32_t bufferSize, uint32_t xCoord, uint32_t yCoord) {
     SB_CORE_ASSERT((static_cast<uint32_t>(m_Format) & 0x30u) == 0, "Cannot read from depth or depth stencil format");
     Ref<OpenGLRenderTarget> instance = this;
-    Renderer::Submit([instance, data, xCoord, yCoord]() {
+    Renderer::Submit([instance, data, bufferSize, xCoord, yCoord]() {
         glCopyImageSubData(instance->m_ID, GL_TEXTURE_2D, 0u, static_cast<int>(xCoord), static_cast<int>(instance->m_Height - yCoord - 1u), 0u, instance->m_ReadBuffer,
             GL_TEXTURE_2D, 0u, 0u, 0u, 0u, 1u, 1u, 1u);
 
@@ -145,7 +145,7 @@ void OpenGLRenderTarget::ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord)
                 type = GL_FLOAT;
                 break;
         }
-        glGetTextureImage(instance->m_ReadBuffer, 0u, format, type, sizeof(glm::vec4), data);
+        glGetTextureImage(instance->m_ReadBuffer, 0u, format, type, bufferSize, data);
     });
 }
 

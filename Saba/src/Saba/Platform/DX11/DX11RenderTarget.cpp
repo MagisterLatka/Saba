@@ -130,9 +130,9 @@ void DX11RenderTarget::BindTexture(uint32_t slot) const {
     });
 }
 
-void DX11RenderTarget::ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) {
+void DX11RenderTarget::ReadPixel(void* data, uint32_t bufferSize, uint32_t xCoord, uint32_t yCoord) {
     Ref<DX11RenderTarget> instance = this;
-    Renderer::Submit([instance, data, xCoord, yCoord]() {
+    Renderer::Submit([instance, data, bufferSize, xCoord, yCoord]() {
         auto context = DX11Context::GetContextFromApplication()->GetContext();
         auto device = DX11Context::GetContextFromApplication()->GetDevice();
         HRESULT hr;
@@ -146,8 +146,8 @@ void DX11RenderTarget::ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) {
         context->CopySubresourceRegion1(instance->m_ReadBuffer.Get(), 0u, 0u, 0u, 0u, instance->m_Texture.Get(), 0u, &box, D3D11_COPY_DISCARD);
         D3D11_MAPPED_SUBRESOURCE map;
         SB_DX_GRAPHICS_CALL_INFO(context->Map(instance->m_ReadBuffer.Get(), 0u, D3D11_MAP_READ, 0u, &map));
-        memcpy(data, map.pData, sizeof(glm::vec4));
-        context->Unmap(instance->m_Texture.Get(), 0u);
+        memcpy(data, map.pData, bufferSize);
+        context->Unmap(instance->m_ReadBuffer.Get(), 0u);
     });
 }
 
