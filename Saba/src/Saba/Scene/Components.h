@@ -3,6 +3,7 @@
 #include "Saba/Core/UUID.h"
 #include "Saba/Renderer/Texture.h"
 #include "Saba/Renderer/Camera.h"
+#include "Saba/Renderer/Mesh.h"
 
 namespace Saba {
 
@@ -108,6 +109,18 @@ struct CameraComponent {
     SB_CORE CameraComponent& operator=(CameraComponent&&) noexcept = default;
 };
 
+struct MeshComponent {
+    Ref<Saba::Mesh> Mesh;
+
+    SB_CORE MeshComponent() noexcept = default;
+    SB_CORE MeshComponent(const MeshComponent&) noexcept = default;
+    SB_CORE MeshComponent(MeshComponent&&) noexcept = default;
+    SB_CORE MeshComponent(Ref<Saba::Mesh> mesh) noexcept : Mesh(std::move(mesh)) {}
+
+    SB_CORE MeshComponent& operator=(const MeshComponent&) noexcept = default;
+    SB_CORE MeshComponent& operator=(MeshComponent&&) noexcept = default;
+};
+
 class ScriptableEntity;
 struct NativeScriptComponent {
     ScriptableEntity* Instance = nullptr;
@@ -135,7 +148,7 @@ struct NativeScriptComponent {
 
 template<typename T>
 concept Component = std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent>
-    || std::is_same_v<T, CircleComponent> || std::is_same_v<T, SpriteComponent> || std::is_same_v<T, CameraComponent>
-    || std::is_same_v<T, NativeScriptComponent>;
+    || std::is_same_v<T, CircleComponent> || std::is_same_v<T, SpriteComponent> || std::is_same_v<T, MeshComponent>
+    || std::is_same_v<T, CameraComponent> || std::is_same_v<T, NativeScriptComponent>;
 
 }

@@ -50,6 +50,7 @@ include_directories(Saba/vendor/ImGui)
 include_directories(Saba/vendor/stb_image)
 include_directories(Saba/vendor/entt)
 include_directories(Saba/vendor/yaml-cpp/include)
+include_directories(Saba/vendor/assimp/include)
 include_directories(Saba/vendor)
 include_directories(Saba/src)
 

@@ -27,6 +27,7 @@ private:
 
     SB_CORE virtual void Draw(Topology topology, uint32_t verticesCount) = 0;
     SB_CORE virtual void DrawIndexed(Topology topology, uint32_t indicesCount) = 0;
+    SB_CORE virtual void DrawIndexedInstanced(RendererAPI::Topology topology, uint32_t indicesCount, uint32_t instancesCount) = 0;
 
     SB_CORE virtual void SetDepthTestOptions(bool enable, bool writeMask = true, ComparisonFunc compFunc = RendererAPI::ComparisonFunc::Less) = 0;
     virtual void SetStencilTestOptions(bool enable, uint8_t writeMask = 0xffu, uint8_t readMask = 0xffu,

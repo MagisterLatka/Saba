@@ -11,6 +11,7 @@ public:
 
     SB_CORE void Draw(Topology topology, uint32_t verticesCount) override;
     SB_CORE void DrawIndexed(Topology topology, uint32_t indicesCount) override;
+    SB_CORE void DrawIndexedInstanced(Topology topology, uint32_t indicesCount, uint32_t instancesCount) override;
 
     SB_CORE void SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) override;
     SB_CORE void SetStencilTestOptions(bool enable, uint8_t writeMask, uint8_t readMask, ComparisonFunc frontFaceFunc,
@@ -22,7 +23,7 @@ public:
         BlendOperation operation, BlendOption sourceAlphaBlend, BlendOption destinationAlphaBlend, BlendOperation alphaOperation,
         uint8_t writeMask, glm::vec4 blendFactor) override;
 private:
-    SB_CORE static int GetTopology(Topology topology);
+    SB_CORE static uint32_t GetTopology(Topology topology);
     SB_CORE void InitShaders();
 };
 

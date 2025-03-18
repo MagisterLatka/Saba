@@ -108,6 +108,11 @@ void DX11RendererAPI::DrawIndexed(Topology topology, uint32_t indicesCount) {
     SetTopology(context, topology);
     context->DrawIndexed(indicesCount, 0u, 0u);
 }
+void DX11RendererAPI::DrawIndexedInstanced(Topology topology, uint32_t indicesCount, uint32_t instancesCount) {
+    auto context = DX11Context::GetContextFromApplication()->GetContext();
+    SetTopology(context, topology);
+    context->DrawIndexed(indicesCount, instancesCount, 0u, 0u, 0u);
+}
 
 void DX11RendererAPI::SetTopology(ComPtr<ID3D11DeviceContext> context, Topology topology) {
     switch (topology) {
@@ -203,7 +208,7 @@ void DX11RendererAPI::InitShaders() {
 
     Renderer::GetShaderLibrary().Load("quadShader", vertexQuad, fragmentQuad);
 
-    std::string vertexCircle = R"(
+    const std::string vertexCircle = R"(
         struct VSOut {
             float4 pos : SV_Position;
             float4 localPos : LocalPos;
@@ -232,7 +237,7 @@ void DX11RendererAPI::InitShaders() {
             return output;
         };
     )";
-    std::string fragmentCircle = R"(
+    const std::string fragmentCircle = R"(
         struct FSIn {
             float4 pos : SV_Position;
             float4 localPos : LocalPos;
@@ -260,6 +265,50 @@ void DX11RendererAPI::InitShaders() {
         };
     )";
     Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
+
+    const std::string vertexMesh = R"(
+        struct VSOut {
+            float4 pos : SV_Position;
+            float4 color : Color;
+            float3 normal : Normal;
+            float2 uv : UV;
+            uint id : ID;
+        };
+        cbuffer ConstBuf {
+            uniform matrix<float, 4, 4> u_ViewProjMat;
+        }
+
+        VSOut main(float3 position : Position, float3 normal : Normal, float2 uv : UV, float4 color : Color, mat4 modelMat : Transform, uint id : EntityID) {
+            VSOut output;
+            output.pos = mul(mul(float4(pos, 1.0f), modelMat), u_ViewProjMat);
+            output.color = color;
+            output.normal = normal;
+            output.uv = uv;
+            output.id = id;
+            return output;
+        }
+    )";
+
+    const std::string fragmentMesh = R"(
+        struct FSIn {
+            float4 pos : SV_Position;
+            float4 color : Color;
+            float3 normal : Normal;
+            float2 uv : UV;
+            uint id : ID;
+        };
+        struct FSOut {
+            float4 color : SV_Target0;
+            uint id : SV_Target1;
+        };
+
+        FSOut main(FSIn input) {
+            FSOut output;
+            output.color = input.color;
+            output.id = input.id;
+            return output;
+        }
+    )";
 }
 
 void DX11RendererAPI::SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) {

@@ -8,7 +8,8 @@ class RenderCommand {
     friend class Renderer;
 public:
     SB_CORE static void Draw(RendererAPI::Topology topology, uint32_t verticesCount);
-    SB_CORE static void DrawIndexed(RendererAPI::Topology topology, uint32_t IndicesCount);
+    SB_CORE static void DrawIndexed(RendererAPI::Topology topology, uint32_t indicesCount);
+    SB_CORE static void DrawIndexedInstanced(RendererAPI::Topology topology, uint32_t indicesCount, uint32_t instancesCount);
 
     SB_CORE static void SetDepthTestOptions(bool enable, bool writeMask = true, RendererAPI::ComparisonFunc compFunc = RendererAPI::ComparisonFunc::Less);
     SB_CORE static void SetStencilTestOptions(bool enable, uint8_t writeMask = 0xffu, uint8_t readMask = 0xffu,

@@ -24,27 +24,29 @@ void OpenGLInputLayout::Create() {
     Renderer::Submit([instance]() mutable {
         glCreateVertexArrays(1, &instance->m_ID);
         glBindVertexArray(instance->m_ID);
-        for (const auto& buffer : instance->m_VertexBuffers)
-            buffer->Bind();
+        
         if (instance->m_IndexBuffer)
             instance->m_IndexBuffer->Bind();
 
         uint32_t index = 0u;
         for (const auto& buffer : instance->m_VertexBuffers) {
+            buffer->Bind();
             for (const auto& element : buffer->GetLayout()) {
                 switch (element.Type) {
                     case BufferLayoutElementDataType::Mat3:
                         for (int i = 0; i < 3; ++i) {
                             glEnableVertexAttribArray(index);
-                            glVertexAttribPointer(index++, 3, GL_FLOAT, element.Normalized, static_cast<int>(buffer->GetLayout().GetStride()),
+                            glVertexAttribPointer(index, 3, GL_FLOAT, element.Normalized, static_cast<int>(buffer->GetLayout().GetStride()),
                                 (const void*)(element.Offset + sizeof(float) * 3 * static_cast<uint64_t>(i)));
+                            glVertexAttribDivisor(index++, element.InstanceStepRate);
                         }
                         break;
                     case BufferLayoutElementDataType::Mat4:
                         for (int i = 0; i < 4; ++i) {
                             glEnableVertexAttribArray(index);
-                            glVertexAttribPointer(index++, 4, GL_FLOAT, element.Normalized, static_cast<int>(buffer->GetLayout().GetStride()),
+                            glVertexAttribPointer(index, 4, GL_FLOAT, element.Normalized, static_cast<int>(buffer->GetLayout().GetStride()),
                                 (const void*)(element.Offset + sizeof(float) * 4 * static_cast<uint64_t>(i)));
+                            glVertexAttribDivisor(index++, element.InstanceStepRate);
                         }
                         break;
                     case BufferLayoutElementDataType::Float:
@@ -52,24 +54,27 @@ void OpenGLInputLayout::Create() {
                     case BufferLayoutElementDataType::Float3:
                     case BufferLayoutElementDataType::Float4:
                         glEnableVertexAttribArray(index);
-                        glVertexAttribPointer(index++, static_cast<int>(element.GetComponentCount()), GL_FLOAT, element.Normalized,
+                        glVertexAttribPointer(index, static_cast<int>(element.GetComponentCount()), GL_FLOAT, element.Normalized,
                             static_cast<int>(buffer->GetLayout().GetStride()), (const void*)(static_cast<uint64_t>(element.Offset)));
+                        glVertexAttribDivisor(index++, element.InstanceStepRate);
                         break;
                     case BufferLayoutElementDataType::Int:
                     case BufferLayoutElementDataType::Int2:
                     case BufferLayoutElementDataType::Int3:
                     case BufferLayoutElementDataType::Int4:
                         glEnableVertexAttribArray(index);
-                        glVertexAttribIPointer(index++, static_cast<int>(element.GetComponentCount()), GL_INT,
+                        glVertexAttribIPointer(index, static_cast<int>(element.GetComponentCount()), GL_INT,
                             static_cast<int>(buffer->GetLayout().GetStride()), (const void*)(static_cast<uint64_t>(element.Offset)));
+                        glVertexAttribDivisor(index++, element.InstanceStepRate);
                         break;
                     case BufferLayoutElementDataType::UInt:
                     case BufferLayoutElementDataType::UInt2:
                     case BufferLayoutElementDataType::UInt3:
                     case BufferLayoutElementDataType::UInt4:
                         glEnableVertexAttribArray(index);
-                        glVertexAttribIPointer(index++, static_cast<int>(element.GetComponentCount()), GL_UNSIGNED_INT,
+                        glVertexAttribIPointer(index, static_cast<int>(element.GetComponentCount()), GL_UNSIGNED_INT,
                             static_cast<int>(buffer->GetLayout().GetStride()), (const void*)(static_cast<uint64_t>(element.Offset)));
+                        glVertexAttribDivisor(index++, element.InstanceStepRate);
                         break;
                     default: break;
                 }

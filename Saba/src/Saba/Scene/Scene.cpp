@@ -3,6 +3,7 @@
 
 #include "Saba/Scene/ScriptableEntity.h"
 #include "Saba/Renderer/Renderer2D.h"
+#include "Saba/Renderer/Renderer3D.h"
 
 namespace Saba {
 
@@ -43,7 +44,8 @@ void Scene::DuplicateEntity(Entity entity) {
     Entity e = CreateEntity(entity.GetComponent<TagComponent>().Tag);
     CopyComponent<TransformComponent>(entity, e);
     CopyComponent<SpriteComponent>(entity, e);
-    CopyComponent<CameraComponent>(entity, e);
+    CopyComponent<CircleComponent>(entity, e);
+    CopyComponent<MeshComponent>(entity, e);
     CopyComponent<CameraComponent>(entity, e);
     CopyComponent<NativeScriptComponent>(entity, e);
 }
@@ -86,17 +88,25 @@ void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const EditorCamera& cam
     Renderer2D::SetViewProjectionMatrix(camera.GetProjectionViewMatrix());
     auto groupQuads = m_Registry.group<const SpriteComponent>(entt::get<const TransformComponent>);
     for (auto entity : groupQuads) {
-        const auto& [tc, sc] = groupQuads.get<TransformComponent, SpriteComponent>(entity);
+        const auto& [tc, sc] = groupQuads.get<const TransformComponent, const SpriteComponent>(entity);
         Renderer2D::SubmitQuad(tc.Position, tc.Size, tc.Orientation.z, sc.Color, sc.Texture, sc.TillingFactor, static_cast<uint32_t>(entity));
     }
     Renderer2D::DrawQuads();
 
     auto groupCircles = m_Registry.group<const CircleComponent>(entt::get<const TransformComponent>);
     for (auto entity : groupCircles) {
-        const auto& [tc, cc] = groupCircles.get<TransformComponent, CircleComponent>(entity);
+        const auto& [tc, cc] = groupCircles.get<const TransformComponent, const CircleComponent>(entity);
         Renderer2D::SubmitCircle(tc.Position, tc.Size.x, cc.Color, cc.Thickness, cc.Fade, static_cast<uint32_t>(entity));
     }
     Renderer2D::DrawCircles();
+
+    Renderer3D::SetViewProjectionMatrix(camera.GetProjectionViewMatrix());
+    auto groupMesh = m_Registry.group<const MeshComponent>(entt::get<const TransformComponent>);
+    for (auto entity : groupMesh) {
+        const auto& [tc, mc] = groupMesh.get<const TransformComponent, const MeshComponent>(entity);
+        Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform, static_cast<uint32_t>(entity));
+    }
+    Renderer3D::Draw();
 }
 void Scene::OnUpdateRuntime(Timestep ts) {
     for (auto [entity, nsc] : m_Registry.view<NativeScriptComponent>().each()) {
@@ -116,7 +126,8 @@ void Scene::OnUpdateRuntime(Timestep ts) {
     if (m_Camera != entt::null) {
         auto camera = m_Registry.get<CameraComponent>(m_Camera).Camera;
         const auto& transform = m_Registry.get<TransformComponent>(m_Camera).Transform;
-        Renderer2D::SetViewProjectionMatrix(camera->GetProjectionMatrix() * glm::inverse(transform));
+        glm::mat4 viewProjMat = camera->GetProjectionMatrix() * glm::inverse(transform);
+        Renderer2D::SetViewProjectionMatrix(viewProjMat);
 
         auto groupQuads = m_Registry.group<const SpriteComponent>(entt::get<const TransformComponent>);
         for (auto entity : groupQuads) {
@@ -131,6 +142,14 @@ void Scene::OnUpdateRuntime(Timestep ts) {
             Renderer2D::SubmitCircle(tc.Position, tc.Size.x, cc.Color, cc.Thickness, cc.Fade, static_cast<uint32_t>(entity));
         }
         Renderer2D::DrawCircles();
+
+        Renderer3D::SetViewProjectionMatrix(viewProjMat);
+        auto groupMesh = m_Registry.group<const MeshComponent>(entt::get<const TransformComponent>);
+        for (auto entity : groupMesh) {
+            const auto& [tc, mc] = groupMesh.get<const TransformComponent, const MeshComponent>(entity);
+            Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform);
+        }
+        Renderer3D::Draw();
     }
 }
 void Scene::OnViewportResize(uint32_t width, uint32_t height) {
@@ -191,6 +210,8 @@ template<>
 SB_CORE void Scene::OnComponentAdd<TransformComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] TransformComponent& component) {}
 template<>
 SB_CORE void Scene::OnComponentAdd<CircleComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CircleComponent& component) {}
+template<>
+SB_CORE void Scene::OnComponentAdd<MeshComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] MeshComponent& component) {}
 template<>
 SB_CORE void Scene::OnComponentAdd<SpriteComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SpriteComponent& component) {}
 template<>

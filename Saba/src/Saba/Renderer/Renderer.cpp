@@ -4,6 +4,7 @@
 #include "Saba/Renderer/RendererAPI.h"
 #include "Saba/Renderer/RenderCommand.h"
 #include "Saba/Renderer/Renderer2D.h"
+#include "Saba/Renderer/Renderer3D.h"
 
 namespace Saba {
 
@@ -19,9 +20,11 @@ void Renderer::Init() {
     RenderCommand::Init();
     s_Data.commandQueue->Execute();
     Renderer2D::Init();
+    Renderer3D::Init();
     s_Data.commandQueue->Execute();
 }
 void Renderer::Shutdown() {
+    Renderer3D::Shutdown();
     Renderer2D::Shutdown();
     s_Data.shaderLibrary.reset();
     RenderCommand::Shutdown();

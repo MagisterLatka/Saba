@@ -11,3 +11,6 @@
 [submodule "Saba/vendor/yaml-cpp"]
 	path = Saba/vendor/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "Saba/vendor/assimp"]
+	path = Saba/vendor/assimp
+	url = https://github.com/assimp/assimp.git

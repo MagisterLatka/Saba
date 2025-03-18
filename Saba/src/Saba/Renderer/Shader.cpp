@@ -100,7 +100,7 @@ Ref<Shader> ShaderLibrary::Load(const std::string& name, std::string vertexSourc
 }
 
 Ref<Shader> ShaderLibrary::Get(const std::string& name) const {
-    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} already exists", name);
+    SB_CORE_ASSERT(m_Shaders.contains(name), "Shader {0} does not exist", name);
     return m_Shaders.at(name);
 }
 

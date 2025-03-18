@@ -5,69 +5,16 @@
 #include <Saba/ImGui/ImGui.h>
 #include <Saba/ImGui/ImGuizmo.h>
 
-class CameraController : public Saba::ScriptableEntity {
-public:
-    CameraController() = default;
-    ~CameraController() = default;
-
-    void OnCreate() override {
-        m_Camera = GetComponent<Saba::CameraComponent>().Camera.As<Saba::OrthographicCamera>();
-    }
-    void OnDestroy() override {
-        m_Camera.Reset();
-    }
-    void OnEvent(Saba::Event& e) override {
-        Saba::Dispatcher dispatcher(e);
-        dispatcher.Dispatch<Saba::MouseScrolledEvent>(SB_BIND_EVENT_FN(CameraController::OnMouseScroll));
-    }
-    bool OnMouseScroll(Saba::MouseScrolledEvent& e) {
-        m_Camera->SetSize(m_Camera->GetSize() * (1 - e.GetYOffset() * 0.1f));
-        return false;
-    }
-    void OnUpdate(Saba::Timestep ts) override {
-        const float cameraSize = m_Camera->GetSize();
-        float deltaSpeed = p_Speed * static_cast<float>(ts);
-        if (cameraSize > 1.0f)
-            deltaSpeed *= glm::pow(1.01f, cameraSize) - 0.01f;
-
-        auto delta = glm::vec3(0.0f);
-        if (Saba::Input::IsKeyPressed(SB_KEY_UP))
-            delta.y = deltaSpeed;
-        else if (Saba::Input::IsKeyPressed(SB_KEY_DOWN))
-            delta.y = -deltaSpeed;
-
-        if (Saba::Input::IsKeyPressed(SB_KEY_LEFT))
-            delta.x = -deltaSpeed;
-        else if (Saba::Input::IsKeyPressed(SB_KEY_RIGHT))
-            delta.x = deltaSpeed;
-
-        GetTransformComponent().Position += delta;
-    }
-    void OnViewportResize(uint32_t width, uint32_t height) override {
-        m_Camera->SetViewportSize(width, height);
-    }
-public:
-    float p_Speed = 5.0f;
-private:
-    Ref<Saba::OrthographicCamera> m_Camera;
-};
-
-ExampleLayer::ExampleLayer() {
-
-}
-ExampleLayer::~ExampleLayer() {
-
-}
-
 void ExampleLayer::OnAttach() {
     auto window = Saba::Application::Get().GetWindow();
     m_RenderPass = Saba::RenderPass::Create();
     m_RenderPass->SetRenderTarget(0u, Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
     m_RenderPass->SetRenderTarget(1u, Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::R32_UINT));
     m_RenderPass->SetDepthStencilTarget(Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::Depth32F));
-    Saba::RenderCommand::SetBlendOptions(0u, true, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert,
-        Saba::RendererAPI::BlendOperation::Add, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert);
-    Saba::RenderCommand::SetBlendOptions(1u, false);
+    Saba::RenderCommand::SetDepthTestOptions(true);
+    // Saba::RenderCommand::SetBlendOptions(0u, true, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert,
+    //     Saba::RendererAPI::BlendOperation::Add, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert);
+    // Saba::RenderCommand::SetBlendOptions(1u, false);
 
     Saba::Texture2DProps textureProps;
     textureProps.Filepath = "assets/textures/PlayButton.png";
@@ -79,6 +26,48 @@ void ExampleLayer::OnAttach() {
     m_ActiveScene = Ref<Saba::Scene>::Create();
     m_ActiveScene->OnViewportResize(window->GetWidth(), window->GetHeight());
     m_EditorScene = m_ActiveScene;
+
+    std::vector<Saba::MeshVertex> vertices = {
+        { { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+
+        { { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+
+        { { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+
+        { {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+
+        { { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+
+        { { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} }
+    };
+    std::vector<uint32_t> indices = {
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6, 6, 7, 4,
+        8, 9, 10, 10, 11, 8,
+        12, 13, 14, 14, 15, 12,
+        16, 17, 18, 18, 19, 16,
+        20, 21, 22, 22, 23, 20
+    };
+    Ref<Saba::Mesh> mesh = Ref<Saba::Mesh>::Create(std::move(vertices), std::move(indices));
+    m_ActiveScene->CreateEntity("Mesh entity").AddComponent<Saba::MeshComponent>(mesh);
 
     m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_ActiveScene);
     m_ContentBrowserPanel = CreateScope<Saba::ContentBrowserPanel>();

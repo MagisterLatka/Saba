@@ -122,12 +122,6 @@ void OpenGLShader::Compile() {
         glAttachShader(instance->m_ID, fragmentID);
 
         glLinkProgram(instance->m_ID);
-        glValidateProgram(instance->m_ID);
-
-        glDetachShader(instance->m_ID, vertexID);
-        glDetachShader(instance->m_ID, fragmentID);
-        glDeleteShader(vertexID);
-        glDeleteShader(fragmentID);
 
         int isLinked = 0;
         glGetProgramiv(instance->m_ID, GL_LINK_STATUS, &isLinked);
@@ -136,9 +130,16 @@ void OpenGLShader::Compile() {
             glGetProgramiv(instance->m_ID, GL_INFO_LOG_LENGTH, &maxLength);
             std::vector<GLchar> infoLog(static_cast<size_t>(maxLength));
             glGetProgramInfoLog(instance->m_ID, maxLength, &maxLength, infoLog.data());
-            SB_CORE_ERROR("Shader linking failed ({0}):\n{1}", instance->m_VPath.string(), infoLog.data());
+            SB_CORE_THROW_INFO("Shader linking failed (" + instance->m_VPath.string() + "):\n" + infoLog.data());
             glDeleteProgram(instance->m_ID);
         }
+
+        glValidateProgram(instance->m_ID);
+
+        glDetachShader(instance->m_ID, vertexID);
+        glDetachShader(instance->m_ID, fragmentID);
+        glDeleteShader(vertexID);
+        glDeleteShader(fragmentID);
 
         if (instance->m_Loaded) {
             for (auto& callback : instance->m_ShaderReloadedCallbacks)

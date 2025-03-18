@@ -43,6 +43,9 @@ void RenderCommand::Draw(RendererAPI::Topology topology, uint32_t verticesCount)
 void RenderCommand::DrawIndexed(RendererAPI::Topology topology, uint32_t indicesCount) {
     Renderer::Submit([topology, indicesCount]() { s_API->DrawIndexed(topology, indicesCount); });
 }
+void RenderCommand::DrawIndexedInstanced(RendererAPI::Topology topology, uint32_t indicesCount, uint32_t instancesCount) {
+    Renderer::Submit([topology, indicesCount, instancesCount]() { s_API->DrawIndexedInstanced(topology, indicesCount, instancesCount); });
+}
 
 void RenderCommand::SetDepthTestOptions(bool enable, bool writeMask, RendererAPI::ComparisonFunc compFunc) {
     Renderer::Submit([enable, writeMask, compFunc]() { s_API->SetDepthTestOptions(enable, writeMask, compFunc); });

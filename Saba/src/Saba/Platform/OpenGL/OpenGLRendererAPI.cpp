@@ -106,15 +106,18 @@ void OpenGLRendererAPI::Init() {
 void OpenGLRendererAPI::Shutdown() {}
 
 void OpenGLRendererAPI::Draw(Topology topology, uint32_t verticesCount) {
-    glDrawArrays(static_cast<GLenum>(GetTopology(topology)), 0, static_cast<int>(verticesCount));
+    glDrawArrays(GetTopology(topology), 0, static_cast<int>(verticesCount));
 }
 void OpenGLRendererAPI::DrawIndexed(Topology topology, uint32_t indicesCount) {
-    glDrawElements(static_cast<GLenum>(GetTopology(topology)), static_cast<int>(indicesCount), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GetTopology(topology), static_cast<int>(indicesCount), GL_UNSIGNED_INT, nullptr);
+}
+void OpenGLRendererAPI::DrawIndexedInstanced(Topology topology, uint32_t indicesCount, uint32_t instancesCount) {
+    glDrawElementsInstanced(GetTopology(topology), static_cast<int>(indicesCount), GL_UNSIGNED_INT, nullptr, static_cast<int>(instancesCount));
 }
 
-int OpenGLRendererAPI::GetTopology(Topology topology) {
+uint32_t OpenGLRendererAPI::GetTopology(Topology topology) {
     switch (topology) {
-        case RendererAPI::Topology::None:           SB_CORE_THROW_INFO("None topology cannot be used"); return -1;
+        case RendererAPI::Topology::None:           SB_CORE_THROW_INFO("None topology cannot be used"); return 0u;
         case RendererAPI::Topology::Points:         return GL_POINTS;
         case RendererAPI::Topology::Lines:          return GL_LINES;
         case RendererAPI::Topology::LineStrip:      return GL_LINE_STRIP;
@@ -122,7 +125,7 @@ int OpenGLRendererAPI::GetTopology(Topology topology) {
         case RendererAPI::Topology::TriangleStrip:  return GL_TRIANGLE_STRIP;
     }
     SB_CORE_THROW_INFO("Unknown topology");
-    return -1;
+    return 0u;
 }
 
 void OpenGLRendererAPI::InitShaders() {
@@ -148,8 +151,7 @@ void OpenGLRendererAPI::InitShaders() {
             flat uint id;
         } vs_out;
 
-        void main()
-        {
+        void main() {
             gl_Position = u_ViewProjMat * i_Pos;
             vs_out.color = i_Color;
             vs_out.uv = i_UV;
@@ -218,7 +220,7 @@ void OpenGLRendererAPI::InitShaders() {
 
     Renderer::GetShaderLibrary().Load("quadShader", vertexQuad, fragmentQuad);
 
-    std::string vertexCircle = R"(
+    const std::string vertexCircle = R"(
         #version 460 core
 
         layout(location = 0) in vec4 i_Pos;
@@ -256,7 +258,7 @@ void OpenGLRendererAPI::InitShaders() {
         }
     )";
 
-    std::string fragmentCircle = R"(
+    const std::string fragmentCircle = R"(
         #version 460 core
 
         layout(location = 0) out vec4 o_Color;
@@ -280,6 +282,57 @@ void OpenGLRendererAPI::InitShaders() {
         }
     )";
     Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
+
+    const std::string vertexMesh = R"(
+        #version 460 core
+
+        layout(location = 0) in vec3 i_Pos;
+        layout(location = 1) in vec3 i_Normal;
+        layout(location = 2) in vec2 i_UV;
+        layout(location = 3) in vec4 i_Color;
+        layout(location = 4) in mat4 i_ModelMat;
+        layout(location = 8) in uint i_ID;
+
+        layout(std140, binding = 0) uniform RendererData {
+            mat4 u_ViewProjMat;
+        };
+
+        out Data {
+            vec4 color;
+            vec3 normal;
+            vec2 uv;
+            flat uint id;
+        } vs_out;
+
+        void main() {
+            gl_Position = u_ViewProjMat * i_ModelMat * vec4(i_Pos, 1.0f);
+            vs_out.color = i_Color;
+            vs_out.normal = i_Normal;
+            vs_out.uv = i_UV;
+            vs_out.id = i_ID;
+        }
+    )";
+
+    const std::string fragmentMesh = R"(
+        #version 460 core
+
+        layout(location = 0) out vec4 o_Color;
+        layout(location = 1) out uint o_ID;
+
+        in Data {
+            vec4 color;
+            vec3 normal;
+            vec2 uv;
+            flat uint id;
+        } fs_in;
+
+        void main() {
+            o_Color = fs_in.color;
+            o_ID = fs_in.id;
+        }
+    )";
+
+    Renderer::GetShaderLibrary().Load("meshShader", vertexMesh, fragmentMesh);
 }
 
 void OpenGLRendererAPI::SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) {

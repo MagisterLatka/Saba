@@ -14,6 +14,7 @@ public:
 
     SB_CORE void Draw(Topology topology, uint32_t verticesCount) override;
     SB_CORE void DrawIndexed(Topology topology, uint32_t indicesCount) override;
+    SB_CORE void DrawIndexedInstanced(Topology topology, uint32_t indicesCount, uint32_t instancesCount) override;
 
     SB_CORE void SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) override;
     SB_CORE void SetStencilTestOptions(bool enable, uint8_t writeMask, uint8_t readMask, ComparisonFunc frontFaceFunc,

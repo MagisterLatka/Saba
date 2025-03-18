@@ -7,8 +7,8 @@ class ExampleLayer : public Saba::Layer
 {
     friend Saba::Application* Saba::CreateApplication();
 public:
-    ExampleLayer();
-    ~ExampleLayer();
+    ExampleLayer() = default;
+    ~ExampleLayer() = default;
 
     void OnAttach() override;
     void OnDetach() override;
