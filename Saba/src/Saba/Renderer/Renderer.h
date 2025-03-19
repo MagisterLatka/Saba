@@ -2,6 +2,7 @@
 
 #include "Saba/Renderer/RenderCommandQueue.h"
 #include "Saba/Renderer/Shader.h"
+#include "Saba/Renderer/Mesh.h"
 
 namespace Saba {
 
@@ -22,6 +23,7 @@ public:
     SB_CORE static void Render();
 
     SB_CORE static ShaderLibrary& GetShaderLibrary() noexcept;
+    SB_CORE static MeshLibrary& GetMeshLibrary() noexcept;
 private:
     SB_CORE static void Init();
     SB_CORE static void Shutdown();

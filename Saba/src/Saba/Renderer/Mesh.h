@@ -29,4 +29,16 @@ private:
     UUID m_ID;
 };
 
+class MeshLibrary {
+public:
+    SB_CORE MeshLibrary() = default;
+    SB_CORE ~MeshLibrary() = default;
+
+    SB_CORE Ref<Mesh> Add(const std::string& name, Ref<Mesh> mesh);
+    SB_CORE Ref<Mesh> Load(const std::string& name, std::vector<MeshVertex> vertices, std::vector<uint32_t> indices);
+    SB_CORE Ref<Mesh> Get(const std::string& name) const;
+private:
+    std::unordered_map<std::string, Ref<Mesh>> m_Meshes;
+};
+
 }

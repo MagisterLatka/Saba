@@ -121,6 +121,21 @@ struct MeshComponent {
     SB_CORE MeshComponent& operator=(MeshComponent&&) noexcept = default;
 };
 
+struct LightComponent {
+    glm::vec3 LightPos = glm::vec3(0.0f);
+    glm::vec4 LightColor = glm::vec4(1.0f);
+    float Radius = 1.0f;
+
+    SB_CORE LightComponent() noexcept = default;
+    SB_CORE LightComponent(const LightComponent&) noexcept = default;
+    SB_CORE LightComponent(LightComponent&&) noexcept = default;
+    SB_CORE LightComponent(glm::vec3 lightPos, glm::vec4 lightColor, float radius) noexcept
+        : LightPos(lightPos), LightColor(lightColor), Radius(radius) {}
+
+    SB_CORE LightComponent& operator=(const LightComponent&) noexcept = default;
+    SB_CORE LightComponent& operator=(LightComponent&&) noexcept = default;
+};
+
 class ScriptableEntity;
 struct NativeScriptComponent {
     ScriptableEntity* Instance = nullptr;
@@ -149,6 +164,6 @@ struct NativeScriptComponent {
 template<typename T>
 concept Component = std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent>
     || std::is_same_v<T, CircleComponent> || std::is_same_v<T, SpriteComponent> || std::is_same_v<T, MeshComponent>
-    || std::is_same_v<T, CameraComponent> || std::is_same_v<T, NativeScriptComponent>;
+    || std::is_same_v<T, LightComponent> || std::is_same_v<T, CameraComponent> || std::is_same_v<T, NativeScriptComponent>;
 
 }

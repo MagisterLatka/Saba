@@ -128,21 +128,29 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
         ImGui::OpenPopup("add");
 
     if (ImGui::BeginPopup("add")) {
-        if (!entity.HasComponent<CameraComponent>() && !entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CircleComponent>()) {
+        bool hasOneOfExcluding = entity.HasComponent<CameraComponent>() || entity.HasComponent<SpriteComponent>()
+            || entity.HasComponent<CircleComponent>() || entity.HasComponent<MeshComponent>() || entity.HasComponent<LightComponent>();
+        if (!hasOneOfExcluding) {
             if (ImGui::MenuItem("Camera")) {
                 entity.AddComponent<CameraComponent>();
                 ImGui::CloseCurrentPopup();
             }
         }
-        if (!entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CameraComponent>() && !entity.HasComponent<CircleComponent>()) {
+        if (!hasOneOfExcluding) {
             if (ImGui::MenuItem("Sprite")) {
                 entity.AddComponent<SpriteComponent>();
                 ImGui::CloseCurrentPopup();
             }
         }
-        if (!entity.HasComponent<CircleComponent>() && !entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CameraComponent>()) {
+        if (!hasOneOfExcluding) {
             if (ImGui::MenuItem("Circle")) {
                 entity.AddComponent<CircleComponent>();
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        if (!hasOneOfExcluding) {
+            if (ImGui::MenuItem("Light")) {
+                entity.AddComponent<LightComponent>();
                 ImGui::CloseCurrentPopup();
             }
         }
@@ -151,15 +159,17 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
     ImGui::PopItemWidth();
 
     constexpr float columnWidth = 85.0f;
-    DrawComponent<TransformComponent>("Transform component", entity, [](TransformComponent& component) {
-        UI::DragFloat3("Pos", component.Position, 0.0f, 0.0f, 0.0f, 0.1f, columnWidth);
+    if (!entity.HasComponent<LightComponent>()) {
+        DrawComponent<TransformComponent>("Transform component", entity, [](TransformComponent& component) {
+            UI::DragFloat3("Pos", component.Position, 0.0f, 0.0f, 0.0f, 0.1f, columnWidth);
 
-        auto orientationDegrees = glm::degrees(component.Orientation);
-        if (UI::DragFloat3("Orientation", orientationDegrees, 0.0f, 0.0f, 0.0f, 1.0f, columnWidth))
-            component.Orientation = glm::radians(orientationDegrees);
+            auto orientationDegrees = glm::degrees(component.Orientation);
+            if (UI::DragFloat3("Orientation", orientationDegrees, 0.0f, 0.0f, 0.0f, 1.0f, columnWidth))
+                component.Orientation = glm::radians(orientationDegrees);
 
-        UI::DragFloat3("Scale", component.Size, 1.0f, 0.01f, 10.0f, 0.01f, columnWidth);
-    }, false);
+            UI::DragFloat3("Scale", component.Size, 1.0f, 0.01f, 10.0f, 0.01f, columnWidth);
+        }, false);
+    }
     DrawComponent<CircleComponent>("Circle component", entity, [](CircleComponent& component) {
         UI::ColorEdit4("Color", component.Color, columnWidth);
         UI::DragFloat("Thickness", component.Thickness, 1.0f, 0.01f, 1.0f, 0.01f, columnWidth);
@@ -200,6 +210,15 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
             if (changed)
                 camera->Recalc();
         }
+    });
+    DrawComponent<LightComponent>("Light component", entity, [](LightComponent& component) {
+        UI::DragFloat3("Pos", component.LightPos, 0.0f, -10.0f, 10.0f, 0.1f, columnWidth);
+        glm::vec3 color = component.LightColor;
+        UI::ColorEdit3("Color", color, columnWidth);
+        float intensity = component.LightColor.a;
+        UI::DragFloat("Intensity", intensity, 1.0f, 0.1f, 10.0f, 0.1f, columnWidth);
+        component.LightColor = glm::vec4(color, intensity);
+        UI::DragFloat("Radius", component.Radius, 10.0f, 1.0f, 100.0f, 0.1f, columnWidth);
     });
 }
 

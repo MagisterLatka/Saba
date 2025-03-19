@@ -11,12 +11,14 @@ namespace Saba {
 struct RendererData {
     Scope<RenderCommandQueue> commandQueue;
     Scope<ShaderLibrary> shaderLibrary;
+    Scope<MeshLibrary> meshLibrary;
 };
 static RendererData s_Data;
 
 void Renderer::Init() {
     s_Data.commandQueue = CreateScope<RenderCommandQueue>();
     s_Data.shaderLibrary = CreateScope<ShaderLibrary>();
+    s_Data.meshLibrary = CreateScope<MeshLibrary>();
     RenderCommand::Init();
     s_Data.commandQueue->Execute();
     Renderer2D::Init();
@@ -38,6 +40,9 @@ void Renderer::Render() {
 
 ShaderLibrary& Renderer::GetShaderLibrary() noexcept {
     return *s_Data.shaderLibrary;
+}
+MeshLibrary& Renderer::GetMeshLibrary() noexcept {
+    return *s_Data.meshLibrary;
 }
 RenderCommandQueue& Renderer::GetRenderCommandQueue() noexcept {
     return *s_Data.commandQueue;

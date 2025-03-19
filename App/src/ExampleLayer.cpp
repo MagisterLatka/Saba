@@ -12,6 +12,7 @@ void ExampleLayer::OnAttach() {
     m_RenderPass->SetRenderTarget(1u, Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::R32_UINT));
     m_RenderPass->SetDepthStencilTarget(Saba::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Saba::RenderTargetFormat::Depth32F));
     Saba::RenderCommand::SetDepthTestOptions(true);
+    Saba::RenderCommand::SetRasterizerOptions(Saba::RendererAPI::TriangleFillMode::Full, Saba::RendererAPI::TriangleCullMode::DrawAll);
     // Saba::RenderCommand::SetBlendOptions(0u, true, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert,
     //     Saba::RendererAPI::BlendOperation::Add, Saba::RendererAPI::BlendOption::SourceAlpha, Saba::RendererAPI::BlendOption::SourceAlphaInvert);
     // Saba::RenderCommand::SetBlendOptions(1u, false);
@@ -28,25 +29,25 @@ void ExampleLayer::OnAttach() {
     m_EditorScene = m_ActiveScene;
 
     std::vector<Saba::MeshVertex> vertices = {
-        { { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
 
-        { { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
 
-        { { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
 
-        { {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+        { {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
 
         { { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
         { {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
@@ -68,6 +69,7 @@ void ExampleLayer::OnAttach() {
     };
     Ref<Saba::Mesh> mesh = Ref<Saba::Mesh>::Create(std::move(vertices), std::move(indices));
     m_ActiveScene->CreateEntity("Mesh entity").AddComponent<Saba::MeshComponent>(mesh);
+    m_ActiveScene->CreateEntity("Light entity").AddComponent<Saba::LightComponent>(glm::vec3(1.0f, 3.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f);
 
     m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_ActiveScene);
     m_ContentBrowserPanel = CreateScope<Saba::ContentBrowserPanel>();
@@ -168,26 +170,33 @@ void ExampleLayer::OnUIRender() {
         const float snapValue = m_GuizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : m_GuizmoType == ImGuizmo::OPERATION::SCALE ? 0.5f : 0.1f;
         const float snapValues[3] = { snapValue, snapValue, snapValue };
 
-        ImGuizmo::SetOrthographic(true);
+        ImGuizmo::SetOrthographic(false);
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
-        const glm::mat4 viewMat = glm::inverse(m_EditorCamera.GetViewMatrix());
+        const glm::mat4 viewMat = m_EditorCamera.GetViewMatrix();
         const glm::mat4& projMat = m_EditorCamera.GetProjectionMatrix();
-        glm::mat4 transform = selected.GetTransform();
+        glm::mat4 transform = selected.HasComponent<Saba::LightComponent>()
+            ? glm::translate(selected.GetComponent<Saba::LightComponent>().LightPos)
+            : selected.GetTransform();
 
         ImGuizmo::Manipulate(glm::value_ptr(viewMat), glm::value_ptr(projMat), static_cast<ImGuizmo::OPERATION>(m_GuizmoType), ImGuizmo::LOCAL,
             glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
 
         if (ImGuizmo::IsUsing()) {
-            auto& tc = selected.GetTransformComponent();
             glm::vec3 pos, size, skew;
             glm::quat orientation;
             glm::vec4 perspective;
             glm::decompose(transform, size, orientation, pos, skew, perspective);
-            tc.Position = pos;
-            tc.Orientation += glm::eulerAngles(orientation) - tc.Orientation;
-            tc.Size = size;
+            if (selected.HasComponent<Saba::LightComponent>()) {
+                selected.GetComponent<Saba::LightComponent>().LightPos = pos;
+            }
+            else {
+                auto& tc = selected.GetTransformComponent();
+                tc.Position = pos;
+                tc.Orientation += glm::eulerAngles(orientation) - tc.Orientation;
+                tc.Size = size;
+            }
         }
     }
 

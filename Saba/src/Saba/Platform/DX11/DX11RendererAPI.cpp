@@ -111,7 +111,7 @@ void DX11RendererAPI::DrawIndexed(Topology topology, uint32_t indicesCount) {
 void DX11RendererAPI::DrawIndexedInstanced(Topology topology, uint32_t indicesCount, uint32_t instancesCount) {
     auto context = DX11Context::GetContextFromApplication()->GetContext();
     SetTopology(context, topology);
-    context->DrawIndexed(indicesCount, instancesCount, 0u, 0u, 0u);
+    context->DrawIndexedInstanced(indicesCount, instancesCount, 0u, 0u, 0u);
 }
 
 void DX11RendererAPI::SetTopology(ComPtr<ID3D11DeviceContext> context, Topology topology) {
@@ -266,11 +266,10 @@ void DX11RendererAPI::InitShaders() {
     )";
     Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
 
-    const std::string vertexMesh = R"(
+    const std::string vertexMeshClear = R"(
         struct VSOut {
             float4 pos : SV_Position;
             float4 color : Color;
-            float3 normal : Normal;
             float2 uv : UV;
             uint id : ID;
         };
@@ -278,22 +277,20 @@ void DX11RendererAPI::InitShaders() {
             uniform matrix<float, 4, 4> u_ViewProjMat;
         }
 
-        VSOut main(float3 position : Position, float3 normal : Normal, float2 uv : UV, float4 color : Color, mat4 modelMat : Transform, uint id : EntityID) {
+        VSOut main(float3 position : Position, float3 normal : Normal, float2 uv : UV, float4 color : Color, matrix<float, 4, 4> modelMat : Transform, uint id : EntityID) {
             VSOut output;
-            output.pos = mul(mul(float4(pos, 1.0f), modelMat), u_ViewProjMat);
+            output.pos = mul(mul(float4(position, 1.0f), modelMat), u_ViewProjMat);
             output.color = color;
-            output.normal = normal;
             output.uv = uv;
             output.id = id;
             return output;
         }
     )";
 
-    const std::string fragmentMesh = R"(
+    const std::string fragmentMeshClear = R"(
         struct FSIn {
             float4 pos : SV_Position;
             float4 color : Color;
-            float3 normal : Normal;
             float2 uv : UV;
             uint id : ID;
         };
@@ -309,6 +306,95 @@ void DX11RendererAPI::InitShaders() {
             return output;
         }
     )";
+
+    Renderer::GetShaderLibrary().Load("meshClearShader", vertexMeshClear, fragmentMeshClear);
+
+    const std::string vertexMesh = R"(
+        struct VSOut {
+            float4 pos : SV_Position;
+            float4 localPos : Pos;
+            float4 color : Color;
+            float3 normal : Normal;
+            float2 uv : UV;
+            uint id : ID;
+        };
+        cbuffer ConstBuf {
+            uniform matrix<float, 4, 4> u_ViewProjMat;
+        }
+
+        VSOut main(float3 position : Position, float3 normal : Normal, float2 uv : UV, float4 color : Color, matrix<float, 4, 4> modelMat : Transform, uint id : EntityID) {
+            VSOut output;
+            output.localPos = mul(float4(position, 1.0f), modelMat);
+            output.pos = mul(output.localPos, u_ViewProjMat);
+            output.color = color;
+            output.normal = mul(normal, (float3x3)modelMat);
+            output.uv = uv;
+            output.id = id;
+            return output;
+        }
+    )";
+
+    const std::string fragmentMesh = R"(
+        struct FSIn {
+            float4 pos : SV_Position;
+            float4 localPos : Pos;
+            float4 color : Color;
+            float3 normal : Normal;
+            float2 uv : UV;
+            uint id : ID;
+        };
+        struct FSOut {
+            float4 color : SV_Target0;
+            uint id : SV_Target1;
+        };
+
+        static const int c_MaxLights = 100;
+        struct LightData {
+            float4 lightPos;
+            float4 lightColor;
+            float4 lightConstants;
+        };
+        cbuffer LightsData : register(b1) {
+            LightData u_Lights[100];
+            float4 u_ViewPos_LightsCount;
+        }
+
+        float3 GetLight(const float3 pos, const float3 color, const float3 viewDir, const float3 normal, const int lightIndex) {
+            const float3 lightDir = normalize(u_Lights[lightIndex].lightPos.xyz - pos);
+            const float distance = length(u_Lights[lightIndex].lightPos.xyz - pos);
+            const float attenuation = 1.0f / (u_Lights[lightIndex].lightConstants.x + u_Lights[lightIndex].lightConstants.y * distance +
+                u_Lights[lightIndex].lightConstants.z * distance * distance);
+
+            const float diff = max(dot(normal, lightDir), 0.0f);
+            const float3 diffuse = u_Lights[lightIndex].lightColor.rgb * diff * color;
+
+            const float shininess = 8.0f;
+            const float3 halfwayDir = normalize(lightDir + viewDir);
+            const float spec = pow(max(dot(normal, halfwayDir), 0.0f), shininess);
+            const float3 specular = u_Lights[lightIndex].lightColor.rgb * spec * color;
+
+            return (diffuse + specular) * max(sign(dot(normal, lightDir)), 0.0f);
+        }
+        FSOut main(FSIn input) {
+            FSOut output;
+
+            const float ambientStrength = 0.1f;
+            const float3 ambient = ambientStrength * input.color.rgb;
+
+            const float3 viewDir = normalize(u_ViewPos_LightsCount.xyz - input.localPos.xyz);
+            const float3 normal = normalize(input.normal);
+            float3 color = ambient;
+            for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
+                color += GetLight(input.localPos.xyz, input.color.rgb, viewDir, normal, i);
+            }
+
+            output.color = float4(color, input.color.a);
+            output.id = input.id;
+            return output;
+        }
+    )";
+
+    Renderer::GetShaderLibrary().Load("meshShader", vertexMesh, fragmentMesh);
 }
 
 void DX11RendererAPI::SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) {

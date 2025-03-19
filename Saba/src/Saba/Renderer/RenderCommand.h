@@ -26,6 +26,10 @@ public:
         RendererAPI::BlendOption sourceAlphaBlend = RendererAPI::BlendOption::One, RendererAPI::BlendOption destinationAlphaBlend = RendererAPI::BlendOption::Zero,
         RendererAPI::BlendOperation alphaOperation = RendererAPI::BlendOperation::Add,
         uint8_t writeMask = 1 | 2 | 4 | 8, glm::vec4 blendFactor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    SB_CORE static void SetRasterizerOptions(RendererAPI::TriangleFillMode fillMode = RendererAPI::TriangleFillMode::Full,
+        RendererAPI::TriangleCullMode cullMode = RendererAPI::TriangleCullMode::DrawFrontFace,
+        bool isFrontFaceCounterClockwise = false);
 private:
     SB_CORE static void Init();
     SB_CORE static void Shutdown();

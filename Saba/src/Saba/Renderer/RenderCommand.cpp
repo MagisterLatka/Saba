@@ -75,5 +75,10 @@ void RenderCommand::SetBlendOptions(uint32_t i, bool enable, RendererAPI::BlendO
         s_API->SetBlendOptions(i, enable, sourceBlend, destinationBlend, operation, sourceAlphaBlend, destinationAlphaBlend, alphaOperation, writeMask, blendFactor);
     });
 }
+void RenderCommand::SetRasterizerOptions(RendererAPI::TriangleFillMode fillMode, RendererAPI::TriangleCullMode cullMode, bool isFrontFaceCounterClockwise) {
+    Renderer::Submit([fillMode, cullMode, isFrontFaceCounterClockwise]() {
+        s_API->SetRasterizerOptions(fillMode, cullMode, isFrontFaceCounterClockwise);
+    });
+}
 
 }

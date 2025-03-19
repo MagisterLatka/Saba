@@ -283,7 +283,7 @@ void OpenGLRendererAPI::InitShaders() {
     )";
     Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
 
-    const std::string vertexMesh = R"(
+    const std::string vertexMeshClear = R"(
         #version 460 core
 
         layout(location = 0) in vec3 i_Pos;
@@ -299,7 +299,6 @@ void OpenGLRendererAPI::InitShaders() {
 
         out Data {
             vec4 color;
-            vec3 normal;
             vec2 uv;
             flat uint id;
         } vs_out;
@@ -307,7 +306,58 @@ void OpenGLRendererAPI::InitShaders() {
         void main() {
             gl_Position = u_ViewProjMat * i_ModelMat * vec4(i_Pos, 1.0f);
             vs_out.color = i_Color;
-            vs_out.normal = i_Normal;
+            vs_out.uv = i_UV;
+            vs_out.id = i_ID;
+        }
+    )";
+
+    const std::string fragmentMeshClear = R"(
+        #version 460 core
+
+        layout(location = 0) out vec4 o_Color;
+        layout(location = 1) out uint o_ID;
+
+        in Data {
+            vec4 color;
+            vec2 uv;
+            flat uint id;
+        } fs_in;
+
+        void main() {
+            o_Color = fs_in.color;
+            o_ID = fs_in.id;
+        }
+    )";
+
+    Renderer::GetShaderLibrary().Load("meshClearShader", vertexMeshClear, fragmentMeshClear);
+
+    const std::string vertexMesh = R"(
+        #version 460 core
+
+        layout(location = 0) in vec3 i_Pos;
+        layout(location = 1) in vec3 i_Normal;
+        layout(location = 2) in vec2 i_UV;
+        layout(location = 3) in vec4 i_Color;
+        layout(location = 4) in mat4 i_ModelMat;
+        layout(location = 8) in uint i_ID;
+
+        layout(std140, binding = 0) uniform RendererData {
+            mat4 u_ViewProjMat;
+        };
+
+        out Data {
+            vec4 pos;
+            vec4 color;
+            vec3 normal;
+            vec2 uv;
+            flat uint id;
+        } vs_out;
+
+        void main() {
+            vs_out.pos = i_ModelMat * vec4(i_Pos, 1.0f);
+            gl_Position = u_ViewProjMat * vs_out.pos;
+            vs_out.color = i_Color;
+            vs_out.normal = mat3(transpose(inverse(i_ModelMat))) * i_Normal;
             vs_out.uv = i_UV;
             vs_out.id = i_ID;
         }
@@ -320,14 +370,52 @@ void OpenGLRendererAPI::InitShaders() {
         layout(location = 1) out uint o_ID;
 
         in Data {
+            vec4 pos;
             vec4 color;
             vec3 normal;
             vec2 uv;
             flat uint id;
         } fs_in;
 
+        const int c_MaxLights = 100;
+        struct LightData {
+            vec4 lightPos;
+            vec4 lightColor;
+            vec4 lightConstants;
+        };
+        layout(std140, binding = 1) uniform LightsData {
+            LightData u_Lights[c_MaxLights];
+            vec4 u_ViewPos_LightsCount;
+        };
+
+        vec3 GetLight(const vec3 viewDir, const vec3 normal, const int lightIndex) {
+            const vec3 lightDir = normalize(u_Lights[lightIndex].lightPos.xyz - fs_in.pos.xyz);
+            const float distance = length(u_Lights[lightIndex].lightPos.xyz - fs_in.pos.xyz);
+            const float attenuation = 1.0f / (u_Lights[lightIndex].lightConstants.x + u_Lights[lightIndex].lightConstants.y * distance
+                + u_Lights[lightIndex].lightConstants.z * distance * distance);
+
+            const float diff = max(dot(normal, lightDir), 0.0f);
+            const vec3 diffuse = u_Lights[lightIndex].lightColor.rgb * diff * fs_in.color.rgb * attenuation;
+
+            const float shininess = 8.0f;
+            const vec3 halfwayDir = normalize(lightDir + viewDir);
+            const float spec = pow(max(dot(normal, halfwayDir), 0.0f), shininess);
+            const vec3 specular = u_Lights[lightIndex].lightColor.rgb * spec * fs_in.color.rgb * attenuation;
+
+            return (diffuse + specular) * max(sign(dot(normal, lightDir)), 0.0f);
+        }
         void main() {
-            o_Color = fs_in.color;
+            const float ambientStrength = 0.1f;
+            const vec3 ambient = ambientStrength * fs_in.color.rgb;
+
+            const vec3 viewDir = normalize(u_ViewPos_LightsCount.xyz - fs_in.pos.xyz);
+            const vec3 normal = normalize(fs_in.normal);
+            vec3 color = ambient;
+            for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
+                color += GetLight(viewDir, normal, i);
+            }
+
+            o_Color = vec4(color, fs_in.color.a);
             o_ID = fs_in.id;
         }
     )";

@@ -4,6 +4,7 @@
 #include "Saba/Scene/ScriptableEntity.h"
 #include "Saba/Renderer/Renderer2D.h"
 #include "Saba/Renderer/Renderer3D.h"
+#include "Saba/Renderer/Renderer.h"
 
 namespace Saba {
 
@@ -24,7 +25,7 @@ Entity Scene::CreateEntity(std::string name) {
 }
 Entity Scene::CreateEntityWithID(UUID id, std::string name) {
     auto entity = Entity(m_Registry.create(), this);
-    
+
     entity.AddComponent<IDComponent>(id);
     entity.AddComponent<TransformComponent>();
     auto& tag = entity.AddComponent<TagComponent>(std::move(name)).Tag;
@@ -100,13 +101,29 @@ void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const EditorCamera& cam
     }
     Renderer2D::DrawCircles();
 
+    Renderer3D::SetShader(Renderer::GetShaderLibrary().Get("meshShader"));
     Renderer3D::SetViewProjectionMatrix(camera.GetProjectionViewMatrix());
+    Renderer3D::SetCameraPosition(camera.GetPosition());
+    Renderer3D::ResetLights();
+    auto viewLights = m_Registry.view<const LightComponent>();
+    for (auto entity : viewLights) {
+        const auto& lc = viewLights.get<const LightComponent>(entity);
+        Renderer3D::SubmitLight(lc.LightPos, glm::vec3(lc.LightColor) * lc.LightColor.a, lc.Radius);
+    }
     auto groupMesh = m_Registry.group<const MeshComponent>(entt::get<const TransformComponent>);
     for (auto entity : groupMesh) {
         const auto& [tc, mc] = groupMesh.get<const TransformComponent, const MeshComponent>(entity);
         Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform, static_cast<uint32_t>(entity));
     }
     Renderer3D::Draw();
+
+    Renderer3D::SetShader({});
+    auto cubeMeshID = Renderer::GetMeshLibrary().Get("Cube")->GetID();
+    for (auto entity : viewLights) {
+        const auto& lc = viewLights.get<const LightComponent>(entity);
+        Renderer3D::SubmitMeshInstance(cubeMeshID, glm::translate(lc.LightPos), static_cast<uint32_t>(entity));
+    }
+    Renderer3D::DrawMesh(cubeMeshID);
 }
 void Scene::OnUpdateRuntime(Timestep ts) {
     for (auto [entity, nsc] : m_Registry.view<NativeScriptComponent>().each()) {
@@ -212,6 +229,8 @@ template<>
 SB_CORE void Scene::OnComponentAdd<CircleComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CircleComponent& component) {}
 template<>
 SB_CORE void Scene::OnComponentAdd<MeshComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] MeshComponent& component) {}
+template<>
+SB_CORE void Scene::OnComponentAdd<LightComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] LightComponent& component) {}
 template<>
 SB_CORE void Scene::OnComponentAdd<SpriteComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] SpriteComponent& component) {}
 template<>
