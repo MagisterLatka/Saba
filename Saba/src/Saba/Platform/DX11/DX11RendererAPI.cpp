@@ -277,9 +277,11 @@ void DX11RendererAPI::InitShaders() {
             uniform matrix<float, 4, 4> u_ViewProjMat;
         }
 
-        VSOut main(float3 position : Position, float3 normal : Normal, float2 uv : UV, float4 color : Color, matrix<float, 4, 4> modelMat : Transform, uint id : EntityID) {
+        VSOut main(float4 position : Position, float3 normal : Normal, float3 tangent : Tangent, float2 uv : UV, float4 color : Color,
+            matrix<float, 4, 4> modelMat : Transform, uint4 tids : TIDs, uint id : EntityID)
+        {
             VSOut output;
-            output.pos = mul(mul(float4(position, 1.0f), modelMat), u_ViewProjMat);
+            output.pos = mul(mul(position, modelMat), u_ViewProjMat);
             output.color = color;
             output.uv = uv;
             output.id = id;
@@ -315,20 +317,31 @@ void DX11RendererAPI::InitShaders() {
             float4 localPos : Pos;
             float4 color : Color;
             float3 normal : Normal;
+            float3 tangent : Tangent;
             float2 uv : UV;
-            uint id : ID;
+            nointerpolation uint colorTID : ColorTID;
+            nointerpolation uint normalTID : NormalTID;
+            nointerpolation uint id : ID;
         };
         cbuffer ConstBuf {
             uniform matrix<float, 4, 4> u_ViewProjMat;
         }
 
-        VSOut main(float3 position : Position, float3 normal : Normal, float2 uv : UV, float4 color : Color, matrix<float, 4, 4> modelMat : Transform, uint id : EntityID) {
+        VSOut main(float4 position : Position, float3 normal : Normal, float3 tangent : Tangent, float2 uv : UV, float4 color : Color,
+            matrix<float, 4, 4> modelMat : Transform, uint4 tids : TIDs, uint id : EntityID)
+        {
             VSOut output;
-            output.localPos = mul(float4(position, 1.0f), modelMat);
+            output.localPos = mul(position, modelMat);
             output.pos = mul(output.localPos, u_ViewProjMat);
             output.color = color;
-            output.normal = mul(normal, (float3x3)modelMat);
+
+            output.normal = normalize(mul(normal, (float3x3)modelMat));
+            output.tangent = normalize(mul(tangent, (float3x3)modelMat));
+            output.tangent = normalize(output.tangent - dot(output.tangent, output.normal) * output.normal);
+
             output.uv = uv;
+            output.colorTID = tids.x;
+            output.normalTID = tids.y;
             output.id = id;
             return output;
         }
@@ -340,8 +353,11 @@ void DX11RendererAPI::InitShaders() {
             float4 localPos : Pos;
             float4 color : Color;
             float3 normal : Normal;
+            float3 tangent : Tangent;
             float2 uv : UV;
-            uint id : ID;
+            nointerpolation uint colorTID : ColorTID;
+            nointerpolation uint normalTID : NormalTID;
+            nointerpolation uint id : ID;
         };
         struct FSOut {
             float4 color : SV_Target0;
@@ -355,46 +371,249 @@ void DX11RendererAPI::InitShaders() {
             float4 lightConstants;
         };
         cbuffer LightsData : register(b1) {
-            LightData u_Lights[100];
+            LightData u_Lights[c_MaxLights];
             float4 u_ViewPos_LightsCount;
         }
 
-        float3 GetLight(const float3 pos, const float3 color, const float3 viewDir, const float3 normal, const int lightIndex) {
+        Texture2D<float4> u_Textures[16];
+        SamplerState u_Samplers[16];
+
+        float4 GetDataFromTexture(uint tid, float2 uv);
+        float3 GetLight(const float3 pos, const float3 color, const float3 viewDir, const float3 normal, const float3 faceNormal, const int lightIndex);
+        FSOut main(FSIn input) {
+            FSOut output;
+
+            const float4 color = GetDataFromTexture(input.colorTID, input.uv) * input.color;
+            const float3 bitangent = normalize(cross(input.normal, input.tangent));
+            float3 normal = (GetDataFromTexture(input.normalTID, input.uv).xyz * 2.0f - 1.0f) * abs(sign(input.normalTID));
+            normal += float3(0.0f, 0.0f, 1.0f) * (1 - abs(sign(input.normalTID)));
+            normal = normalize(mul(normal, float3x3(input.tangent, bitangent, input.normal)));
+
+            const float ambientStrength = 0.05f;
+            const float3 ambient = ambientStrength * color.rgb;
+
+            const float3 viewDir = normalize(u_ViewPos_LightsCount.xyz - input.localPos.xyz);
+            float3 finalColor = ambient;
+            for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
+                finalColor += GetLight(input.localPos.xyz, input.color.rgb, viewDir, normal, input.normal, i);
+            }
+
+            output.color = float4(finalColor, color.a);
+            output.id = input.id;
+            return output;
+        }
+        float4 GetDataFromTexture(uint tid, float2 uv) {
+            float4 output = u_Textures[0].Sample(u_Samplers[0], uv) * (1 - abs(sign(tid - 0)));
+            output += u_Textures[1].Sample(u_Samplers[1], uv) * (1 - abs(sign(tid - 1)));
+            output += u_Textures[2].Sample(u_Samplers[2], uv) * (1 - abs(sign(tid - 2)));
+            output += u_Textures[3].Sample(u_Samplers[3], uv) * (1 - abs(sign(tid - 3)));
+            output += u_Textures[4].Sample(u_Samplers[4], uv) * (1 - abs(sign(tid - 4)));
+            output += u_Textures[5].Sample(u_Samplers[5], uv) * (1 - abs(sign(tid - 5)));
+            output += u_Textures[6].Sample(u_Samplers[6], uv) * (1 - abs(sign(tid - 6)));
+            output += u_Textures[7].Sample(u_Samplers[7], uv) * (1 - abs(sign(tid - 7)));
+            output += u_Textures[8].Sample(u_Samplers[8], uv) * (1 - abs(sign(tid - 8)));
+            output += u_Textures[9].Sample(u_Samplers[9], uv) * (1 - abs(sign(tid - 9)));
+            output += u_Textures[10].Sample(u_Samplers[10], uv) * (1 - abs(sign(tid - 10)));
+            output += u_Textures[11].Sample(u_Samplers[11], uv) * (1 - abs(sign(tid - 11)));
+            output += u_Textures[12].Sample(u_Samplers[12], uv) * (1 - abs(sign(tid - 12)));
+            output += u_Textures[13].Sample(u_Samplers[13], uv) * (1 - abs(sign(tid - 13)));
+            output += u_Textures[14].Sample(u_Samplers[14], uv) * (1 - abs(sign(tid - 14)));
+            output += u_Textures[15].Sample(u_Samplers[15], uv) * (1 - abs(sign(tid - 15)));
+            return output;
+        }
+        float3 GetLight(const float3 pos, const float3 color, const float3 viewDir, const float3 normal, const float3 faceNormal, const int lightIndex) {
             const float3 lightDir = normalize(u_Lights[lightIndex].lightPos.xyz - pos);
             const float distance = length(u_Lights[lightIndex].lightPos.xyz - pos);
             const float attenuation = 1.0f / (u_Lights[lightIndex].lightConstants.x + u_Lights[lightIndex].lightConstants.y * distance +
                 u_Lights[lightIndex].lightConstants.z * distance * distance);
 
             const float diff = max(dot(normal, lightDir), 0.0f);
-            const float3 diffuse = u_Lights[lightIndex].lightColor.rgb * diff * color;
+            const float3 diffuse = u_Lights[lightIndex].lightColor.rgb * diff * color * attenuation;
 
             const float shininess = 8.0f;
             const float3 halfwayDir = normalize(lightDir + viewDir);
             const float spec = pow(max(dot(normal, halfwayDir), 0.0f), shininess);
-            const float3 specular = u_Lights[lightIndex].lightColor.rgb * spec * color;
+            const float3 specular = u_Lights[lightIndex].lightColor.rgb * spec * color * attenuation;
 
-            return (diffuse + specular) * max(sign(dot(normal, lightDir)), 0.0f);
-        }
-        FSOut main(FSIn input) {
-            FSOut output;
-
-            const float ambientStrength = 0.1f;
-            const float3 ambient = ambientStrength * input.color.rgb;
-
-            const float3 viewDir = normalize(u_ViewPos_LightsCount.xyz - input.localPos.xyz);
-            const float3 normal = normalize(input.normal);
-            float3 color = ambient;
-            for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
-                color += GetLight(input.localPos.xyz, input.color.rgb, viewDir, normal, i);
-            }
-
-            output.color = float4(color, input.color.a);
-            output.id = input.id;
-            return output;
+            return (diffuse + specular) * max(sign(dot(faceNormal, lightDir)), 0.0f);
         }
     )";
 
     Renderer::GetShaderLibrary().Load("meshShader", vertexMesh, fragmentMesh);
+
+    const std::string vertexMeshPBR = R"(
+        struct VSOut {
+            float4 pos : SV_Position;
+            float4 localPos : Pos;
+            float4 color : Color;
+            float3 normal : Normal;
+            float3 tangent : Tangent;
+            float2 uv : UV;
+            nointerpolation uint colorTID : ColorTID;
+            nointerpolation uint normalTID : NormalTID;
+            nointerpolation uint metallicTID : metallicTID;
+            nointerpolation uint roughnessTID : roughnessTID;
+            nointerpolation uint id : ID;
+        };
+        cbuffer ConstBuf {
+            uniform matrix<float, 4, 4> u_ViewProjMat;
+        }
+
+        VSOut main(float4 position : Position, float3 normal : Normal, float3 tangent : Tangent, float2 uv : UV, float4 color : Color,
+            matrix<float, 4, 4> modelMat : Transform, uint4 tids : TIDs, uint id : EntityID)
+        {
+            VSOut output;
+            output.localPos = mul(position, modelMat);
+            output.pos = mul(output.localPos, u_ViewProjMat);
+            output.color = color;
+
+            output.normal = normalize(mul(normal, (float3x3)modelMat));
+            output.tangent = normalize(mul(tangent, (float3x3)modelMat));
+            output.tangent = normalize(output.tangent - dot(output.tangent, output.normal) * output.normal);
+
+            output.uv = uv;
+            output.colorTID = tids.x;
+            output.normalTID = tids.y;
+            output.metallicTID = tids.z;
+            output.roughnessTID = tids.w;
+            output.id = id;
+            return output;
+        }
+    )";
+
+    const std::string fragmentMeshPBR = R"(
+        static const float pi = 3.1415926535897932384626433832795f;
+
+        struct FSIn {
+            float4 pos : SV_Position;
+            float4 localPos : Pos;
+            float4 color : Color;
+            float3 normal : Normal;
+            float3 tangent : Tangent;
+            float2 uv : UV;
+            nointerpolation uint colorTID : ColorTID;
+            nointerpolation uint normalTID : NormalTID;
+            nointerpolation uint metallicTID : metallicTID;
+            nointerpolation uint roughnessTID : roughnessTID;
+            nointerpolation uint id : ID;
+        };
+        struct FSOut {
+            float4 color : SV_Target0;
+            uint id : SV_Target1;
+        };
+
+        static const int c_MaxLights = 100;
+        struct LightData {
+            float4 lightPos;
+            float4 lightColor;
+            float4 lightConstants;
+        };
+        cbuffer LightsData : register(b1) {
+            LightData u_Lights[c_MaxLights];
+            float4 u_ViewPos_LightsCount;
+        }
+
+        Texture2D<float4> u_Textures[16];
+        SamplerState u_Samplers[16];
+
+        float4 GetDataFromTexture(uint tid, float2 uv);
+        float DistributionGGX(float3 normal, float3 halfwayDir, float roughness);
+        float GeometrySmith(float3 normal, float3 viewDir, float3 lightDir, float roughness);
+        float3 FresnelSchlick(float cosTheta, float3 F0);
+
+        FSOut main(FSIn input) {
+            FSOut output;
+
+            float4 albedo = GetDataFromTexture(input.colorTID, input.uv) * input.color;
+            albedo.rgb = pow(albedo.rgb, float3(2.2f, 2.2f, 2.2f));
+
+            const float3 bitangent = normalize(cross(input.normal, input.tangent));
+            float3 normal = (GetDataFromTexture(input.normalTID, input.uv).xyz * 2.0f - 1.0f) * abs(sign(input.normalTID))
+                + float3(0.0f, 0.0f, 1.0f) * (1 - abs(sign(input.normalTID)));
+            normal = normalize(mul(normal, float3x3(input.tangent, bitangent, input.normal)));
+
+            const float metallic = GetDataFromTexture(input.metallicTID, input.uv).r * abs(sign(input.metallicTID))
+                + 0.5f * (1 - abs(sign(input.metallicTID)));
+            const float roughness = GetDataFromTexture(input.roughnessTID, input.uv).r * abs(sign(input.roughnessTID))
+                + 0.5f * (1 - abs(sign(input.roughnessTID)));
+
+            const float ambientStrength = 0.001f;
+            const float3 ambient = ambientStrength * albedo.rgb;
+
+            const float3 viewDir = normalize(u_ViewPos_LightsCount.xyz - input.localPos.xyz);
+
+            const float3 F0 = lerp(float3(0.04f, 0.04f, 0.04f), albedo.rgb, metallic);
+            float3 Lo = ambient;
+            for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
+                const float3 lightDir = normalize(u_Lights[i].lightPos.xyz - input.localPos.xyz);
+                const float3 halfwayDir = normalize(viewDir + lightDir);
+                const float distance = length(u_Lights[i].lightPos.xyz - input.localPos.xyz);
+                const float attenuation = 1.0f / (u_Lights[i].lightConstants.x + u_Lights[i].lightConstants.y * distance
+                    + u_Lights[i].lightConstants.z * distance * distance);
+                const float3 radiance = u_Lights[i].lightColor.rgb * attenuation;
+
+                const float NDF = DistributionGGX(normal, halfwayDir, roughness);
+                const float G = GeometrySmith(normal, viewDir, halfwayDir, roughness);
+                const float3 F = FresnelSchlick(max(dot(halfwayDir, viewDir), 0.0f), F0);
+
+                const float3 numerator = NDF * G * F;
+                const float denominator = max(4.0f * max(dot(normal, viewDir), 0.0f) * max(dot(normal, lightDir), 0.0f), 0.0001f);
+                const float3 specular = numerator / denominator;
+
+                const float3 kD = (float3(1.0f, 1.0f, 1.0f) - F) * (1.0f - metallic);
+                Lo += (kD * albedo.rgb / pi + specular) * radiance * max(dot(normal, lightDir), 0.0f) * max(sign(dot(input.normal, lightDir)), 0.0f);
+            }
+
+            Lo = Lo / (Lo + float3(1.0f, 1.0f, 1.0f));
+            Lo = pow(Lo, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f)); //temp HDR and gamma correction
+
+            output.color = float4(Lo, albedo.a);
+            output.id = input.id;
+            return output;
+        }
+        float4 GetDataFromTexture(uint tid, float2 uv) {
+            float4 output = u_Textures[0].Sample(u_Samplers[0], uv) * (1 - abs(sign(tid - 0)));
+            output += u_Textures[1].Sample(u_Samplers[1], uv) * (1 - abs(sign(tid - 1)));
+            output += u_Textures[2].Sample(u_Samplers[2], uv) * (1 - abs(sign(tid - 2)));
+            output += u_Textures[3].Sample(u_Samplers[3], uv) * (1 - abs(sign(tid - 3)));
+            output += u_Textures[4].Sample(u_Samplers[4], uv) * (1 - abs(sign(tid - 4)));
+            output += u_Textures[5].Sample(u_Samplers[5], uv) * (1 - abs(sign(tid - 5)));
+            output += u_Textures[6].Sample(u_Samplers[6], uv) * (1 - abs(sign(tid - 6)));
+            output += u_Textures[7].Sample(u_Samplers[7], uv) * (1 - abs(sign(tid - 7)));
+            output += u_Textures[8].Sample(u_Samplers[8], uv) * (1 - abs(sign(tid - 8)));
+            output += u_Textures[9].Sample(u_Samplers[9], uv) * (1 - abs(sign(tid - 9)));
+            output += u_Textures[10].Sample(u_Samplers[10], uv) * (1 - abs(sign(tid - 10)));
+            output += u_Textures[11].Sample(u_Samplers[11], uv) * (1 - abs(sign(tid - 11)));
+            output += u_Textures[12].Sample(u_Samplers[12], uv) * (1 - abs(sign(tid - 12)));
+            output += u_Textures[13].Sample(u_Samplers[13], uv) * (1 - abs(sign(tid - 13)));
+            output += u_Textures[14].Sample(u_Samplers[14], uv) * (1 - abs(sign(tid - 14)));
+            output += u_Textures[15].Sample(u_Samplers[15], uv) * (1 - abs(sign(tid - 15)));
+            return output;
+        }
+        float DistributionGGX(float3 normal, float3 halfwayDir, float roughness) {
+            const float a = roughness * roughness;
+            const float cosNH = max(dot(normal, halfwayDir), 0.0f);
+            const float nominator = a * a;
+            float denominator = (cosNH * cosNH * (nominator - 1.0f) + 1.0f);
+            denominator = pi * denominator * denominator;
+            return nominator / denominator;
+        }
+        float GeometrySchlickGGX(float cosNV, float roughness) {
+            const float r = roughness + 1.0f;
+            const float k = (r * r) / 8.0f;
+            return cosNV / (cosNV * (1.0f - k) + k);
+        }
+        float GeometrySmith(float3 normal, float3 viewDir, float3 lightDir, float roughness) {
+            const float cosNV = max(dot(normal, viewDir), 0.0f);
+            const float cosNL = max(dot(normal, lightDir), 0.0f);
+            return GeometrySchlickGGX(cosNV, roughness) * GeometrySchlickGGX(cosNL, roughness);
+        }
+        float3 FresnelSchlick(float cosTheta, float3 F0) {
+            return F0 + (1.0f + F0) * pow(clamp(1.0f - cosTheta, 0.0f, 1.0f), 5.0f);
+        }
+    )";
+
+    Renderer::GetShaderLibrary().Load("meshPBRShader", vertexMeshPBR, fragmentMeshPBR);
 }
 
 void DX11RendererAPI::SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) {

@@ -80,7 +80,7 @@ void Scene::OnEvent(Event& e) {
 }
 
 void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const EditorCamera& camera) {
-    for (auto [entity, tc] : m_Registry.view<TransformComponent>(entt::exclude<SpriteComponent>).each()) {
+    for (auto [entity, tc] : m_Registry.view<TransformComponent>(entt::exclude<SpriteComponent, CircleComponent, LightComponent>).each()) {
         tc.Orientation = glm::mod(tc.Orientation, glm::two_pi<float>());
         const auto rotation = glm::quat(tc.Orientation);
         tc.Transform = glm::translate(glm::mat4(1.0f), tc.Position) * glm::scale(glm::toMat4(rotation), tc.Size);
@@ -101,7 +101,7 @@ void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const EditorCamera& cam
     }
     Renderer2D::DrawCircles();
 
-    Renderer3D::SetShader(Renderer::GetShaderLibrary().Get("meshShader"));
+    Renderer3D::SetShader(Renderer::GetShaderLibrary().Get("meshPBRShader"));
     Renderer3D::SetViewProjectionMatrix(camera.GetProjectionViewMatrix());
     Renderer3D::SetCameraPosition(camera.GetPosition());
     Renderer3D::ResetLights();
@@ -113,15 +113,16 @@ void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const EditorCamera& cam
     auto groupMesh = m_Registry.group<const MeshComponent>(entt::get<const TransformComponent>);
     for (auto entity : groupMesh) {
         const auto& [tc, mc] = groupMesh.get<const TransformComponent, const MeshComponent>(entity);
-        Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform, static_cast<uint32_t>(entity));
+        Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform, mc.Material, static_cast<uint32_t>(entity));
     }
     Renderer3D::Draw();
+    Renderer::Render();
 
     Renderer3D::SetShader({});
     auto cubeMeshID = Renderer::GetMeshLibrary().Get("Cube")->GetID();
     for (auto entity : viewLights) {
         const auto& lc = viewLights.get<const LightComponent>(entity);
-        Renderer3D::SubmitMeshInstance(cubeMeshID, glm::translate(lc.LightPos), static_cast<uint32_t>(entity));
+        Renderer3D::SubmitMeshInstance(cubeMeshID, glm::scale(glm::translate(lc.LightPos), glm::vec3(0.1f)), {}, static_cast<uint32_t>(entity));
     }
     Renderer3D::DrawMesh(cubeMeshID);
 }
@@ -134,7 +135,7 @@ void Scene::OnUpdateRuntime(Timestep ts) {
         }
         nsc.Instance->OnUpdate(ts);
     }
-    for (auto [entity, tc] : m_Registry.view<TransformComponent>(entt::exclude<SpriteComponent>).each()) {
+    for (auto [entity, tc] : m_Registry.view<TransformComponent>(entt::exclude<SpriteComponent, CircleComponent, LightComponent>).each()) {
         tc.Orientation = glm::mod(tc.Orientation, glm::two_pi<float>());
         const auto rotation = glm::quat(tc.Orientation);
         tc.Transform = glm::translate(glm::mat4(1.0f), tc.Position) * glm::scale(glm::toMat4(rotation), tc.Size);

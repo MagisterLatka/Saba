@@ -10,11 +10,13 @@ namespace Saba {
 
 struct MeshInstanceData {
     glm::mat4 transform;
+    glm::uvec4 textureIDs;
     uint32_t entityID;
 };
 static constexpr uint32_t c_MaxInstances = 1000u;
 static constexpr uint32_t c_InstanceBufferSize = c_MaxInstances * static_cast<uint32_t>(sizeof(MeshInstanceData));
 static constexpr uint32_t c_MaxLights = 100u;
+static constexpr uint32_t c_MaxTextures = 16u;
 
 struct MeshData {
     Ref<InputLayout> inputLayout;
@@ -32,6 +34,8 @@ struct LightsBufferData {
 };
 struct Renderer3DData {
     std::unordered_map<UUID, MeshData> meshes;
+    std::array<Ref<Texture2D>, c_MaxTextures> textures;
+    uint32_t textureIndex = 1u;
 
     LightsBufferData* lightsData;
     LightData* lightsInsert;
@@ -56,36 +60,39 @@ void Renderer3D::Init() {
     s_Data.lightsData = s_Data.lightsBuffer->GetLocalData().As<LightsBufferData>();
     s_Data.lightsInsert = s_Data.lightsData->lights;
 
+    uint32_t texData = 0xffffffffu;
+    s_Data.textures[0] = Texture2D::Create(1u, 1u, &texData);
+
     std::vector<Saba::MeshVertex> vertices = {
-        { { -0.1f, -0.1f, -0.1f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f, -0.1f, -0.1f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f, -0.1f,  0.1f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { { -0.1f, -0.1f,  0.1f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
 
-        { { -0.1f,  0.1f, -0.1f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f,  0.1f, -0.1f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f,  0.1f,  0.1f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { { -0.1f,  0.1f,  0.1f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
 
-        { { -0.1f, -0.1f, -0.1f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { { -0.1f,  0.1f, -0.1f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { { -0.1f,  0.1f,  0.1f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { { -0.1f, -0.1f,  0.1f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f, -0.5f, -0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f, -0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f, -0.5f,  0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
 
-        { {  0.1f, -0.1f, -0.1f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f,  0.1f, -0.1f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f,  0.1f,  0.1f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f, -0.1f,  0.1f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f, -0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
 
-        { { -0.1f, -0.1f, -0.1f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f, -0.1f, -0.1f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f,  0.1f, -0.1f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { { -0.1f,  0.1f, -0.1f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
 
-        { { -0.1f, -0.1f,  0.1f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f, -0.1f,  0.1f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { {  0.1f,  0.1f,  0.1f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
-        { { -0.1f,  0.1f,  0.1f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} }
+        { { -0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { {  0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} },
+        { { -0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f} }
     };
     std::vector<uint32_t> indices = {
         0, 1, 2, 2, 3, 0,
@@ -102,8 +109,9 @@ void Renderer3D::InitMesh(Ref<Mesh> mesh) {
     MeshData meshData;
 
     BufferLayout verticesLayout = {
-        { "Position", BufferLayoutElementDataType::Float3 },
+        { "Position", BufferLayoutElementDataType::Float4 },
         { "Normal", BufferLayoutElementDataType::Float3 },
+        { "Tangent", BufferLayoutElementDataType::Float3 },
         { "UV", BufferLayoutElementDataType::Float2 },
         { "Color", BufferLayoutElementDataType::Float4 }
     };
@@ -112,6 +120,7 @@ void Renderer3D::InitMesh(Ref<Mesh> mesh) {
     
     BufferLayout instancesLayout = {
         { "Transform", BufferLayoutElementDataType::Mat4, false, 1u },
+        { "TIDs", BufferLayoutElementDataType::UInt4, false, 1u },
         { "EntityID", BufferLayoutElementDataType::UInt, false, 1u }
     };
     Buffer instancesBuffer = Buffer(new MeshInstanceData[c_MaxInstances], c_InstanceBufferSize, true);
@@ -171,19 +180,95 @@ void Renderer3D::SubmitMesh(Ref<Mesh> mesh) {
     else
         InitMesh(mesh);
 }
-void Renderer3D::SubmitMeshInstance(Ref<Mesh> mesh, const glm::mat4& transform, uint32_t entityID) {
+void Renderer3D::SubmitMeshInstance(Ref<Mesh> mesh, const glm::mat4& transform, Ref<Material> material, uint32_t entityID) {
     if (!s_Data.meshes.contains(mesh->GetID()))
         InitMesh(mesh);
 
-    SubmitMeshInstance(mesh->GetID(), transform, entityID);
+    SubmitMeshInstance(mesh->GetID(), transform, std::move(material), entityID);
 }
-void Renderer3D::SubmitMeshInstance(UUID meshID, const glm::mat4& transform, uint32_t entityID) {
+void Renderer3D::SubmitMeshInstance(UUID meshID, const glm::mat4& transform, Ref<Material> material, uint32_t entityID) {
     SB_CORE_ASSERT(s_Data.meshes.contains(meshID), "Renderer3D does not have mesh with ID: {0}.", static_cast<uint32_t>(meshID));
 
     auto& meshData = s_Data.meshes[meshID];
     if (meshData.instanceCount >= c_MaxInstances) {
         DrawMesh(meshID);
         Renderer::Render();
+    }
+
+    uint32_t colorTID = 0u, normalTID = 0u, metallicTID = 0u, roughnessTID = 0u;
+    if (material) {
+        if (auto texture = material->GetColorTexture()) {
+            for (uint32_t i = 1u; i < c_MaxTextures; ++i) {
+                if (s_Data.textures[i] == texture) {
+                    colorTID = i;
+                    break;
+                }
+            }
+            if (colorTID == 0u) {
+                if (s_Data.textureIndex >= c_MaxTextures) {
+                    DrawMesh(meshID);
+                    Renderer::Render();
+                    SubmitMeshInstance(meshID, transform, std::move(material), entityID);
+                    return;
+                }
+                colorTID = s_Data.textureIndex++;
+                s_Data.textures[colorTID] = texture;
+            }
+        }
+        if (auto texture = material->GetNormalTexture()) {
+            for (uint32_t i = 1u; i < c_MaxTextures; ++i) {
+                if (s_Data.textures[i] == texture) {
+                    normalTID = i;
+                    break;
+                }
+            }
+            if (normalTID == 0u) {
+                if (s_Data.textureIndex >= c_MaxTextures) {
+                    DrawMesh(meshID);
+                    Renderer::Render();
+                    SubmitMeshInstance(meshID, transform, std::move(material), entityID);
+                    return;
+                }
+                normalTID = s_Data.textureIndex++;
+                s_Data.textures[normalTID] = texture;
+            }
+        }
+        if (auto texture = material->GetMetallicTexture()) {
+            for (uint32_t i = 1u; i < c_MaxTextures; ++i) {
+                if (s_Data.textures[i] == texture) {
+                    metallicTID = i;
+                    break;
+                }
+            }
+            if (metallicTID == 0u) {
+                if (s_Data.textureIndex >= c_MaxTextures) {
+                    DrawMesh(meshID);
+                    Renderer::Render();
+                    SubmitMeshInstance(meshID, transform, std::move(material), entityID);
+                    return;
+                }
+                metallicTID = s_Data.textureIndex++;
+                s_Data.textures[metallicTID] = texture;
+            }
+        }
+        if (auto texture = material->GetRoughnessTexture()) {
+            for (uint32_t i = 1u; i < c_MaxTextures; ++i) {
+                if (s_Data.textures[i] == texture) {
+                    roughnessTID = i;
+                    break;
+                }
+            }
+            if (roughnessTID == 0u) {
+                if (s_Data.textureIndex >= c_MaxTextures) {
+                    DrawMesh(meshID);
+                    Renderer::Render();
+                    SubmitMeshInstance(meshID, transform, std::move(material), entityID);
+                    return;
+                }
+                roughnessTID = s_Data.textureIndex++;
+                s_Data.textures[roughnessTID] = texture;
+            }
+        }
     }
 
     switch (RendererAPI::GetAPI()) {
@@ -200,6 +285,7 @@ void Renderer3D::SubmitMeshInstance(UUID meshID, const glm::mat4& transform, uin
         meshData.instanceInsert->transform = glm::transpose(transform);
         break;
     }
+    meshData.instanceInsert->textureIDs = glm::uvec4(colorTID, normalTID, 0u, 0u);
     meshData.instanceInsert->entityID = entityID;
     ++meshData.instanceInsert;
     ++meshData.instanceCount;
@@ -231,6 +317,10 @@ void Renderer3D::DrawMesh(UUID meshID) {
     s_Data.lightsData->viewPos_LightsCount = glm::vec4(s_Data.viewPos, static_cast<float>(s_Data.lightsCount));
     s_Data.lightsBuffer->UploadCurrent();
     s_Data.lightsBuffer->Bind(1u);
+    for (uint32_t i = 0; i < s_Data.textureIndex; ++i) {
+        if (s_Data.textures[i])
+            s_Data.textures[i]->Bind(i);
+    }
 
     RenderCommand::DrawIndexedInstanced(RendererAPI::Topology::Triangles, meshData.inputLayout->GetIndexBuffer()->GetIndicesCount(), meshData.instanceCount);
 

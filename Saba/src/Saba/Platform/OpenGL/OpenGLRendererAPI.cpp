@@ -286,12 +286,14 @@ void OpenGLRendererAPI::InitShaders() {
     const std::string vertexMeshClear = R"(
         #version 460 core
 
-        layout(location = 0) in vec3 i_Pos;
+        layout(location = 0) in vec4 i_Pos;
         layout(location = 1) in vec3 i_Normal;
-        layout(location = 2) in vec2 i_UV;
-        layout(location = 3) in vec4 i_Color;
-        layout(location = 4) in mat4 i_ModelMat;
-        layout(location = 8) in uint i_ID;
+        layout(location = 2) in vec3 i_Tangent;
+        layout(location = 3) in vec2 i_UV;
+        layout(location = 4) in vec4 i_Color;
+        layout(location = 5) in mat4 i_ModelMat;
+        layout(location = 9) in uvec4 i_TIDs;
+        layout(location = 10) in uint i_ID;
 
         layout(std140, binding = 0) uniform RendererData {
             mat4 u_ViewProjMat;
@@ -304,7 +306,7 @@ void OpenGLRendererAPI::InitShaders() {
         } vs_out;
 
         void main() {
-            gl_Position = u_ViewProjMat * i_ModelMat * vec4(i_Pos, 1.0f);
+            gl_Position = u_ViewProjMat * i_ModelMat * i_Pos;
             vs_out.color = i_Color;
             vs_out.uv = i_UV;
             vs_out.id = i_ID;
@@ -334,12 +336,14 @@ void OpenGLRendererAPI::InitShaders() {
     const std::string vertexMesh = R"(
         #version 460 core
 
-        layout(location = 0) in vec3 i_Pos;
+        layout(location = 0) in vec4 i_Pos;
         layout(location = 1) in vec3 i_Normal;
-        layout(location = 2) in vec2 i_UV;
-        layout(location = 3) in vec4 i_Color;
-        layout(location = 4) in mat4 i_ModelMat;
-        layout(location = 8) in uint i_ID;
+        layout(location = 2) in vec3 i_Tangent;
+        layout(location = 3) in vec2 i_UV;
+        layout(location = 4) in vec4 i_Color;
+        layout(location = 5) in mat4 i_ModelMat;
+        layout(location = 9) in uvec4 i_TIDs;
+        layout(location = 10) in uint i_ID;
 
         layout(std140, binding = 0) uniform RendererData {
             mat4 u_ViewProjMat;
@@ -349,16 +353,26 @@ void OpenGLRendererAPI::InitShaders() {
             vec4 pos;
             vec4 color;
             vec3 normal;
+            vec3 tangent;
             vec2 uv;
+            flat uint colorTID;
+            flat uint normalTID;
             flat uint id;
         } vs_out;
 
         void main() {
-            vs_out.pos = i_ModelMat * vec4(i_Pos, 1.0f);
+            vs_out.pos = i_ModelMat * i_Pos;
             gl_Position = u_ViewProjMat * vs_out.pos;
             vs_out.color = i_Color;
-            vs_out.normal = mat3(transpose(inverse(i_ModelMat))) * i_Normal;
+
+            mat3 normalMatrix = transpose(inverse(mat3(i_ModelMat)));
+            vs_out.normal = normalize(normalMatrix * i_Normal);
+            vs_out.tangent = normalize(normalMatrix * i_Tangent);
+            vs_out.tangent = normalize(vs_out.tangent - dot(vs_out.tangent, vs_out.normal) * vs_out.normal);
+
             vs_out.uv = i_UV;
+            vs_out.colorTID = i_TIDs.x;
+            vs_out.normalTID = i_TIDs.y;
             vs_out.id = i_ID;
         }
     )";
@@ -373,7 +387,10 @@ void OpenGLRendererAPI::InitShaders() {
             vec4 pos;
             vec4 color;
             vec3 normal;
+            vec3 tangent;
             vec2 uv;
+            flat uint colorTID;
+            flat uint normalTID;
             flat uint id;
         } fs_in;
 
@@ -388,39 +405,273 @@ void OpenGLRendererAPI::InitShaders() {
             vec4 u_ViewPos_LightsCount;
         };
 
-        vec3 GetLight(const vec3 viewDir, const vec3 normal, const int lightIndex) {
+        layout(binding = 0) uniform sampler2D u_Tex0;
+        layout(binding = 1) uniform sampler2D u_Tex1;
+        layout(binding = 2) uniform sampler2D u_Tex2;
+        layout(binding = 3) uniform sampler2D u_Tex3;
+        layout(binding = 4) uniform sampler2D u_Tex4;
+        layout(binding = 5) uniform sampler2D u_Tex5;
+        layout(binding = 6) uniform sampler2D u_Tex6;
+        layout(binding = 7) uniform sampler2D u_Tex7;
+        layout(binding = 8) uniform sampler2D u_Tex8;
+        layout(binding = 9) uniform sampler2D u_Tex9;
+        layout(binding = 10) uniform sampler2D u_Tex10;
+        layout(binding = 11) uniform sampler2D u_Tex11;
+        layout(binding = 12) uniform sampler2D u_Tex12;
+        layout(binding = 13) uniform sampler2D u_Tex13;
+        layout(binding = 14) uniform sampler2D u_Tex14;
+        layout(binding = 15) uniform sampler2D u_Tex15;
+
+        vec4 GetDataFromTexture(uint tid, vec2 uv) {
+            vec4 color = texture(u_Tex0, uv) * (1 - abs(sign(tid - 0)));
+            color += texture(u_Tex1, uv) * (1 - abs(sign(tid - 1)));
+            color += texture(u_Tex2, uv) * (1 - abs(sign(tid - 2)));
+            color += texture(u_Tex3, uv) * (1 - abs(sign(tid - 3)));
+            color += texture(u_Tex4, uv) * (1 - abs(sign(tid - 4)));
+            color += texture(u_Tex5, uv) * (1 - abs(sign(tid - 5)));
+            color += texture(u_Tex6, uv) * (1 - abs(sign(tid - 6)));
+            color += texture(u_Tex7, uv) * (1 - abs(sign(tid - 7)));
+            color += texture(u_Tex8, uv) * (1 - abs(sign(tid - 8)));
+            color += texture(u_Tex9, uv) * (1 - abs(sign(tid - 9)));
+            color += texture(u_Tex10, uv) * (1 - abs(sign(tid - 10)));
+            color += texture(u_Tex11, uv) * (1 - abs(sign(tid - 11)));
+            color += texture(u_Tex12, uv) * (1 - abs(sign(tid - 12)));
+            color += texture(u_Tex13, uv) * (1 - abs(sign(tid - 13)));
+            color += texture(u_Tex14, uv) * (1 - abs(sign(tid - 14)));
+            color += texture(u_Tex15, uv) * (1 - abs(sign(tid - 15)));
+            return color;
+        }
+
+        vec3 GetLight(const vec3 viewDir, const vec3 color, const vec3 normal, const int lightIndex) {
             const vec3 lightDir = normalize(u_Lights[lightIndex].lightPos.xyz - fs_in.pos.xyz);
             const float distance = length(u_Lights[lightIndex].lightPos.xyz - fs_in.pos.xyz);
             const float attenuation = 1.0f / (u_Lights[lightIndex].lightConstants.x + u_Lights[lightIndex].lightConstants.y * distance
                 + u_Lights[lightIndex].lightConstants.z * distance * distance);
 
             const float diff = max(dot(normal, lightDir), 0.0f);
-            const vec3 diffuse = u_Lights[lightIndex].lightColor.rgb * diff * fs_in.color.rgb * attenuation;
+            const vec3 diffuse = u_Lights[lightIndex].lightColor.rgb * diff * color.rgb * attenuation;
 
             const float shininess = 8.0f;
             const vec3 halfwayDir = normalize(lightDir + viewDir);
             const float spec = pow(max(dot(normal, halfwayDir), 0.0f), shininess);
-            const vec3 specular = u_Lights[lightIndex].lightColor.rgb * spec * fs_in.color.rgb * attenuation;
+            const vec3 specular = u_Lights[lightIndex].lightColor.rgb * spec * color.rgb * attenuation;
 
-            return (diffuse + specular) * max(sign(dot(normal, lightDir)), 0.0f);
+            return (diffuse + specular) * max(sign(dot(fs_in.normal, lightDir)), 0.0f);
         }
         void main() {
-            const float ambientStrength = 0.1f;
-            const vec3 ambient = ambientStrength * fs_in.color.rgb;
+            const vec4 color = GetDataFromTexture(fs_in.colorTID, fs_in.uv) * fs_in.color;
+            const vec3 bitangent = normalize(cross(fs_in.normal, fs_in.tangent));
+            vec3 normal = (GetDataFromTexture(fs_in.normalTID, fs_in.uv).xyz * 2.0f - 1.0f) * abs(sign(fs_in.normalTID));
+            normal += vec3(0.0f, 0.0f, 1.0f) * (1 - abs(sign(fs_in.normalTID)));
+            normal = normalize(mat3(fs_in.tangent, bitangent, fs_in.normal) * normal);
+
+            const float ambientStrength = 0.05f;
+            const vec3 ambient = ambientStrength * color.rgb;
 
             const vec3 viewDir = normalize(u_ViewPos_LightsCount.xyz - fs_in.pos.xyz);
-            const vec3 normal = normalize(fs_in.normal);
-            vec3 color = ambient;
+            vec3 finalColor = ambient;
             for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
-                color += GetLight(viewDir, normal, i);
+                finalColor += GetLight(viewDir, color.rgb, normal, i);
             }
 
-            o_Color = vec4(color, fs_in.color.a);
+            o_Color = vec4(finalColor, color.a);
             o_ID = fs_in.id;
         }
     )";
 
     Renderer::GetShaderLibrary().Load("meshShader", vertexMesh, fragmentMesh);
+
+    const std::string vertexMeshPBR = R"(
+        #version 460 core
+
+        layout(location = 0) in vec4 i_Pos;
+        layout(location = 1) in vec3 i_Normal;
+        layout(location = 2) in vec3 i_Tangent;
+        layout(location = 3) in vec2 i_UV;
+        layout(location = 4) in vec4 i_Color;
+        layout(location = 5) in mat4 i_ModelMat;
+        layout(location = 9) in uvec4 i_TIDs;
+        layout(location = 10) in uint i_ID;
+
+        layout(std140, binding = 0) uniform RendererData {
+            mat4 u_ViewProjMat;
+        };
+
+        out Data {
+            vec4 pos;
+            vec4 color;
+            vec3 normal;
+            vec3 tangent;
+            vec2 uv;
+            flat uint colorTID;
+            flat uint normalTID;
+            flat uint metallicTID;
+            flat uint roughnessTID;
+            flat uint id;
+        } vs_out;
+
+        void main() {
+            vs_out.pos = i_ModelMat * i_Pos;
+            gl_Position = u_ViewProjMat * vs_out.pos;
+            vs_out.color = i_Color;
+
+            mat3 normalMatrix = transpose(inverse(mat3(i_ModelMat)));
+            vs_out.normal = normalize(normalMatrix * i_Normal);
+            vs_out.tangent = normalize(normalMatrix * i_Tangent);
+            vs_out.tangent = normalize(vs_out.tangent - dot(vs_out.tangent, vs_out.normal) * vs_out.normal);
+
+            vs_out.uv = i_UV;
+            vs_out.colorTID = i_TIDs.x;
+            vs_out.normalTID = i_TIDs.y;
+            vs_out.metallicTID = i_TIDs.z;
+            vs_out.roughnessTID = i_TIDs.w;
+            vs_out.id = i_ID;
+        }
+    )";
+
+    const std::string fragmentMeshPBR = R"(
+        #version 460 core
+        const float pi = 3.1415926535897932384626433832795f;
+
+        layout(location = 0) out vec4 o_Color;
+        layout(location = 1) out uint o_ID;
+
+        in Data {
+            vec4 pos;
+            vec4 color;
+            vec3 normal;
+            vec3 tangent;
+            vec2 uv;
+            flat uint colorTID;
+            flat uint normalTID;
+            flat uint metallicTID;
+            flat uint roughnessTID;
+            flat uint id;
+        } fs_in;
+
+        const int c_MaxLights = 100;
+        struct LightData {
+            vec4 lightPos;
+            vec4 lightColor;
+            vec4 lightConstants;
+        };
+        layout(std140, binding = 1) uniform LightsData {
+            LightData u_Lights[c_MaxLights];
+            vec4 u_ViewPos_LightsCount;
+        };
+
+        layout(binding = 0) uniform sampler2D u_Tex0;
+        layout(binding = 1) uniform sampler2D u_Tex1;
+        layout(binding = 2) uniform sampler2D u_Tex2;
+        layout(binding = 3) uniform sampler2D u_Tex3;
+        layout(binding = 4) uniform sampler2D u_Tex4;
+        layout(binding = 5) uniform sampler2D u_Tex5;
+        layout(binding = 6) uniform sampler2D u_Tex6;
+        layout(binding = 7) uniform sampler2D u_Tex7;
+        layout(binding = 8) uniform sampler2D u_Tex8;
+        layout(binding = 9) uniform sampler2D u_Tex9;
+        layout(binding = 10) uniform sampler2D u_Tex10;
+        layout(binding = 11) uniform sampler2D u_Tex11;
+        layout(binding = 12) uniform sampler2D u_Tex12;
+        layout(binding = 13) uniform sampler2D u_Tex13;
+        layout(binding = 14) uniform sampler2D u_Tex14;
+        layout(binding = 15) uniform sampler2D u_Tex15;
+
+        vec4 GetDataFromTexture(uint tid, vec2 uv);
+        float DistributionGGX(vec3 normal, vec3 halfwayDir, float roughness);
+        float GeometrySmith(vec3 normal, vec3 viewDir, vec3 lightDir, float roughness);
+        vec3 FresnelSchlick(float cosTheta, vec3 F0);
+
+        void main() {
+            vec4 albedo = GetDataFromTexture(fs_in.colorTID, fs_in.uv) * fs_in.color;
+            albedo.rgb = pow(albedo.rgb, vec3(2.2f));
+
+            const vec3 bitangent = normalize(cross(fs_in.normal, fs_in.tangent));
+            vec3 normal = (GetDataFromTexture(fs_in.normalTID, fs_in.uv).xyz * 2.0f - 1.0f) * abs(sign(fs_in.normalTID))
+                + vec3(0.0f, 0.0f, 1.0f) * (1 - abs(sign(fs_in.normalTID)));
+            normal = normalize(mat3(fs_in.tangent, bitangent, fs_in.normal) * normal);
+
+            const float metallic = GetDataFromTexture(fs_in.metallicTID, fs_in.uv).r * abs(sign(fs_in.metallicTID))
+                + 0.5f * (1 - abs(sign(fs_in.metallicTID)));
+            const float roughness = GetDataFromTexture(fs_in.roughnessTID, fs_in.uv).r * abs(sign(fs_in.roughnessTID))
+                + 0.5f * (1 - abs(sign(fs_in.roughnessTID)));
+
+            const float ambientStrength = 0.001f;
+            const vec3 ambient = ambientStrength * albedo.rgb;
+
+            const vec3 viewDir = normalize(u_ViewPos_LightsCount.xyz - fs_in.pos.xyz);
+
+            const vec3 F0 = mix(vec3(0.04f), albedo.rgb, metallic);
+            vec3 Lo = ambient;
+            for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
+                const vec3 lightDir = normalize(u_Lights[i].lightPos.xyz - fs_in.pos.xyz);
+                const vec3 halfwayDir = normalize(viewDir + lightDir);
+                const float distance = length(u_Lights[i].lightPos.xyz - fs_in.pos.xyz);
+                const float attenuation = 1.0f / (u_Lights[i].lightConstants.x + u_Lights[i].lightConstants.y * distance
+                    + u_Lights[i].lightConstants.z * distance * distance);
+                const vec3 radiance = u_Lights[i].lightColor.rgb * attenuation;
+
+                const float NDF = DistributionGGX(normal, halfwayDir, roughness);
+                const float G = GeometrySmith(normal, viewDir, halfwayDir, roughness);
+                const vec3 F = FresnelSchlick(max(dot(halfwayDir, viewDir), 0.0f), F0);
+
+                const vec3 numerator = NDF * G * F;
+                const float denominator = max(4.0f * max(dot(normal, viewDir), 0.0f) * max(dot(normal, lightDir), 0.0f), 0.0001f);
+                const vec3 specular = numerator / denominator;
+
+                const vec3 kD = (vec3(1.0f) - F) * (1.0f - metallic);
+                Lo += (kD * albedo.rgb / pi + specular) * radiance * max(dot(normal, lightDir), 0.0f) * max(sign(dot(fs_in.normal, lightDir)), 0.0f);
+            }
+
+            Lo = Lo / (Lo + vec3(1.0f));
+            Lo = pow(Lo, vec3(1.0f / 2.2f)); //temp HDR and gamma correction
+
+            o_Color = vec4(Lo, albedo.a);
+            o_ID = fs_in.id;
+        }
+        vec4 GetDataFromTexture(uint tid, vec2 uv) {
+            vec4 color = texture(u_Tex0, uv) * (1 - abs(sign(tid - 0)));
+            color += texture(u_Tex1, uv) * (1 - abs(sign(tid - 1)));
+            color += texture(u_Tex2, uv) * (1 - abs(sign(tid - 2)));
+            color += texture(u_Tex3, uv) * (1 - abs(sign(tid - 3)));
+            color += texture(u_Tex4, uv) * (1 - abs(sign(tid - 4)));
+            color += texture(u_Tex5, uv) * (1 - abs(sign(tid - 5)));
+            color += texture(u_Tex6, uv) * (1 - abs(sign(tid - 6)));
+            color += texture(u_Tex7, uv) * (1 - abs(sign(tid - 7)));
+            color += texture(u_Tex8, uv) * (1 - abs(sign(tid - 8)));
+            color += texture(u_Tex9, uv) * (1 - abs(sign(tid - 9)));
+            color += texture(u_Tex10, uv) * (1 - abs(sign(tid - 10)));
+            color += texture(u_Tex11, uv) * (1 - abs(sign(tid - 11)));
+            color += texture(u_Tex12, uv) * (1 - abs(sign(tid - 12)));
+            color += texture(u_Tex13, uv) * (1 - abs(sign(tid - 13)));
+            color += texture(u_Tex14, uv) * (1 - abs(sign(tid - 14)));
+            color += texture(u_Tex15, uv) * (1 - abs(sign(tid - 15)));
+            return color;
+        }
+        float DistributionGGX(vec3 normal, vec3 halfwayDir, float roughness) {
+            const float a = roughness * roughness;
+            const float cosNH = max(dot(normal, halfwayDir), 0.0f);
+            const float nominator = a * a;
+            float denominator = (cosNH * cosNH * (nominator - 1.0f) + 1.0f);
+            denominator = pi * denominator * denominator;
+            return nominator / denominator;
+        }
+        float GeometrySchlickGGX(float cosNV, float roughness) {
+            const float r = roughness + 1.0f;
+            const float k = (r * r) / 8.0f;
+            return cosNV / (cosNV * (1.0f - k) + k);
+        }
+        float GeometrySmith(vec3 normal, vec3 viewDir, vec3 lightDir, float roughness) {
+            const float cosNV = max(dot(normal, viewDir), 0.0f);
+            const float cosNL = max(dot(normal, lightDir), 0.0f);
+            return GeometrySchlickGGX(cosNV, roughness) * GeometrySchlickGGX(cosNL, roughness);
+        }
+        vec3 FresnelSchlick(float cosTheta, vec3 F0) {
+            return F0 + (1.0f + F0) * pow(clamp(1.0f - cosTheta, 0.0f, 1.0f), 5.0f);
+        }
+    )";
+
+    Renderer::GetShaderLibrary().Load("meshPBRShader", vertexMeshPBR, fragmentMeshPBR);
 }
 
 void OpenGLRendererAPI::SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc) {

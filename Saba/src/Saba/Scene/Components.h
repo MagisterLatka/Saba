@@ -4,6 +4,7 @@
 #include "Saba/Renderer/Texture.h"
 #include "Saba/Renderer/Camera.h"
 #include "Saba/Renderer/Mesh.h"
+#include "Saba/Renderer/Material.h"
 
 namespace Saba {
 
@@ -111,11 +112,13 @@ struct CameraComponent {
 
 struct MeshComponent {
     Ref<Saba::Mesh> Mesh;
+    Ref<Saba::Material> Material;
 
     SB_CORE MeshComponent() noexcept = default;
     SB_CORE MeshComponent(const MeshComponent&) noexcept = default;
     SB_CORE MeshComponent(MeshComponent&&) noexcept = default;
-    SB_CORE MeshComponent(Ref<Saba::Mesh> mesh) noexcept : Mesh(std::move(mesh)) {}
+    SB_CORE MeshComponent(Ref<Saba::Mesh> mesh, Ref<Saba::Material> material = {}) noexcept
+        : Mesh(std::move(mesh)), Material(std::move(material)) {}
 
     SB_CORE MeshComponent& operator=(const MeshComponent&) noexcept = default;
     SB_CORE MeshComponent& operator=(MeshComponent&&) noexcept = default;

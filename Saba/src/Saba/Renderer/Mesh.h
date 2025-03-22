@@ -6,8 +6,9 @@
 namespace Saba {
 
 struct MeshVertex {
-    glm::vec3 Pos;
+    glm::vec4 Pos;
     glm::vec3 Normal;
+    glm::vec3 Tangent;
     glm::vec2 UV;
     glm::vec4 Color;
 };

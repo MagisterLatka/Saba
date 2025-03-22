@@ -1,7 +1,11 @@
 project(App)
 
 if (WIN32)
-    set (DLLFilePath "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Saba.dll")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set (DLLFilePath "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Sabad.dll")
+    else()
+        set (DLLFilePath "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Saba.dll")
+    endif()
 endif()
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${outputdir}/App")

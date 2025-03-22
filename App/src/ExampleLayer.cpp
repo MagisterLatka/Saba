@@ -22,54 +22,89 @@ void ExampleLayer::OnAttach() {
     textureProps.Sampling = Saba::TextureSampling::Point;
     m_PlayButton = Saba::Texture2D::Create(textureProps);
     textureProps.Filepath = "assets/textures/StopButton.png";
-    m_StopButton = Saba::Texture2D::Create(std::move(textureProps));
+    m_StopButton = Saba::Texture2D::Create(textureProps);
 
     m_ActiveScene = Ref<Saba::Scene>::Create();
     m_ActiveScene->OnViewportResize(window->GetWidth(), window->GetHeight());
     m_EditorScene = m_ActiveScene;
 
-    std::vector<Saba::MeshVertex> vertices = {
-        { { -0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { {  0.5f, -0.5f, -0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { {  0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { { -0.5f, -0.5f,  0.5f }, {  0.0f, -1.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    // std::vector<Saba::MeshVertex> vertices = {
+    //     { { -0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    //     { {  0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    //     { {  0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    //     { { -0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
 
-        { { -0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f, -0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-        { { -0.5f,  0.5f,  0.5f }, {  0.0f,  1.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    //     { { -0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    //     { {  0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    //     { {  0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
+    //     { { -0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
 
-        { { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { { -0.5f, -0.5f, -0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { { -0.5f,  0.5f, -0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { { -0.5f,  0.5f,  0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { { -0.5f, -0.5f,  0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
 
-        { {  0.5f, -0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f, -0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { {  0.5f,  0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-        { {  0.5f, -0.5f,  0.5f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { {  0.5f, -0.5f, -0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { {  0.5f,  0.5f, -0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { {  0.5f,  0.5f,  0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
+    //     { {  0.5f, -0.5f,  0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
 
-        { { -0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-        { {  0.5f, -0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-        { {  0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-        { { -0.5f,  0.5f, -0.5f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+    //     { { -0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+    //     { {  0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+    //     { {  0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+    //     { { -0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
 
-        { { -0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-        { {  0.5f, -0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-        { {  0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-        { { -0.5f,  0.5f,  0.5f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} }
-    };
-    std::vector<uint32_t> indices = {
-        0, 1, 2, 2, 3, 0,
-        4, 5, 6, 6, 7, 4,
-        8, 9, 10, 10, 11, 8,
-        12, 13, 14, 14, 15, 12,
-        16, 17, 18, 18, 19, 16,
-        20, 21, 22, 22, 23, 20
-    };
-    Ref<Saba::Mesh> mesh = Ref<Saba::Mesh>::Create(std::move(vertices), std::move(indices));
-    m_ActiveScene->CreateEntity("Mesh entity").AddComponent<Saba::MeshComponent>(mesh);
-    m_ActiveScene->CreateEntity("Light entity").AddComponent<Saba::LightComponent>(glm::vec3(1.0f, 3.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f);
+    //     { { -0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+    //     { {  0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+    //     { {  0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
+    //     { { -0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} }
+    // };
+    // std::vector<uint32_t> indices = {
+    //     0, 1, 2, 2, 3, 0,
+    //     4, 5, 6, 6, 7, 4,
+    //     8, 9, 10, 10, 11, 8,
+    //     12, 13, 14, 14, 15, 12,
+    //     16, 17, 18, 18, 19, 16,
+    //     20, 21, 22, 22, 23, 20
+    // };
+    // Ref<Saba::Mesh> mesh = Ref<Saba::Mesh>::Create(std::move(vertices), std::move(indices));
+    textureProps.Filepath = "assets/textures/brickwall.jpg";
+    auto brickTexture = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/brickwall_normal.jpg";
+    auto brickTextureNormal = Saba::Texture2D::Create(textureProps); 
+    Ref<Saba::Material> brickMaterial = Ref<Saba::Material>::Create(brickTexture, brickTextureNormal);
+    auto brickCube = m_ActiveScene->CreateEntity("Brick cube");
+    brickCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), brickMaterial);
+    brickCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(0.0f, 0.0f, -1.0f);
+
+    textureProps.Filepath = "assets/textures/RustedIron/rustediron2_basecolor.png";
+    auto rustedTexture = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/RustedIron/rustediron2_normal.png";
+    auto rustedTextureNormal = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/RustedIron/rustediron2_metallic.png";
+    auto rustedTextureMetallic = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/RustedIron/rustediron2_roughness.png";
+    auto rustedTextureRoughness = Saba::Texture2D::Create(textureProps);
+    Ref<Saba::Material> rustedMaterial = Ref<Saba::Material>::Create(rustedTexture, rustedTextureNormal, rustedTextureMetallic, rustedTextureRoughness);
+    auto rustedCube = m_ActiveScene->CreateEntity("Rusted cube");
+    rustedCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), rustedMaterial);
+    rustedCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(-1.0f, 0.0f, 1.0f);
+
+    textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_albedo.png";
+    auto clayTexture = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_normal-ogl.png";
+    auto clayTextureNormal = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_metallic.png";
+    auto clayTextureMetallic = Saba::Texture2D::Create(textureProps);
+    textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_roughness.png";
+    auto clayTextureRoughness = Saba::Texture2D::Create(textureProps);
+    Ref<Saba::Material> clayMaterial = Ref<Saba::Material>::Create(clayTexture, clayTextureNormal, clayTextureMetallic, clayTextureRoughness);
+    auto clayCube = m_ActiveScene->CreateEntity("Clay cube");
+    clayCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), clayMaterial);
+    clayCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(1.0f, 0.0f, 2.0f);
+
+    m_ActiveScene->CreateEntity("Light 0").AddComponent<Saba::LightComponent>(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 5.0f), 50.0f);
+    m_ActiveScene->CreateEntity("Light 1").AddComponent<Saba::LightComponent>(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 5.0f), 50.0f);
 
     m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_ActiveScene);
     m_ContentBrowserPanel = CreateScope<Saba::ContentBrowserPanel>();
