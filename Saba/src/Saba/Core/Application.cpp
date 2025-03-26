@@ -151,53 +151,59 @@ bool Application::OnWindowResize(WindowResizeEvent& e) noexcept {
 }
 
 void Application::ImGuiRender() {
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->Pos);
-    ImGui::SetNextWindowSize(viewport->Size);
-    ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    if (m_Specs.DrawUI) {
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-    if (!m_Specs.CustomTitleBar && m_MenuBarCallback)
-        windowFlags |= ImGuiWindowFlags_MenuBar;
+        if (!m_Specs.CustomTitleBar && m_MenuBarCallback)
+            windowFlags |= ImGuiWindowFlags_MenuBar;
 
-    const bool isMaximized = m_Window->IsMaximized();
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
-    ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+        const bool isMaximized = m_Window->IsMaximized();
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
+        ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
 
-    ImGui::Begin("DockSpaceWindow", nullptr, windowFlags);
+        ImGui::Begin("DockSpaceWindow", nullptr, windowFlags);
 
-    ImGui::PopStyleColor();
-    ImGui::PopStyleVar(4);
-
-    if (!m_Window->IsMaximized()) {
-        ImGui::PushStyleColor(ImGuiCol_Border, IM_COL32(0x30u, 0x30u, 0x30u, 0xffu));
-        UI::RenderWindowOuterBorders(ImGui::GetCurrentWindow());
         ImGui::PopStyleColor();
+        ImGui::PopStyleVar(4);
+
+        if (!m_Window->IsMaximized()) {
+            ImGui::PushStyleColor(ImGuiCol_Border, IM_COL32(0x30u, 0x30u, 0x30u, 0xffu));
+            UI::RenderWindowOuterBorders(ImGui::GetCurrentWindow());
+            ImGui::PopStyleColor();
+        }
+
+        if (m_Specs.CustomTitleBar) {
+            float titlebarHeight;
+            DrawTitleBar(titlebarHeight);
+            ImGui::SetCursorPosY(titlebarHeight);
+        }
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        float minWinSizeX = style.WindowMinSize.x;
+        style.WindowMinSize.x = 370.0f;
+        ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+        style.WindowMinSize.x = minWinSizeX;
+
+        if (!m_Specs.CustomTitleBar)
+            DrawMenuBarUI();
+
+        for (auto *layer : *m_LayerStack)
+            layer->OnUIRender();
+
+        ImGui::End();
     }
-
-    if (m_Specs.CustomTitleBar) {
-        float titlebarHeight;
-        DrawTitleBar(titlebarHeight);
-        ImGui::SetCursorPosY(titlebarHeight);
+    else {
+        for (auto *layer : *m_LayerStack)
+            layer->OnUIRender();
     }
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    float minWinSizeX = style.WindowMinSize.x;
-    style.WindowMinSize.x = 370.0f;
-    ImGui::DockSpace(ImGui::GetID("MyDockspace"));
-    style.WindowMinSize.x = minWinSizeX;
-
-    if (!m_Specs.CustomTitleBar)
-        DrawMenuBarUI();
-
-    for (auto *layer : *m_LayerStack)
-        layer->OnUIRender();
-
-    ImGui::End();
 }
 void Application::DrawTitleBar(float& outTitlebarHeight)
 {

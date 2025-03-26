@@ -161,13 +161,30 @@ void Scene::OnUpdateRuntime(Timestep ts) {
         }
         Renderer2D::DrawCircles();
 
+        Renderer3D::SetShader(Renderer::GetShaderLibrary().Get("meshPBRShader"));
         Renderer3D::SetViewProjectionMatrix(viewProjMat);
+        Renderer3D::SetCameraPosition(m_Registry.get<TransformComponent>(m_Camera).Position);
+        Renderer3D::ResetLights();
+        auto viewLights = m_Registry.view<const LightComponent>();
+        for (auto entity : viewLights) {
+            const auto& lc = viewLights.get<const LightComponent>(entity);
+            Renderer3D::SubmitLight(lc.LightPos, glm::vec3(lc.LightColor) * lc.LightColor.a, lc.Radius);
+        }
         auto groupMesh = m_Registry.group<const MeshComponent>(entt::get<const TransformComponent>);
         for (auto entity : groupMesh) {
             const auto& [tc, mc] = groupMesh.get<const TransformComponent, const MeshComponent>(entity);
-            Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform);
+            Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform, mc.Material, static_cast<uint32_t>(entity));
         }
         Renderer3D::Draw();
+        Renderer::Render();
+    
+        Renderer3D::SetShader({});
+        auto cubeMeshID = Renderer::GetMeshLibrary().Get("Cube")->GetID();
+        for (auto entity : viewLights) {
+            const auto& lc = viewLights.get<const LightComponent>(entity);
+            Renderer3D::SubmitMeshInstance(cubeMeshID, glm::scale(glm::translate(lc.LightPos), glm::vec3(0.1f)), {}, static_cast<uint32_t>(entity));
+        }
+        Renderer3D::DrawMesh(cubeMeshID);
     }
 }
 void Scene::OnViewportResize(uint32_t width, uint32_t height) {

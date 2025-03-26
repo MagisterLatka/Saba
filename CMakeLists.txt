@@ -61,4 +61,5 @@ SabaApplyOptions()
 target_compile_features(SabaOptions INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
 add_subdirectory(Saba)
+add_subdirectory(Editor)
 add_subdirectory(App)

@@ -1,4 +1,5 @@
 #pragma once
+// #include "valgrind/callgrind.h"
 
 extern Saba::Application* Saba::CreateApplication();
 
@@ -13,7 +14,11 @@ int main(int argc, char** argv, char** envp)
         SB_CORE_ASSERT(app, "Could not initialize app!");
         app->Init();
         ImGui::SetCurrentContext(app->m_ImGuiLayer->GetContext());
+        // CALLGRIND_START_INSTRUMENTATION;
+        // CALLGRIND_TOGGLE_COLLECT;
         returnVal = app->Run();
+        // CALLGRIND_TOGGLE_COLLECT;
+        // CALLGRIND_STOP_INSTRUMENTATION;
         app->Shutdown();
     }
 #if defined(SB_PLATFORM_WINDOWS)

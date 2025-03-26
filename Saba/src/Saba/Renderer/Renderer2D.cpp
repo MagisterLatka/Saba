@@ -49,6 +49,8 @@ struct Renderer2DData {
     Ref<ConstantBuffer> viewProj;
 
     Renderer2D::Stats stats;
+
+    Ref<InputLayout> fullscreenQuadInputLayout;
 };
 static Renderer2DData s_Data;
 
@@ -121,6 +123,22 @@ void Renderer2D::Init() {
     Ref<IndexBuffer> circleIBO = IndexBuffer::Create(indices, c_MaxCircles * 6 * static_cast<uint32_t>(sizeof(uint32_t)));
     s_Data.circleInputLayout = InputLayout::Create({ circleVBO }, s_Data.circleShader, circleIBO);
     delete[] indices;
+
+    auto fullscreenQuadData = std::to_array<float>({
+        -1.0f, -1.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+         1.0f, -1.0f, 0.0f, 1.0f,   1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f,   1.0f, 1.0f,
+         1.0f,  1.0f, 0.0f, 1.0f,   1.0f, 1.0f,
+        -1.0f,  1.0f, 0.0f, 1.0f,   0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 1.0f,   0.0f, 0.0f
+    });
+    BufferLayout fullscreenQuadLayout = {
+        { "Position", BufferLayoutElementDataType::Float4 },
+        { "UV", BufferLayoutElementDataType::Float2 }
+    };
+    Ref<VertexBuffer> fullscreenVBO = VertexBuffer::Create(fullscreenQuadLayout, fullscreenQuadData.data(),
+        fullscreenQuadData.size() * static_cast<uint32_t>(sizeof(float)), BufferUsage::Immutable);
+    s_Data.fullscreenQuadInputLayout = InputLayout::Create({ fullscreenVBO });
 }
 void Renderer2D::Shutdown() {
     for (uint32_t i = 0; i < c_MaxTextures; ++i)
@@ -339,6 +357,12 @@ void Renderer2D::DrawCircles() {
 
     s_Data.circleInsert = s_Data.circleVertexData;
     s_Data.circleCount = 0u;
+}
+
+void Renderer2D::DrawFullscreenQuad() {
+    s_Data.fullscreenQuadInputLayout->Bind();
+    Renderer::GetShaderLibrary().Get("fullscreenQuadShader")->Bind();
+    RenderCommand::Draw(RendererAPI::Topology::Triangles, 6u);
 }
 
 Renderer2D::Stats Renderer2D::GetStats() noexcept {

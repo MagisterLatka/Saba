@@ -129,6 +129,39 @@ uint32_t OpenGLRendererAPI::GetTopology(Topology topology) {
 }
 
 void OpenGLRendererAPI::InitShaders() {
+    const std::string vertexFullscreen = R"(
+        #version 460 core
+
+        layout(location = 0) in vec4 i_Pos;
+        layout(location = 1) in vec2 i_UV;
+
+        out Data {
+            vec2 uv;
+        } vs_out;
+
+        void main() {
+            gl_Position = i_Pos;
+            vs_out.uv = i_UV;
+        }
+    )";
+    const std::string fragmentFullscreen = R"(
+        #version 460 core
+
+        layout(location = 0) out vec4 o_Color;
+
+        in Data {
+            vec2 uv;
+        } fs_in;
+
+        layout(binding = 0) uniform sampler2D u_Tex;
+
+        void main() {
+            o_Color = texture(u_Tex, fs_in.uv);
+        }
+    )";
+
+    Renderer::GetShaderLibrary().Load("fullscreenQuadShader", vertexFullscreen, fragmentFullscreen);
+
     const std::string vertexQuad = R"(
         #version 460 core
 
@@ -152,7 +185,7 @@ void OpenGLRendererAPI::InitShaders() {
         } vs_out;
 
         void main() {
-            gl_Position = u_ViewProjMat * i_Pos;
+            gl_Position = /*u_ViewProjMat * */i_Pos;
             vs_out.color = i_Color;
             vs_out.uv = i_UV;
             vs_out.tid = i_TID;
@@ -355,6 +388,7 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
+            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint id;
@@ -389,6 +423,7 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
+            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint id;
@@ -503,6 +538,7 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
+            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint metallicTID;
@@ -542,6 +578,7 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
+            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint metallicTID;
@@ -601,7 +638,7 @@ void OpenGLRendererAPI::InitShaders() {
 
             const vec3 viewDir = normalize(u_ViewPos_LightsCount.xyz - fs_in.pos.xyz);
 
-            const vec3 F0 = mix(vec3(0.04f), albedo.rgb, metallic);
+            const vec3 F0 = mix(vec3(0.04), albedo.rgb, metallic);
             vec3 Lo = ambient;
             for (int i = 0; i < int(u_ViewPos_LightsCount.w + 0.5f); ++i) {
                 const vec3 lightDir = normalize(u_Lights[i].lightPos.xyz - fs_in.pos.xyz);
