@@ -1,21 +1,13 @@
 project(Editor)
 
-if (WIN32)
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set (DLLFilePath "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Sabad.dll")
-    else()
-        set (DLLFilePath "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Saba.dll")
-    endif()
-endif()
-
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${outputdir}/Editor")
 
 add_subdirectory(src)
 
 if (WIN32)
     add_custom_target(CopyEditorSabaDLL ALL
-        COMMAND ${CMAKE_COMMAND} -E copy ${DLLFilePath} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        COMMENT "Copy dll file to executable"
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Editor> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND_EXPAND_LISTS
+        COMMENT "Copy dll files to executable"
     )
     add_dependencies(CopyEditorSabaDLL Saba)
 
@@ -28,7 +20,7 @@ if (WIN32)
         get_filename_component(FILE_WE ${FILE} NAME_WE)
         get_source_file_property(shaderType ${FILE} ShaderType)
         get_source_file_property(shaderModel ${FILE} ShaderModel)
-        add_custom_command(TARGET SabaShaders POST_BUILD
+        add_custom_command(TARGET SabaEditorShaders POST_BUILD
             COMMAND fxc.exe /nologo /Emain /T${shaderType}_${shaderModel} $<IF:$<CONFIG:DEBUG>,/Od,/O1> /Zi /Fo
                 ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/${FILE_WE}.vert.cso /Fd ${CMAKE_BINARY_DIR}/${FILE_WE}.vert.pbd ${FILE}
             MAIN_DEPENDENCY ${FILE}
@@ -44,7 +36,7 @@ if (WIN32)
         get_filename_component(FILE_WE ${FILE} NAME_WE)
         get_source_file_property(shaderType ${FILE} ShaderType)
         get_source_file_property(shaderModel ${FILE} ShaderModel)
-        add_custom_command(TARGET SabaShaders POST_BUILD
+        add_custom_command(TARGET SabaEditorShaders POST_BUILD
             COMMAND fxc.exe /nologo /Emain /T${shaderType}_${shaderModel} $<IF:$<CONFIG:DEBUG>,/Od,/O1> /Zi /Fo
                 ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/${FILE_WE}.frag.cso /Fd ${CMAKE_BINARY_DIR}/${FILE_WE}.frag.pbd ${FILE}
             MAIN_DEPENDENCY ${FILE}

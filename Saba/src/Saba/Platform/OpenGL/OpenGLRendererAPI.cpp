@@ -185,7 +185,7 @@ void OpenGLRendererAPI::InitShaders() {
         } vs_out;
 
         void main() {
-            gl_Position = /*u_ViewProjMat * */i_Pos;
+            gl_Position = u_ViewProjMat * i_Pos;
             vs_out.color = i_Color;
             vs_out.uv = i_UV;
             vs_out.tid = i_TID;
@@ -388,7 +388,6 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
-            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint id;
@@ -423,7 +422,6 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
-            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint id;
@@ -494,13 +492,14 @@ void OpenGLRendererAPI::InitShaders() {
             return (diffuse + specular) * max(sign(dot(fs_in.normal, lightDir)), 0.0f);
         }
         void main() {
-            const vec4 color = GetDataFromTexture(fs_in.colorTID, fs_in.uv) * fs_in.color;
+            vec4 color = GetDataFromTexture(fs_in.colorTID, fs_in.uv) * fs_in.color;
+            color.rgb = pow(color.rgb, vec3(2.2f));
             const vec3 bitangent = normalize(cross(fs_in.normal, fs_in.tangent));
             vec3 normal = (GetDataFromTexture(fs_in.normalTID, fs_in.uv).xyz * 2.0f - 1.0f) * abs(sign(fs_in.normalTID));
             normal += vec3(0.0f, 0.0f, 1.0f) * (1 - abs(sign(fs_in.normalTID)));
             normal = normalize(mat3(fs_in.tangent, bitangent, fs_in.normal) * normal);
 
-            const float ambientStrength = 0.05f;
+            const float ambientStrength = 0.005f;
             const vec3 ambient = ambientStrength * color.rgb;
 
             const vec3 viewDir = normalize(u_ViewPos_LightsCount.xyz - fs_in.pos.xyz);
@@ -509,6 +508,8 @@ void OpenGLRendererAPI::InitShaders() {
                 finalColor += GetLight(viewDir, color.rgb, normal, i);
             }
 
+            finalColor = finalColor / (finalColor + vec3(1.0f));
+            finalColor = pow(finalColor, vec3(1.0f / 2.2f));
             o_Color = vec4(finalColor, color.a);
             o_ID = fs_in.id;
         }
@@ -538,7 +539,6 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
-            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint metallicTID;
@@ -578,7 +578,6 @@ void OpenGLRendererAPI::InitShaders() {
             vec3 normal;
             vec3 tangent;
             vec2 uv;
-            flat vec3 viewPos;
             flat uint colorTID;
             flat uint normalTID;
             flat uint metallicTID;
@@ -633,7 +632,7 @@ void OpenGLRendererAPI::InitShaders() {
             const float roughness = GetDataFromTexture(fs_in.roughnessTID, fs_in.uv).r * abs(sign(fs_in.roughnessTID))
                 + 0.5f * (1 - abs(sign(fs_in.roughnessTID)));
 
-            const float ambientStrength = 0.001f;
+            const float ambientStrength = 0.005f;
             const vec3 ambient = ambientStrength * albedo.rgb;
 
             const vec3 viewDir = normalize(u_ViewPos_LightsCount.xyz - fs_in.pos.xyz);

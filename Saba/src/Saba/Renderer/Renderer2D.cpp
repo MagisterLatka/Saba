@@ -138,7 +138,7 @@ void Renderer2D::Init() {
     };
     Ref<VertexBuffer> fullscreenVBO = VertexBuffer::Create(fullscreenQuadLayout, fullscreenQuadData.data(),
         fullscreenQuadData.size() * static_cast<uint32_t>(sizeof(float)), BufferUsage::Immutable);
-    s_Data.fullscreenQuadInputLayout = InputLayout::Create({ fullscreenVBO });
+    s_Data.fullscreenQuadInputLayout = InputLayout::Create({ fullscreenVBO }, Renderer::GetShaderLibrary().Get("fullscreenQuadShader"));
 }
 void Renderer2D::Shutdown() {
     for (uint32_t i = 0; i < c_MaxTextures; ++i)

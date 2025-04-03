@@ -28,53 +28,14 @@ void EditorLayer::OnAttach() {
     m_ActiveScene->OnViewportResize(window->GetWidth(), window->GetHeight());
     m_EditorScene = m_ActiveScene;
 
-    // std::vector<Saba::MeshVertex> vertices = {
-    //     { { -0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-    //     { {  0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-    //     { {  0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-    //     { { -0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f, -1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-
-    //     { { -0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-    //     { {  0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-    //     { {  0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-    //     { { -0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  1.0f,  0.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f} },
-
-    //     { { -0.5f, -0.5f, -0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-    //     { { -0.5f,  0.5f, -0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-    //     { { -0.5f,  0.5f,  0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-    //     { { -0.5f, -0.5f,  0.5f, 1.0f }, { -1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f,  1.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-
-    //     { {  0.5f, -0.5f, -0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-    //     { {  0.5f,  0.5f, -0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-    //     { {  0.5f,  0.5f,  0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-    //     { {  0.5f, -0.5f,  0.5f, 1.0f }, {  1.0f,  0.0f,  0.0f }, {  0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f} },
-
-    //     { { -0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-    //     { {  0.5f, -0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-    //     { {  0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-    //     { { -0.5f,  0.5f, -0.5f, 1.0f }, {  0.0f,  0.0f, -1.0f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-
-    //     { { -0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-    //     { {  0.5f, -0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-    //     { {  0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} },
-    //     { { -0.5f,  0.5f,  0.5f, 1.0f }, {  0.0f,  0.0f,  1.0f }, {  1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f} }
-    // };
-    // std::vector<uint32_t> indices = {
-    //     0, 1, 2, 2, 3, 0,
-    //     4, 5, 6, 6, 7, 4,
-    //     8, 9, 10, 10, 11, 8,
-    //     12, 13, 14, 14, 15, 12,
-    //     16, 17, 18, 18, 19, 16,
-    //     20, 21, 22, 22, 23, 20
-    // };
-    // Ref<Saba::Mesh> mesh = Ref<Saba::Mesh>::Create(std::move(vertices), std::move(indices));
     textureProps.Filepath = "assets/textures/brickwall.jpg";
     auto brickTexture = Saba::Texture2D::Create(textureProps);
     textureProps.Filepath = "assets/textures/brickwall_normal.jpg";
     auto brickTextureNormal = Saba::Texture2D::Create(textureProps); 
-    Ref<Saba::Material> brickMaterial = Ref<Saba::Material>::Create(brickTexture, brickTextureNormal);
+    auto brickMaterial = Ref<Saba::Material>::Create(brickTexture, brickTextureNormal);
+    auto brickModel = Ref<Saba::Model>::Create(std::initializer_list{ Saba::Renderer::GetMeshLibrary().Get("Cube") }, brickMaterial);
     auto brickCube = m_ActiveScene->CreateEntity("Brick cube");
-    brickCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), brickMaterial);
+    brickCube.AddComponent<Saba::ModelComponent>(std::move(brickModel));
     brickCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(0.0f, 0.0f, -1.0f);
 
     textureProps.Filepath = "assets/textures/RustedIron/rustediron2_basecolor.png";
@@ -85,9 +46,10 @@ void EditorLayer::OnAttach() {
     auto rustedTextureMetallic = Saba::Texture2D::Create(textureProps);
     textureProps.Filepath = "assets/textures/RustedIron/rustediron2_roughness.png";
     auto rustedTextureRoughness = Saba::Texture2D::Create(textureProps);
-    Ref<Saba::Material> rustedMaterial = Ref<Saba::Material>::Create(rustedTexture, rustedTextureNormal, rustedTextureMetallic, rustedTextureRoughness);
+    auto rustedMaterial = Ref<Saba::Material>::Create(rustedTexture, rustedTextureNormal, rustedTextureMetallic, rustedTextureRoughness);
+    auto rustedModel = Ref<Saba::Model>::Create(std::initializer_list{ Saba::Renderer::GetMeshLibrary().Get("Cube") }, rustedMaterial);
     auto rustedCube = m_ActiveScene->CreateEntity("Rusted cube");
-    rustedCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), rustedMaterial);
+    rustedCube.AddComponent<Saba::ModelComponent>(rustedModel);
     rustedCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(-1.0f, 0.0f, 1.0f);
 
     textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_albedo.png";
@@ -98,13 +60,22 @@ void EditorLayer::OnAttach() {
     auto clayTextureMetallic = Saba::Texture2D::Create(textureProps);
     textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_roughness.png";
     auto clayTextureRoughness = Saba::Texture2D::Create(textureProps);
-    Ref<Saba::Material> clayMaterial = Ref<Saba::Material>::Create(clayTexture, clayTextureNormal, clayTextureMetallic, clayTextureRoughness);
+    auto clayMaterial = Ref<Saba::Material>::Create(clayTexture, clayTextureNormal, clayTextureMetallic, clayTextureRoughness);
+    auto clayModel = Ref<Saba::Model>::Create(std::initializer_list{ Saba::Renderer::GetMeshLibrary().Get("Cube") }, clayMaterial);
     auto clayCube = m_ActiveScene->CreateEntity("Clay cube");
-    clayCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), clayMaterial);
+    clayCube.AddComponent<Saba::ModelComponent>(clayModel);
     clayCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(1.0f, 0.0f, 2.0f);
+
+    auto sphere = m_ActiveScene->CreateEntity("Sphere");
+    sphere.GetTransformComponent().Position = glm::vec3(0.0f, -2.0f, 0.0f);
+    sphere.GetTransformComponent().Size = glm::vec3(0.5f, 0.5f, 0.5f);
+    auto model = Ref<Saba::Model>::Create("assets/models/sphere.fbx", clayMaterial);
+    sphere.AddComponent<Saba::ModelComponent>(model);
 
     m_ActiveScene->CreateEntity("Light 0").AddComponent<Saba::LightComponent>(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 5.0f), 50.0f);
     m_ActiveScene->CreateEntity("Light 1").AddComponent<Saba::LightComponent>(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 5.0f), 50.0f);
+
+    m_ActiveScene->CreateAndSetCameraEntity(Ref<Saba::PerspectiveCamera>::Create(16.0f / 9.0f)).GetTransformComponent().Position.z = 3.0f;
 
     m_SceneHierarchyPanel = CreateScope<Saba::SceneHierarchyPanel>(m_ActiveScene);
     m_ContentBrowserPanel = CreateScope<Saba::ContentBrowserPanel>();

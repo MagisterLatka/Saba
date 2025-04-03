@@ -15,6 +15,8 @@ public:
     SB_CORE void SetSelected(Entity entity = {}) noexcept;
     SB_CORE Entity GetSelected() const noexcept { return m_Selected; }
 
+    SB_CORE void Open();
+
     SB_CORE void OnUIRender();
 private:
     SB_CORE void DrawEntityNode(Entity entity);
@@ -22,6 +24,7 @@ private:
 private:
     Ref<Scene> m_Scene;
     Entity m_Selected;
+    bool m_Open;
 };
 
 }

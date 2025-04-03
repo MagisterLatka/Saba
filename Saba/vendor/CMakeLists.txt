@@ -1,5 +1,14 @@
 add_subdirectory(glfw)
 add_subdirectory(glad)
 add_subdirectory(stb_image)
+
+set(YAML_CPP_BUILD_TOOLS OFF)
 add_subdirectory(yaml-cpp)
+
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_INSTALL OFF)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF)
+set(ASSIMP_INJECT_DEBUG_POSTFIX OFF)
+set(ASSIMP_BUILD_ZLIB)
+set(BUILD_SHARED_LIBS ON)
 add_subdirectory(assimp)

@@ -26,9 +26,10 @@ void ExampleLayer::OnAttach() {
     auto brickTexture = Saba::Texture2D::Create(textureProps);
     textureProps.Filepath = "assets/textures/brickwall_normal.jpg";
     auto brickTextureNormal = Saba::Texture2D::Create(textureProps); 
-    Ref<Saba::Material> brickMaterial = Ref<Saba::Material>::Create(brickTexture, brickTextureNormal);
+    auto brickMaterial = Ref<Saba::Material>::Create(brickTexture, brickTextureNormal);
+    auto brickModel = Ref<Saba::Model>::Create(std::initializer_list{ Saba::Renderer::GetMeshLibrary().Get("Cube") }, brickMaterial);
     auto brickCube = m_Scene->CreateEntity("Brick cube");
-    brickCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), brickMaterial);
+    brickCube.AddComponent<Saba::ModelComponent>(std::move(brickModel));
     brickCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(0.0f, 0.0f, -1.0f);
 
     textureProps.Filepath = "assets/textures/RustedIron/rustediron2_basecolor.png";
@@ -39,9 +40,10 @@ void ExampleLayer::OnAttach() {
     auto rustedTextureMetallic = Saba::Texture2D::Create(textureProps);
     textureProps.Filepath = "assets/textures/RustedIron/rustediron2_roughness.png";
     auto rustedTextureRoughness = Saba::Texture2D::Create(textureProps);
-    Ref<Saba::Material> rustedMaterial = Ref<Saba::Material>::Create(rustedTexture, rustedTextureNormal, rustedTextureMetallic, rustedTextureRoughness);
+    auto rustedMaterial = Ref<Saba::Material>::Create(rustedTexture, rustedTextureNormal, rustedTextureMetallic, rustedTextureRoughness);
+    auto rustedModel = Ref<Saba::Model>::Create(std::initializer_list{ Saba::Renderer::GetMeshLibrary().Get("Cube") }, rustedMaterial);
     auto rustedCube = m_Scene->CreateEntity("Rusted cube");
-    rustedCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), rustedMaterial);
+    rustedCube.AddComponent<Saba::ModelComponent>(rustedModel);
     rustedCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(-1.0f, 0.0f, 1.0f);
 
     textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_albedo.png";
@@ -52,15 +54,22 @@ void ExampleLayer::OnAttach() {
     auto clayTextureMetallic = Saba::Texture2D::Create(textureProps);
     textureProps.Filepath = "assets/textures/ClayShingles/clay-shingles1_roughness.png";
     auto clayTextureRoughness = Saba::Texture2D::Create(textureProps);
-    Ref<Saba::Material> clayMaterial = Ref<Saba::Material>::Create(clayTexture, clayTextureNormal, clayTextureMetallic, clayTextureRoughness);
+    auto clayMaterial = Ref<Saba::Material>::Create(clayTexture, clayTextureNormal, clayTextureMetallic, clayTextureRoughness);
+    auto clayModel = Ref<Saba::Model>::Create(std::initializer_list{ Saba::Renderer::GetMeshLibrary().Get("Cube") }, clayMaterial);
     auto clayCube = m_Scene->CreateEntity("Clay cube");
-    clayCube.AddComponent<Saba::MeshComponent>(Saba::Renderer::GetMeshLibrary().Get("Cube"), clayMaterial);
+    clayCube.AddComponent<Saba::ModelComponent>(clayModel);
     clayCube.GetComponent<Saba::TransformComponent>().Position = glm::vec3(1.0f, 0.0f, 2.0f);
+
+    auto sphere = m_Scene->CreateEntity("Sphere");
+    sphere.GetTransformComponent().Position = glm::vec3(0.0f, -2.0f, 0.0f);
+    sphere.GetTransformComponent().Size = glm::vec3(0.5f, 0.5f, 0.5f);
+    auto model = Ref<Saba::Model>::Create("assets/models/sphere.fbx", clayMaterial);
+    sphere.AddComponent<Saba::ModelComponent>(model);
 
     m_Scene->CreateEntity("Light 0").AddComponent<Saba::LightComponent>(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 5.0f), 50.0f);
     m_Scene->CreateEntity("Light 1").AddComponent<Saba::LightComponent>(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 5.0f), 50.0f);
 
-    m_Scene->CreateAndSetCameraEntity();
+    m_Scene->CreateAndSetCameraEntity(Ref<Saba::PerspectiveCamera>::Create(16.0f / 9.0f)).GetTransformComponent().Position.z = 3.0f;
 }
 void ExampleLayer::OnDetach() {
     m_Scene.Reset();

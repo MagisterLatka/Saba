@@ -137,6 +137,34 @@ void DX11RendererAPI::SetTopology(ComPtr<ID3D11DeviceContext> context, Topology 
 }
 
 void DX11RendererAPI::InitShaders() {
+    const std::string vertexFullscreen = R"(
+        struct VSOut {
+            float4 pos : SV_Position;
+            float2 uv : UV;
+        };
+        VSOut main(float4 pos : Position, float2 uv : UV) {
+            VSOut output;
+            output.pos = pos;
+            output.uv = uv;
+            return output;
+        }
+    )";
+    const std::string fragmentFullscreen = R"(
+        struct FSIn {
+            float4 pos : SV_Position;
+            float2 uv : UV;
+        };
+
+        Texture2D<float4> u_Texture;
+        SamplerState u_Sampler;
+
+        float4 main(FSIn input) : SV_Target0 {
+            return u_Texture.Sample(u_Sampler, input.uv);
+        }
+    )";
+
+    Renderer::GetShaderLibrary().Load("fullscreenQuadShader", vertexFullscreen, fragmentFullscreen);
+
     const std::string vertexQuad = R"(
         struct VSOut {
             float4 pos : SV_Position;
@@ -383,13 +411,14 @@ void DX11RendererAPI::InitShaders() {
         FSOut main(FSIn input) {
             FSOut output;
 
-            const float4 color = GetDataFromTexture(input.colorTID, input.uv) * input.color;
+            float4 color = GetDataFromTexture(input.colorTID, input.uv) * input.color;
+            color.rgb = pow(abs(color.rgb), float3(2.2f, 2.2f, 2.2f));
             const float3 bitangent = normalize(cross(input.normal, input.tangent));
             float3 normal = (GetDataFromTexture(input.normalTID, input.uv).xyz * 2.0f - 1.0f) * abs(sign(input.normalTID));
             normal += float3(0.0f, 0.0f, 1.0f) * (1 - abs(sign(input.normalTID)));
             normal = normalize(mul(normal, float3x3(input.tangent, bitangent, input.normal)));
 
-            const float ambientStrength = 0.05f;
+            const float ambientStrength = 0.005f;
             const float3 ambient = ambientStrength * color.rgb;
 
             const float3 viewDir = normalize(u_ViewPos_LightsCount.xyz - input.localPos.xyz);
@@ -398,6 +427,9 @@ void DX11RendererAPI::InitShaders() {
                 finalColor += GetLight(input.localPos.xyz, input.color.rgb, viewDir, normal, input.normal, i);
             }
 
+            finalColor = finalColor / (finalColor + 1.0f);
+            const float val = 1.0f / 2.2f;
+            finalColor = pow(abs(finalColor), float3(val, val, val));
             output.color = float4(finalColor, color.a);
             output.id = input.id;
             return output;
@@ -525,7 +557,7 @@ void DX11RendererAPI::InitShaders() {
             FSOut output;
 
             float4 albedo = GetDataFromTexture(input.colorTID, input.uv) * input.color;
-            albedo.rgb = pow(albedo.rgb, float3(2.2f, 2.2f, 2.2f));
+            albedo.rgb = pow(abs(albedo.rgb), float3(2.2f, 2.2f, 2.2f));
 
             const float3 bitangent = normalize(cross(input.normal, input.tangent));
             float3 normal = (GetDataFromTexture(input.normalTID, input.uv).xyz * 2.0f - 1.0f) * abs(sign(input.normalTID))
@@ -537,7 +569,7 @@ void DX11RendererAPI::InitShaders() {
             const float roughness = GetDataFromTexture(input.roughnessTID, input.uv).r * abs(sign(input.roughnessTID))
                 + 0.5f * (1 - abs(sign(input.roughnessTID)));
 
-            const float ambientStrength = 0.001f;
+            const float ambientStrength = 0.005f;
             const float3 ambient = ambientStrength * albedo.rgb;
 
             const float3 viewDir = normalize(u_ViewPos_LightsCount.xyz - input.localPos.xyz);
@@ -565,7 +597,7 @@ void DX11RendererAPI::InitShaders() {
             }
 
             Lo = Lo / (Lo + float3(1.0f, 1.0f, 1.0f));
-            Lo = pow(Lo, float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f)); //temp HDR and gamma correction
+            Lo = pow(abs(Lo), float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f)); //temp HDR and gamma correction
 
             output.color = float4(Lo, albedo.a);
             output.id = input.id;

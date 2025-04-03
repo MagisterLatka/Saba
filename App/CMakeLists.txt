@@ -1,21 +1,13 @@
 project(App)
 
-if (WIN32)
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set (DLLFilePath "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Sabad.dll")
-    else()
-        set (DLLFilePath "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Saba.dll")
-    endif()
-endif()
-
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${outputdir}/App")
 
 add_subdirectory(src)
 
 if (WIN32)
     add_custom_target(CopySabaDLL ALL
-        COMMAND ${CMAKE_COMMAND} -E copy ${DLLFilePath} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        COMMENT "Copy dll file to executable"
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:App> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND_EXPAND_LISTS
+        COMMENT "Copy dll files to executable"
     )
     add_dependencies(CopySabaDLL Saba)
 

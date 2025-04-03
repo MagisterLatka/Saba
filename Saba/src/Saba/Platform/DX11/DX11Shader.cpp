@@ -115,18 +115,18 @@ void DX11Shader::CompileFromSource()
 #endif
 
     ID3DBlob* errorMsgs = nullptr;
-    D3DCompile(m_FsSource.c_str(), m_FsSource.length(), nullptr, nullptr, nullptr, "main", "ps_5_0", compileFlags, 0u, &m_VSource, &errorMsgs);
+    D3DCompile(m_FsSource.c_str(), m_FsSource.length(), m_Name.c_str(), nullptr, nullptr, "main", "ps_5_0", compileFlags, 0u, &m_VSource, &errorMsgs);
     if (errorMsgs != nullptr) {
-        std::string errors = "Vertex shader compilation failed: ";
+        std::string errors = "Fragment shader compilation failed: ";
         errors.append(reinterpret_cast<const char*>(errorMsgs->GetBufferPointer()), errorMsgs->GetBufferSize());
         SB_CORE_THROW_INFO(errors);
         errorMsgs->Release();
     }
     SB_DX_GRAPHICS_CALL_INFO(device->CreatePixelShader(m_VSource->GetBufferPointer(), m_VSource->GetBufferSize(), nullptr, &m_FShader));
 
-    D3DCompile(m_VsSource.c_str(), m_VsSource.length(), nullptr, nullptr, nullptr, "main", "vs_5_0", compileFlags, 0u, &m_VSource, &errorMsgs);
+    D3DCompile(m_VsSource.c_str(), m_VsSource.length(), m_Name.c_str(), nullptr, nullptr, "main", "vs_5_0", compileFlags, 0u, &m_VSource, &errorMsgs);
     if (errorMsgs != nullptr) {
-        std::string errors = "Fragment shader compilation failed: ";
+        std::string errors = "Vertex shader compilation failed: ";
         errors.append(reinterpret_cast<const char*>(errorMsgs->GetBufferPointer()), errorMsgs->GetBufferSize());
         SB_CORE_THROW_INFO(errors);
         errorMsgs->Release();

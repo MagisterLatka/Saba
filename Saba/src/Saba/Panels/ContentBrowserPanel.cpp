@@ -16,8 +16,15 @@ ContentBrowserPanel::ContentBrowserPanel()
     m_FileIcon = Texture2D::Create(props);
 }
 
+void ContentBrowserPanel::Open() {
+    m_Open = true;
+}
+
 void ContentBrowserPanel::OnUIRender() {
-    ImGui::Begin("Content Browser");
+    if (!m_Open)
+        return;
+
+    ImGui::Begin("Content Browser", &m_Open);
 
     if (m_CurrentDir != g_AssetsPath) {
         if (ImGui::Button("<-"))
