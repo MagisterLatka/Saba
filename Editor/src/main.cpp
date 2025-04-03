@@ -31,6 +31,14 @@ Saba::Application* Saba::CreateApplication()
 
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Panels")) {
+            if (ImGui::MenuItem("Scene Hierarchy Panel"))
+                layer->m_SceneHierarchyPanel->Open();
+            if (ImGui::MenuItem("Content Browser Panel"))
+                layer->m_ContentBrowserPanel->Open();
+
+            ImGui::EndMenu();
+        }
     });
     return app;
 }

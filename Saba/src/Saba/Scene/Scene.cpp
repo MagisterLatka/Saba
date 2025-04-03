@@ -46,7 +46,8 @@ void Scene::DuplicateEntity(Entity entity) {
     CopyComponent<TransformComponent>(entity, e);
     CopyComponent<SpriteComponent>(entity, e);
     CopyComponent<CircleComponent>(entity, e);
-    CopyComponent<MeshComponent>(entity, e);
+    CopyComponent<ModelComponent>(entity, e);
+    CopyComponent<LightComponent>(entity, e);
     CopyComponent<CameraComponent>(entity, e);
     CopyComponent<NativeScriptComponent>(entity, e);
 }
@@ -110,10 +111,12 @@ void Scene::OnUpdateEditor([[maybe_unused]] Timestep ts, const EditorCamera& cam
         const auto& lc = viewLights.get<const LightComponent>(entity);
         Renderer3D::SubmitLight(lc.LightPos, glm::vec3(lc.LightColor) * lc.LightColor.a, lc.Radius);
     }
-    auto groupMesh = m_Registry.group<const MeshComponent>(entt::get<const TransformComponent>);
+    auto groupMesh = m_Registry.group<const ModelComponent>(entt::get<const TransformComponent>);
     for (auto entity : groupMesh) {
-        const auto& [tc, mc] = groupMesh.get<const TransformComponent, const MeshComponent>(entity);
-        Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform, mc.Material, static_cast<uint32_t>(entity));
+        const auto& [tc, mc] = groupMesh.get<const TransformComponent, const ModelComponent>(entity);
+        for (const auto& mesh : mc.Model->GetMeshes()) {
+            Renderer3D::SubmitMeshInstance(mesh, tc.Transform, mc.Model->GetMaterial(), static_cast<uint32_t>(entity));
+        }
     }
     Renderer3D::Draw();
     Renderer::Render();
@@ -170,14 +173,16 @@ void Scene::OnUpdateRuntime(Timestep ts) {
             const auto& lc = viewLights.get<const LightComponent>(entity);
             Renderer3D::SubmitLight(lc.LightPos, glm::vec3(lc.LightColor) * lc.LightColor.a, lc.Radius);
         }
-        auto groupMesh = m_Registry.group<const MeshComponent>(entt::get<const TransformComponent>);
+        auto groupMesh = m_Registry.group<const ModelComponent>(entt::get<const TransformComponent>);
         for (auto entity : groupMesh) {
-            const auto& [tc, mc] = groupMesh.get<const TransformComponent, const MeshComponent>(entity);
-            Renderer3D::SubmitMeshInstance(mc.Mesh, tc.Transform, mc.Material, static_cast<uint32_t>(entity));
+            const auto& [tc, mc] = groupMesh.get<const TransformComponent, const ModelComponent>(entity);
+            for (const auto& mesh : mc.Model->GetMeshes()) {
+                Renderer3D::SubmitMeshInstance(mesh, tc.Transform, mc.Model->GetMaterial(), static_cast<uint32_t>(entity));
+            }
         }
         Renderer3D::Draw();
         Renderer::Render();
-    
+
         Renderer3D::SetShader({});
         auto cubeMeshID = Renderer::GetMeshLibrary().Get("Cube")->GetID();
         for (auto entity : viewLights) {
@@ -229,6 +234,8 @@ Ref<Scene> Scene::Copy(Ref<Scene> scene) {
     CopyComponent<SpriteComponent>(scene->m_Registry, newScene->m_Registry, entities);
     CopyComponent<CircleComponent>(scene->m_Registry, newScene->m_Registry, entities);
     CopyComponent<CameraComponent>(scene->m_Registry, newScene->m_Registry, entities);
+    CopyComponent<ModelComponent>(scene->m_Registry, newScene->m_Registry, entities);
+    CopyComponent<LightComponent>(scene->m_Registry, newScene->m_Registry, entities);
     CopyComponent<NativeScriptComponent>(scene->m_Registry, newScene->m_Registry, entities);
 
     if (scene->m_Camera != entt::null)
@@ -246,7 +253,7 @@ SB_CORE void Scene::OnComponentAdd<TransformComponent>([[maybe_unused]] Entity e
 template<>
 SB_CORE void Scene::OnComponentAdd<CircleComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] CircleComponent& component) {}
 template<>
-SB_CORE void Scene::OnComponentAdd<MeshComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] MeshComponent& component) {}
+SB_CORE void Scene::OnComponentAdd<ModelComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] ModelComponent& component) {}
 template<>
 SB_CORE void Scene::OnComponentAdd<LightComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] LightComponent& component) {}
 template<>

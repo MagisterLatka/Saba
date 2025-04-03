@@ -3,8 +3,7 @@
 #include "Saba/Core/UUID.h"
 #include "Saba/Renderer/Texture.h"
 #include "Saba/Renderer/Camera.h"
-#include "Saba/Renderer/Mesh.h"
-#include "Saba/Renderer/Material.h"
+#include "Saba/Renderer/Model.h"
 
 namespace Saba {
 
@@ -110,18 +109,19 @@ struct CameraComponent {
     SB_CORE CameraComponent& operator=(CameraComponent&&) noexcept = default;
 };
 
-struct MeshComponent {
-    Ref<Saba::Mesh> Mesh;
-    Ref<Saba::Material> Material;
+struct ModelComponent {
+    Ref<Saba::Model> Model;
 
-    SB_CORE MeshComponent() noexcept = default;
-    SB_CORE MeshComponent(const MeshComponent&) noexcept = default;
-    SB_CORE MeshComponent(MeshComponent&&) noexcept = default;
-    SB_CORE MeshComponent(Ref<Saba::Mesh> mesh, Ref<Saba::Material> material = {}) noexcept
-        : Mesh(std::move(mesh)), Material(std::move(material)) {}
+    SB_CORE ModelComponent() noexcept = default;
+    SB_CORE ModelComponent(const ModelComponent&) noexcept = default;
+    SB_CORE ModelComponent(ModelComponent&&) noexcept = default;
+    SB_CORE ModelComponent(Ref<Saba::Model> model) noexcept
+        : Model(std::move(model)) {}
+    SB_CORE ModelComponent(const std::filesystem::path& filepath, Ref<Material> material = {}) noexcept
+        : Model(Ref<Saba::Model>::Create(filepath, std::move(material))) {}
 
-    SB_CORE MeshComponent& operator=(const MeshComponent&) noexcept = default;
-    SB_CORE MeshComponent& operator=(MeshComponent&&) noexcept = default;
+    SB_CORE ModelComponent& operator=(const ModelComponent&) noexcept = default;
+    SB_CORE ModelComponent& operator=(ModelComponent&&) noexcept = default;
 };
 
 struct LightComponent {
@@ -166,7 +166,7 @@ struct NativeScriptComponent {
 
 template<typename T>
 concept Component = std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent>
-    || std::is_same_v<T, CircleComponent> || std::is_same_v<T, SpriteComponent> || std::is_same_v<T, MeshComponent>
+    || std::is_same_v<T, CircleComponent> || std::is_same_v<T, SpriteComponent> || std::is_same_v<T, ModelComponent>
     || std::is_same_v<T, LightComponent> || std::is_same_v<T, CameraComponent> || std::is_same_v<T, NativeScriptComponent>;
 
 }

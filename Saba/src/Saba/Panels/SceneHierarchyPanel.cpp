@@ -17,8 +17,15 @@ void SceneHierarchyPanel::SetSelected(Entity entity) noexcept {
         m_Selected = entity;
 }
 
+void SceneHierarchyPanel::Open() {
+    m_Open = true;
+}
+
 void SceneHierarchyPanel::OnUIRender() {
-    ImGui::Begin("Scene hierarchy");
+    if (!m_Open)
+        return;
+
+    ImGui::Begin("Scene hierarchy", &m_Open);
 
     if (m_Scene) {
         std::string buffer = m_Scene->m_Name;
@@ -129,7 +136,7 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
 
     if (ImGui::BeginPopup("add")) {
         bool hasOneOfExcluding = entity.HasComponent<CameraComponent>() || entity.HasComponent<SpriteComponent>()
-            || entity.HasComponent<CircleComponent>() || entity.HasComponent<MeshComponent>() || entity.HasComponent<LightComponent>();
+            || entity.HasComponent<CircleComponent>() || entity.HasComponent<ModelComponent>() || entity.HasComponent<LightComponent>();
         if (!hasOneOfExcluding) {
             if (ImGui::MenuItem("Camera")) {
                 entity.AddComponent<CameraComponent>();
@@ -196,15 +203,55 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
         UI::DragFloat("Tilling factor", component.TillingFactor, 1.0f, 0.01f, 10.0f, 0.01f, columnWidth);
     });
     DrawComponent<CameraComponent>("Camera component", entity, [](CameraComponent& component) {
-        if (!component.Camera)
-            return;
+        if (!component.Camera) {
+            component.Camera = Ref<OrthographicCamera>::Create();
+        }
+
+        static auto options = std::to_array<std::string>({
+            "Orthographic",
+            "Perspective"
+        });
+        uint32_t option = component.Camera.CanConvert<PerspectiveCamera>();
+        if (ImGui::BeginCombo("Camera type", options[option].c_str(), ImGuiComboFlags_HeightSmall)) {
+            for (const auto& [i, line] : options | std::views::enumerate) {
+                const bool isSelected = option == i;
+                if (ImGui::Selectable(line.c_str(), isSelected)) {
+                    option = static_cast<uint32_t>(i);
+                }
+
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
 
         if (component.Camera.CanConvert<OrthographicCamera>()) {
+            if (option != 0u) {
+                component.Camera = Ref<PerspectiveCamera>::Create();
+                return;
+            }
+
             auto camera = component.Camera.As<OrthographicCamera>();
 
             bool changed = false;
             changed |= UI::DragFloat("Aspect ratio", camera->m_AspectRatio, 16.0f / 9.0f, 0.01f, 5.0f, 0.01f, columnWidth);
             changed |= UI::DragFloat("Size", camera->m_Size, 1.0f, 0.5f, 20.0f, 0.1f, columnWidth);
+            changed |= UI::DragFloat("Near clip", camera->m_NearClip, -1.0f, -10.0f, -1.0f, 0.1f, columnWidth);
+            changed |= UI::DragFloat("Far clip", camera->m_FarClip, 1.0f, 1.0f, 10.0f, 0.1f, columnWidth);
+            if (changed)
+                camera->Recalc();
+        }
+        else {
+            if (option != 1u) {
+                component.Camera = Ref<OrthographicCamera>::Create();
+                return;
+            }
+
+            auto camera = component.Camera.As<PerspectiveCamera>();
+
+            bool changed = false;
+            changed |= UI::DragFloat("Aspect ratio", camera->m_AspectRatio, 16.0f / 9.0f, 0.01f, 5.0f, 0.01f, columnWidth);
+            changed |= UI::DragFloat("FOV", camera->m_Fov, glm::half_pi<float>(), glm::radians(10.0f), glm::radians(120.0f), 0.1f, columnWidth);
             changed |= UI::DragFloat("Near clip", camera->m_NearClip, -1.0f, -10.0f, -1.0f, 0.1f, columnWidth);
             changed |= UI::DragFloat("Far clip", camera->m_FarClip, 1.0f, 1.0f, 10.0f, 0.1f, columnWidth);
             if (changed)
