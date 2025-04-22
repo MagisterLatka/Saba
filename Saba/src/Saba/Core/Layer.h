@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Saba/Core/Core.h"
 #include "Saba/Core/Timestep.h"
 #include "Saba/Events/Event.h"
 
@@ -9,15 +8,15 @@ namespace Saba {
 class Layer
 {
 public:
-    SB_CORE Layer(const std::string& name = "Layer") noexcept
-        : m_Name(name) {}
-    SB_CORE virtual ~Layer() = default;
+    Layer(std::string name = "Layer") noexcept
+        : m_Name(std::move(name)) {}
+    virtual ~Layer() = default;
 
-    SB_CORE virtual void OnAttach() {}
-    SB_CORE virtual void OnDetach() {}
-    SB_CORE virtual void OnUpdate([[maybe_unused]] Timestep ts) {}
-    SB_CORE virtual void OnUIRender() {}
-    SB_CORE virtual void OnEvent([[maybe_unused]] Event& e) {}
+    virtual void OnAttach() {}
+    virtual void OnDetach() {}
+    virtual void OnUpdate([[maybe_unused]] Timestep ts) {}
+    virtual void OnUIRender() {}
+    virtual void OnEvent([[maybe_unused]] Event& e) {}
 protected:
     std::string m_Name;
 };

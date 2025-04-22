@@ -25,49 +25,13 @@ class Log {
 public:
     SB_CORE static void Init();
 
-    SB_CORE static std::shared_ptr<spdlog::logger> GetCoreLogger() noexcept { return s_CoreLogger; }
-    SB_CORE static std::shared_ptr<spdlog::logger> GetClientLogger() noexcept { return s_ClientLogger; }
+    static std::shared_ptr<spdlog::logger> GetCoreLogger() noexcept { return s_CoreLogger; }
+    static std::shared_ptr<spdlog::logger> GetClientLogger() noexcept { return s_ClientLogger; }
 private:
     SB_CORE static std::shared_ptr<spdlog::logger> s_CoreLogger;
     SB_CORE static std::shared_ptr<spdlog::logger> s_ClientLogger;
 };
 
-inline std::string Format(const std::string &text) noexcept {
-    return text;
-}
-template <typename T>
-std::string Format(const std::string &text, int argNum, T &&arg) noexcept {
-    std::ostringstream oss;
-    size_t a = text.find('{' + std::to_string(argNum) + '}');
-    size_t b = 0;
-    while (a != std::string::npos) {
-        oss << text.substr(b, a - b);
-        oss << arg;
-        b = a + 2 + std::to_string(argNum).length();
-        a = text.find('{' + std::to_string(argNum) + '}', b);
-    }
-    if (b < text.length())
-        oss << text.substr(b);
-    std::string output = oss.str();
-    return output;
-}
-template <typename T, typename... Args>
-std::string Format(const std::string &text, int argNum, T &&arg,
-                   Args &&...args) noexcept {
-    std::ostringstream oss;
-    size_t a = text.find('{' + std::to_string(argNum) + '}');
-    size_t b = 0;
-    while (a != std::string::npos) {
-        oss << text.substr(b, a - b);
-        oss << arg;
-        b = a + 2 + std::to_string(argNum).length();
-        a = text.find('{' + std::to_string(argNum) + '}', b);
-    }
-    if (b < text.length())
-        oss << text.substr(b);
-    std::string output = oss.str();
-    return Format(output, ++argNum, std::forward<Args>(args)...);
-}
 } // namespace Saba
 
 #define SB_CORE_TRACE(...)    Saba::Log::GetCoreLogger()->trace(__VA_ARGS__)

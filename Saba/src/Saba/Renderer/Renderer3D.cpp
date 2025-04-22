@@ -20,7 +20,8 @@ static constexpr uint32_t c_MaxTextures = 16u;
 
 struct MeshData {
     Ref<InputLayout> inputLayout;
-    MeshInstanceData* instanceData, *instanceInsert;
+    Ref<VertexBuffer> copyBuffer;
+    MeshInstanceData* instanceData = nullptr, *instanceInsert = nullptr;
     uint32_t instanceCount = 0u;
 };
 struct LightData {
@@ -29,7 +30,7 @@ struct LightData {
     glm::vec4 lightRadiusConstants;
 };
 struct LightsBufferData {
-    LightData lights[c_MaxLights];
+    std::array<LightData, c_MaxLights> lights;
     glm::vec4 viewPos_LightsCount;
 };
 struct Renderer3DData {
@@ -58,7 +59,7 @@ void Renderer3D::Init() {
     Buffer lightsBuffer = Buffer(new LightsBufferData, sizeof(LightsBufferData));
     s_Data.lightsBuffer = ConstantBuffer::Create(BufferShaderBinding::Fragment, std::move(lightsBuffer));
     s_Data.lightsData = s_Data.lightsBuffer->GetLocalData().As<LightsBufferData>();
-    s_Data.lightsInsert = s_Data.lightsData->lights;
+    s_Data.lightsInsert = s_Data.lightsData->lights.data();
 
     uint32_t texData = 0xffffffffu;
     s_Data.textures[0] = Texture2D::Create(1u, 1u, &texData);
@@ -116,20 +117,21 @@ void Renderer3D::InitMesh(Ref<Mesh> mesh) {
         { "Color", BufferLayoutElementDataType::Float4 }
     };
     Ref<VertexBuffer> verticesVBO = VertexBuffer::Create(std::move(verticesLayout), mesh->GetVertices().data(),
-        static_cast<uint32_t>(mesh->GetVertices().size() * sizeof(MeshVertex)), BufferUsage::Immutable);
+        static_cast<uint32_t>(mesh->GetVertices().size() * sizeof(MeshVertex)), GraphicsBufferUsage::Immutable);
     
     BufferLayout instancesLayout = {
         { "Transform", BufferLayoutElementDataType::Mat4, false, 1u },
         { "TIDs", BufferLayoutElementDataType::UInt4, false, 1u },
         { "EntityID", BufferLayoutElementDataType::UInt, false, 1u }
     };
+    Ref<VertexBuffer> instancesVBO = VertexBuffer::Create(std::move(instancesLayout), nullptr, c_InstanceBufferSize, GraphicsBufferUsage::Default);
     Buffer instancesBuffer = Buffer(new MeshInstanceData[c_MaxInstances], c_InstanceBufferSize, true);
-    Ref<VertexBuffer> instancesVBO = VertexBuffer::Create(std::move(instancesLayout), std::move(instancesBuffer), BufferUsage::Dynamic);
-    meshData.instanceData = reinterpret_cast<MeshInstanceData*>(instancesVBO->GetLocalData().Data);
+    meshData.copyBuffer = VertexBuffer::Create(BufferLayout{}, std::move(instancesBuffer), GraphicsBufferUsage::Staging);
+    meshData.instanceData = reinterpret_cast<MeshInstanceData*>(meshData.copyBuffer->GetLocalData().Data);
     meshData.instanceInsert = meshData.instanceData;
 
     Ref<IndexBuffer> ibo = IndexBuffer::Create(mesh->GetIndices().data(), static_cast<uint32_t>(mesh->GetIndices().size() * sizeof(uint32_t)),
-        BufferUsage::Immutable);
+        GraphicsBufferUsage::Immutable);
     meshData.inputLayout = InputLayout::Create({ verticesVBO, instancesVBO }, s_Data.shader, ibo);
 
     s_Data.meshes.emplace(mesh->GetID(), std::move(meshData));
@@ -144,7 +146,7 @@ void Renderer3D::Shutdown() {
 
 void Renderer3D::SetShader(Ref<Shader> shader) {
     if (shader)
-        s_Data.shader = shader;
+        s_Data.shader = std::move(shader);
     else
         s_Data.shader = Renderer::GetShaderLibrary().Get("meshClearShader");
 }
@@ -308,7 +310,8 @@ void Renderer3D::DrawMesh(UUID meshID) {
     if (meshData.instanceCount == 0u)
         return;
 
-    meshData.inputLayout->GetVertexBuffer(1u)->UploadCurrent();
+    meshData.copyBuffer->UploadCurrent();
+    meshData.copyBuffer->TransferToBuffer(meshData.inputLayout->GetVertexBuffer(1u), c_InstanceBufferSize);
     meshData.inputLayout->Bind();
 
     s_Data.shader->Bind();
@@ -341,8 +344,8 @@ void Renderer3D::SubmitLight(const glm::vec3& lightPos, const glm::vec3& lightCo
     ++s_Data.lightsCount;
 }
 void Renderer3D::ResetLights() {
-    s_Data.lightsInsert = s_Data.lightsData->lights;
+    s_Data.lightsInsert = s_Data.lightsData->lights.data();
     s_Data.lightsCount = 0u;
 }
 
-}
+} //namespace Saba

@@ -4,83 +4,80 @@
 
 namespace Saba {
 
-class OpenGLVertexBuffer : public VertexBuffer {
+class OpenGLGraphicsBuffer : virtual public GraphicsBuffer {
+public:
+    OpenGLGraphicsBuffer(const void* data, uint32_t size, GraphicsBufferUsage usage);
+    OpenGLGraphicsBuffer(const Buffer& buffer, GraphicsBufferUsage usage);
+    OpenGLGraphicsBuffer(Buffer&& buffer, GraphicsBufferUsage usage);
+    virtual ~OpenGLGraphicsBuffer();
+
+    void SetData(const void* data, uint32_t size, uint32_t offset) override;
+    void SetData(const Buffer& buffer, uint32_t offset) override;
+    void SetData(Buffer&& buffer, uint32_t offset) override;
+
+    Buffer& GetLocalData() override { return m_Data; }
+    void UploadCurrent(uint32_t offset) override;
+
+    void TransferToBuffer(Ref<GraphicsBuffer> other, uint32_t dataSize, uint32_t offset, uint32_t otherOffset) override;
+
+    uint32_t GetSize() const noexcept override { return m_Size; }
+protected:
+    void Create();
+    void Update(uint32_t offset);
+protected:
+    Buffer m_Data;
+    uint32_t m_ID = 0u, m_Size = 0u;
+    GraphicsBufferUsage m_Usage;
+};
+
+class OpenGLVertexBuffer : public OpenGLGraphicsBuffer, public VertexBuffer {
     friend class OpenGLInputLayout;
 public:
-    SB_CORE OpenGLVertexBuffer(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage);
-    SB_CORE OpenGLVertexBuffer(BufferLayout layout, const Buffer& buffer, BufferUsage usage);
-    SB_CORE OpenGLVertexBuffer(BufferLayout layout, Buffer&& buffer, BufferUsage usage);
-    SB_CORE ~OpenGLVertexBuffer();
+    OpenGLVertexBuffer(BufferLayout layout, const void* data, uint32_t size, GraphicsBufferUsage usage)
+        : OpenGLGraphicsBuffer(data, size, usage), m_Layout(std::move(layout)) {}
+    OpenGLVertexBuffer(BufferLayout layout, const Buffer& buffer, GraphicsBufferUsage usage)
+        : OpenGLGraphicsBuffer(buffer, usage), m_Layout(std::move(layout)) {}
+    OpenGLVertexBuffer(BufferLayout layout, Buffer&& buffer, GraphicsBufferUsage usage)
+        : OpenGLGraphicsBuffer(std::move(buffer), usage), m_Layout(std::move(layout)) {}
+    ~OpenGLVertexBuffer() = default;
 
-    SB_CORE void SetData(const void* data, uint32_t size, uint32_t offset = 0u) override;
-    SB_CORE void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
-    SB_CORE void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
-
-    SB_CORE Buffer& GetLocalData() override { return m_Data; }
-    SB_CORE void UploadCurrent(uint32_t offset = 0u) override;
-
-    SB_CORE const BufferLayout& GetLayout() const noexcept override { return m_Layout; }
-    SB_CORE uint32_t GetSize() const noexcept override { return m_Size; }
-private:
-    SB_CORE void Create();
-    SB_CORE void Update(uint32_t offset);
-    SB_CORE void Bind() const;
+    const BufferLayout& GetLayout() const noexcept override { return m_Layout; }
 private:
     BufferLayout m_Layout;
-    Buffer m_Data;
-    uint32_t m_ID = 0u, m_Size = 0u;
-    BufferUsage m_Usage;
 };
 
-class OpenGLIndexBuffer : public IndexBuffer {
+class OpenGLIndexBuffer : public OpenGLGraphicsBuffer, public IndexBuffer {
     friend class OpenGLInputLayout;
 public:
-    SB_CORE OpenGLIndexBuffer(const uint32_t* data, uint32_t size, BufferUsage usage);
-    SB_CORE OpenGLIndexBuffer(const Buffer& buffer, BufferUsage usage);
-    SB_CORE OpenGLIndexBuffer(Buffer&& buffer, BufferUsage usage);
-    SB_CORE ~OpenGLIndexBuffer();
+    OpenGLIndexBuffer(const void* data, uint32_t size, GraphicsBufferUsage usage)
+        : OpenGLGraphicsBuffer(data, size, usage) {}
+    OpenGLIndexBuffer(const Buffer& buffer, GraphicsBufferUsage usage)
+        : OpenGLGraphicsBuffer(buffer, usage) {}
+    OpenGLIndexBuffer(Buffer&& buffer, GraphicsBufferUsage usage)
+        : OpenGLGraphicsBuffer(std::move(buffer), usage) {}
+    ~OpenGLIndexBuffer() = default;
 
-    SB_CORE void SetData(const uint32_t* data, uint32_t size, uint32_t offset = 0u) override;
-    SB_CORE void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
-    SB_CORE void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
-
-    SB_CORE uint32_t GetSize() const noexcept override { return m_Size; }
-    SB_CORE uint32_t GetIndicesCount() const noexcept override { return m_Size / sizeof(uint32_t); }
-private:
-    SB_CORE void Create();
-    SB_CORE void Update(uint32_t offset);
-    SB_CORE void Bind() const;
-private:
-    Buffer m_Data;
-    uint32_t m_ID = 0u, m_Size = 0u;
-    BufferUsage m_Usage;
+    uint32_t GetIndicesCount() const noexcept override { return m_Size / sizeof(uint32_t); }
 };
 
-class OpenGLConstantBuffer : public ConstantBuffer {
+class OpenGLConstantBuffer : public OpenGLGraphicsBuffer, public ConstantBuffer {
 public:
-    SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, const void* data, uint32_t size);
-    SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, const Buffer& buffer);
-    SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, Buffer&& buffer);
-    SB_CORE OpenGLConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer);
-    SB_CORE ~OpenGLConstantBuffer();
+    OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding binding, const void* data, uint32_t size)
+        : OpenGLGraphicsBuffer(data, size, GraphicsBufferUsage::Default) {}
+    OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding binding, const Buffer& buffer)
+        : OpenGLGraphicsBuffer(buffer, GraphicsBufferUsage::Default) {}
+    OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding binding, Buffer&& buffer)
+        : OpenGLGraphicsBuffer(std::move(buffer), GraphicsBufferUsage::Default) {}
+    OpenGLConstantBuffer([[maybe_unused]] BufferShaderBinding binding, const UniformBufferBase& buffer)
+        : OpenGLGraphicsBuffer(buffer.GetBuffer(), buffer.GetBufferSize(), GraphicsBufferUsage::Default) {}
+    ~OpenGLConstantBuffer() = default;
 
-    SB_CORE void SetData(const void* data, uint32_t size) override;
-    SB_CORE void SetData(const Buffer& buffer) override;
-    SB_CORE void SetData(Buffer&& buffer) override;
-    SB_CORE void SetData(const UniformBufferBase& buffer) override;
+    void SetData(const void* data, uint32_t size, uint32_t offset) override;
+    void SetData(const Buffer& buffer, uint32_t offset) override;
+    void SetData(Buffer&& buffer, uint32_t offset) override;
+    void SetData(const UniformBufferBase& buffer) override;
 
-    SB_CORE Buffer& GetLocalData() override { return m_Data; }
-    SB_CORE void UploadCurrent() override;
-
-    SB_CORE void Bind(uint32_t slot) const override;
-
-    SB_CORE uint32_t GetSize() const noexcept override { return m_Size; }
-private:
-    SB_CORE void Create();
-    SB_CORE void Update();
-private:
-    Buffer m_Data;
-    uint32_t m_ID = 0u, m_Size = 0u;
+    void Bind(uint32_t slot) const override;
 };
 
-}
+} //namespace Saba

@@ -62,4 +62,5 @@ public:
 private:
     uint8_t m_Code;
 };
+
 } // namespace Saba

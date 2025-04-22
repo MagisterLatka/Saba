@@ -10,51 +10,51 @@ namespace Saba {
 struct IDComponent {
     UUID ID;
 
-    SB_CORE IDComponent() noexcept = default;
-    SB_CORE IDComponent(UUID id) noexcept : ID(id) {}
-    SB_CORE IDComponent(const IDComponent&) noexcept = default;
-    SB_CORE IDComponent(IDComponent&&) noexcept = default;
+    IDComponent() noexcept = default;
+    IDComponent(UUID id) noexcept : ID(id) {}
+    IDComponent(const IDComponent&) noexcept = default;
+    IDComponent(IDComponent&&) noexcept = default;
 
-    SB_CORE IDComponent& operator=(const IDComponent&) noexcept = default;
-    SB_CORE IDComponent& operator=(IDComponent&&) noexcept = default;
+    IDComponent& operator=(const IDComponent&) noexcept = default;
+    IDComponent& operator=(IDComponent&&) noexcept = default;
 };
 
 struct TagComponent {
     std::string Tag;
 
-    SB_CORE TagComponent() noexcept = default;
-    SB_CORE TagComponent(const TagComponent&) noexcept = default;
-    SB_CORE TagComponent(TagComponent&&) noexcept = default;
-    SB_CORE TagComponent(std::string tag) noexcept : Tag(std::move(tag)) {}
+    TagComponent() noexcept = default;
+    TagComponent(const TagComponent&) noexcept = default;
+    TagComponent(TagComponent&&) noexcept = default;
+    TagComponent(std::string tag) noexcept : Tag(std::move(tag)) {}
 
-    SB_CORE TagComponent& operator=(std::string tag) noexcept { Tag = std::move(tag); return *this; }
-    SB_CORE TagComponent& operator=(const TagComponent& other) noexcept = default;
-    SB_CORE TagComponent& operator=(TagComponent&& other) noexcept = default;
+    TagComponent& operator=(std::string tag) noexcept { Tag = std::move(tag); return *this; }
+    TagComponent& operator=(const TagComponent& other) noexcept = default;
+    TagComponent& operator=(TagComponent&& other) noexcept = default;
 
-    SB_CORE operator std::string&() noexcept { return Tag; }
-    SB_CORE operator const std::string&() const noexcept { return Tag; }
+    operator std::string&() noexcept { return Tag; }
+    operator const std::string&() const noexcept { return Tag; }
 };
 
 struct TransformComponent {
     glm::mat4 Transform = glm::mat4(1.0f);
     glm::vec3 Position = glm::vec3(0.0f), Orientation = glm::vec3(0.0f), Size = glm::vec3(1.0f);
 
-    SB_CORE TransformComponent() noexcept = default;
-    SB_CORE TransformComponent(const TransformComponent&) noexcept = default;
-    SB_CORE TransformComponent(TransformComponent&&) noexcept = default;
-    SB_CORE TransformComponent(glm::mat4 transform) noexcept : Transform(transform) {
+    TransformComponent() noexcept = default;
+    TransformComponent(const TransformComponent&) noexcept = default;
+    TransformComponent(TransformComponent&&) noexcept = default;
+    TransformComponent(glm::mat4 transform) noexcept : Transform(transform) {
         glm::quat orientation;
         glm::vec3 skew;
         glm::vec4 perspective;
         glm::decompose(Transform, Size, orientation, Position, skew, perspective);
         Orientation = glm::eulerAngles(orientation);
     }
-    SB_CORE TransformComponent(glm::vec3 position, glm::vec3 orientation = glm::vec3(0.0f), glm::vec3 size = glm::vec3(1.0f)) noexcept
+    TransformComponent(glm::vec3 position, glm::vec3 orientation = glm::vec3(0.0f), glm::vec3 size = glm::vec3(1.0f)) noexcept
         : Position(position), Orientation(orientation), Size(size) {}
 
-    SB_CORE TransformComponent& operator=(const TransformComponent&) noexcept = default;
-    SB_CORE TransformComponent& operator=(TransformComponent&&) noexcept = default;
-    SB_CORE TransformComponent& operator=(glm::mat4 transform) noexcept {
+    TransformComponent& operator=(const TransformComponent&) noexcept = default;
+    TransformComponent& operator=(TransformComponent&&) noexcept = default;
+    TransformComponent& operator=(glm::mat4 transform) noexcept {
         Transform = transform;
         glm::quat orientation;
         glm::vec3 skew;
@@ -64,22 +64,22 @@ struct TransformComponent {
         return *this;
     }
 
-    SB_CORE operator glm::mat4&() noexcept { return Transform; }
-    SB_CORE operator const glm::mat4&() const noexcept { return Transform; }
+    operator glm::mat4&() noexcept { return Transform; }
+    operator const glm::mat4&() const noexcept { return Transform; }
 };
 
 struct CircleComponent {
     glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     float Thickness = 1.0f, Fade = 0.005f;
 
-    SB_CORE CircleComponent() noexcept = default;
-    SB_CORE CircleComponent(const CircleComponent&) noexcept = default;
-    SB_CORE CircleComponent(CircleComponent&&) noexcept = default;
-    SB_CORE CircleComponent(glm::vec4 color, float thickness = 1.0f, float fade = 0.005f) noexcept
+    CircleComponent() noexcept = default;
+    CircleComponent(const CircleComponent&) noexcept = default;
+    CircleComponent(CircleComponent&&) noexcept = default;
+    CircleComponent(glm::vec4 color, float thickness = 1.0f, float fade = 0.005f) noexcept
         : Color(color), Thickness(thickness), Fade(fade) {}
 
-    SB_CORE CircleComponent& operator=(const CircleComponent&) noexcept = default;
-    SB_CORE CircleComponent& operator=(CircleComponent&&) noexcept = default;
+    CircleComponent& operator=(const CircleComponent&) noexcept = default;
+    CircleComponent& operator=(CircleComponent&&) noexcept = default;
 };
 
 struct SpriteComponent {
@@ -87,41 +87,41 @@ struct SpriteComponent {
     Ref<Texture2D> Texture;
     float TillingFactor = 1.0f;
 
-    SB_CORE SpriteComponent() noexcept = default;
-    SB_CORE SpriteComponent(const SpriteComponent&) noexcept = default;
-    SB_CORE SpriteComponent(SpriteComponent&&) noexcept = default;
-    SB_CORE SpriteComponent(glm::vec4 color, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f) noexcept
+    SpriteComponent() noexcept = default;
+    SpriteComponent(const SpriteComponent&) noexcept = default;
+    SpriteComponent(SpriteComponent&&) noexcept = default;
+    SpriteComponent(glm::vec4 color, Ref<Texture2D> texture = {}, float tillingFactor = 1.0f) noexcept
         : Color(color), Texture(std::move(texture)), TillingFactor(tillingFactor) {}
 
-    SB_CORE SpriteComponent& operator=(const SpriteComponent&) noexcept = default;
-    SB_CORE SpriteComponent& operator=(SpriteComponent&&) noexcept = default;
+    SpriteComponent& operator=(const SpriteComponent&) noexcept = default;
+    SpriteComponent& operator=(SpriteComponent&&) noexcept = default;
 };
 
 struct CameraComponent {
     Ref<Saba::Camera> Camera;
 
-    SB_CORE CameraComponent() noexcept = default;
-    SB_CORE CameraComponent(const CameraComponent&) noexcept = default;
-    SB_CORE CameraComponent(CameraComponent&&) noexcept = default;
-    SB_CORE CameraComponent(Ref<Saba::Camera> camera) noexcept : Camera(std::move(camera)) {}
+    CameraComponent() noexcept = default;
+    CameraComponent(const CameraComponent&) noexcept = default;
+    CameraComponent(CameraComponent&&) noexcept = default;
+    CameraComponent(Ref<Saba::Camera> camera) noexcept : Camera(std::move(camera)) {}
 
-    SB_CORE CameraComponent& operator=(const CameraComponent&) noexcept = default;
-    SB_CORE CameraComponent& operator=(CameraComponent&&) noexcept = default;
+    CameraComponent& operator=(const CameraComponent&) noexcept = default;
+    CameraComponent& operator=(CameraComponent&&) noexcept = default;
 };
 
 struct ModelComponent {
     Ref<Saba::Model> Model;
 
-    SB_CORE ModelComponent() noexcept = default;
-    SB_CORE ModelComponent(const ModelComponent&) noexcept = default;
-    SB_CORE ModelComponent(ModelComponent&&) noexcept = default;
-    SB_CORE ModelComponent(Ref<Saba::Model> model) noexcept
+    ModelComponent() noexcept = default;
+    ModelComponent(const ModelComponent&) noexcept = default;
+    ModelComponent(ModelComponent&&) noexcept = default;
+    ModelComponent(Ref<Saba::Model> model) noexcept
         : Model(std::move(model)) {}
-    SB_CORE ModelComponent(const std::filesystem::path& filepath, Ref<Material> material = {}) noexcept
+    ModelComponent(const std::filesystem::path& filepath, Ref<Material> material = {}) noexcept
         : Model(Ref<Saba::Model>::Create(filepath, std::move(material))) {}
 
-    SB_CORE ModelComponent& operator=(const ModelComponent&) noexcept = default;
-    SB_CORE ModelComponent& operator=(ModelComponent&&) noexcept = default;
+    ModelComponent& operator=(const ModelComponent&) noexcept = default;
+    ModelComponent& operator=(ModelComponent&&) noexcept = default;
 };
 
 struct LightComponent {
@@ -129,14 +129,14 @@ struct LightComponent {
     glm::vec4 LightColor = glm::vec4(1.0f);
     float Radius = 1.0f;
 
-    SB_CORE LightComponent() noexcept = default;
-    SB_CORE LightComponent(const LightComponent&) noexcept = default;
-    SB_CORE LightComponent(LightComponent&&) noexcept = default;
-    SB_CORE LightComponent(glm::vec3 lightPos, glm::vec4 lightColor, float radius) noexcept
+    LightComponent() noexcept = default;
+    LightComponent(const LightComponent&) noexcept = default;
+    LightComponent(LightComponent&&) noexcept = default;
+    LightComponent(glm::vec3 lightPos, glm::vec4 lightColor, float radius) noexcept
         : LightPos(lightPos), LightColor(lightColor), Radius(radius) {}
 
-    SB_CORE LightComponent& operator=(const LightComponent&) noexcept = default;
-    SB_CORE LightComponent& operator=(LightComponent&&) noexcept = default;
+    LightComponent& operator=(const LightComponent&) noexcept = default;
+    LightComponent& operator=(LightComponent&&) noexcept = default;
 };
 
 class ScriptableEntity;
@@ -150,7 +150,7 @@ struct NativeScriptComponent {
     requires(std::is_base_of_v<ScriptableEntity, T>)
     void Bind() {
         InstantiateScript = []() { return reinterpret_cast<ScriptableEntity*>(new T()); };
-        DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+        DestroyScript = [](NativeScriptComponent* nsc) { delete reinterpret_cast<T*>(nsc->Instance); nsc->Instance = nullptr; };
     }
     template<typename T>
     requires(std::is_base_of_v<ScriptableEntity, T>)
@@ -165,8 +165,7 @@ struct NativeScriptComponent {
 };
 
 template<typename T>
-concept Component = std::is_same_v<T, IDComponent> || std::is_same_v<T, TagComponent> || std::is_same_v<T, TransformComponent>
-    || std::is_same_v<T, CircleComponent> || std::is_same_v<T, SpriteComponent> || std::is_same_v<T, ModelComponent>
-    || std::is_same_v<T, LightComponent> || std::is_same_v<T, CameraComponent> || std::is_same_v<T, NativeScriptComponent>;
+concept Component = IsOneOf<T, IDComponent, TagComponent, TransformComponent, CircleComponent, SpriteComponent,
+    ModelComponent, LightComponent, CameraComponent, NativeScriptComponent>;
 
-}
+} //namespace Saba

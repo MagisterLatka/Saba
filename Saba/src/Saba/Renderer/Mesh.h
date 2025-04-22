@@ -18,12 +18,12 @@ public:
 
     Mesh(const Mesh&) = delete;
     Mesh& operator=(const Mesh&) = delete;
-    SB_CORE Mesh(Mesh&&) = default;
-    SB_CORE Mesh& operator=(Mesh&&) = default;
+    Mesh(Mesh&&) = default;
+    Mesh& operator=(Mesh&&) = default;
 
-    SB_CORE UUID GetID() const noexcept { return m_ID; }
-    SB_CORE const std::vector<MeshVertex>& GetVertices() const noexcept { return m_Vertices; }
-    SB_CORE const std::vector<uint32_t>& GetIndices() const noexcept { return m_Indices; }
+    UUID GetID() const noexcept { return m_ID; }
+    const std::vector<MeshVertex>& GetVertices() const noexcept { return m_Vertices; }
+    const std::vector<uint32_t>& GetIndices() const noexcept { return m_Indices; }
 private:
     std::vector<MeshVertex> m_Vertices;
     std::vector<uint32_t> m_Indices;
@@ -32,8 +32,8 @@ private:
 
 class MeshLibrary {
 public:
-    SB_CORE MeshLibrary() = default;
-    SB_CORE ~MeshLibrary() = default;
+    MeshLibrary() = default;
+    ~MeshLibrary() = default;
 
     SB_CORE Ref<Mesh> Add(const std::string& name, Ref<Mesh> mesh);
     SB_CORE Ref<Mesh> Load(const std::string& name, std::vector<MeshVertex> vertices, std::vector<uint32_t> indices);
@@ -42,4 +42,4 @@ private:
     std::unordered_map<std::string, Ref<Mesh>> m_Meshes;
 };
 
-}
+} //namespace Saba

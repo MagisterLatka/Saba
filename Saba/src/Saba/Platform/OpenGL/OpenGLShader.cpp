@@ -98,7 +98,7 @@ void OpenGLShader::Compile() {
             glGetShaderInfoLog(vertexID, maxLength, &maxLength, infoLog.data());
 
             glDeleteShader(vertexID);
-            SB_CORE_THROW_INFO(std::string("Shader compilation failed (" + instance->m_VPath.string() + "):\n" + infoLog.data()));
+            SB_CORE_THROW_INFO("Shader compilation failed ({0}):\n{1}", instance->m_VPath.string(), infoLog.data());
         }
         glAttachShader(instance->m_ID, vertexID);
 
@@ -115,9 +115,7 @@ void OpenGLShader::Compile() {
             glGetShaderInfoLog(fragmentID, maxLength, &maxLength, infoLog.data());
 
             glDeleteShader(fragmentID);
-            SB_CORE_THROW_INFO(std::string("Shader compilation failed (" +
-                (instance->m_FPath.empty() ? instance->m_VPath.string() : instance->m_FPath.string()) +
-                "):\n" + infoLog.data()));
+            SB_CORE_THROW_INFO("Shader compilation failed ({0}):\n{1}", instance->m_FPath.empty() ? instance->m_VPath.string() : instance->m_FPath.string(), infoLog.data());
         }
         glAttachShader(instance->m_ID, fragmentID);
 
@@ -130,7 +128,7 @@ void OpenGLShader::Compile() {
             glGetProgramiv(instance->m_ID, GL_INFO_LOG_LENGTH, &maxLength);
             std::vector<GLchar> infoLog(static_cast<size_t>(maxLength));
             glGetProgramInfoLog(instance->m_ID, maxLength, &maxLength, infoLog.data());
-            SB_CORE_THROW_INFO("Shader linking failed (" + instance->m_VPath.string() + "):\n" + infoLog.data());
+            SB_CORE_THROW_INFO("Shader linking failed ({0}):\n{1}", instance->m_VPath.string(), infoLog.data());
             glDeleteProgram(instance->m_ID);
         }
 
@@ -160,4 +158,4 @@ void OpenGLShader::AddReloadedCallback(ShaderReloadedCallback callback) noexcept
     m_ShaderReloadedCallbacks.push_back(std::move(callback));
 }
 
-}
+} //namespace Saba

@@ -18,7 +18,7 @@ public:
     SB_CORE const Texture2DProps& GetProps() const noexcept override { return m_Props; }
     SB_CORE uint32_t GetWidth() const noexcept override { return m_Props.Width; }
     SB_CORE uint32_t GetHeight() const noexcept override { return m_Props.Height; }
-    SB_CORE void* GetRawPointer() const noexcept override { return m_View.Get(); }
+    SB_CORE uint64_t GetRawPointer() const noexcept override { return (uint64_t)m_View.Get(); }
 
     SB_CORE bool IsLoaded() const noexcept override { return m_Loaded; }
 private:

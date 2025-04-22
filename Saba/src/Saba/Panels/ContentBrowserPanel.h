@@ -9,9 +9,9 @@ inline static const std::filesystem::path g_AssetsPath = "assets";
 class ContentBrowserPanel {
 public:
     SB_CORE ContentBrowserPanel();
-    SB_CORE ~ContentBrowserPanel() = default;
+    ~ContentBrowserPanel() = default;
 
-    SB_CORE void Open();
+    SB_CORE void Open() noexcept;
 
     SB_CORE void OnUIRender();
 private:
@@ -20,4 +20,4 @@ private:
     bool m_Open = false;
 };
 
-}
+} //namespace Saba

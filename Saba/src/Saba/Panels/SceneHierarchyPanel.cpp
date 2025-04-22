@@ -17,7 +17,7 @@ void SceneHierarchyPanel::SetSelected(Entity entity) noexcept {
         m_Selected = entity;
 }
 
-void SceneHierarchyPanel::Open() {
+void SceneHierarchyPanel::Open() noexcept {
     m_Open = true;
 }
 
@@ -269,4 +269,4 @@ void SceneHierarchyPanel::DrawComponents(Entity entity) {
     });
 }
 
-}
+} //namespace Saba

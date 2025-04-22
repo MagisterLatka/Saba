@@ -69,7 +69,7 @@ static GLenum GetBlendOp(RendererAPI::BlendOperation op) {
     SB_CORE_THROW_INFO("Invalid blend operation");
     return GL_FUNC_ADD;
 }
-static void OpenGLMessageCallback(GLenum source, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id,
+[[maybe_unused]] static void OpenGLMessageCallback(GLenum source, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id,
     GLenum severity, [[maybe_unused]] GLsizei length, const GLchar* message, [[maybe_unused]] const void* userParam)
 {
     const char* Source;
@@ -775,7 +775,7 @@ void OpenGLRendererAPI::SetRasterizerOptions(TriangleFillMode fillMode, Triangle
         glFrontFace(GL_CW);
 }
 void OpenGLRendererAPI::SetBlendOptions(uint32_t i, bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation,
-    BlendOption sourceAlphaBlend, BlendOption destinationAlphaBlend, BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
+    BlendOption sourceAlphaBlend, BlendOption destinationAlphaBlend, BlendOperation alphaOperation, [[maybe_unused]] uint8_t writeMask, glm::vec4 blendFactor)
 {
     if (enable)
         glEnablei(GL_BLEND, i);
@@ -787,4 +787,4 @@ void OpenGLRendererAPI::SetBlendOptions(uint32_t i, bool enable, BlendOption sou
     glBlendColor(blendFactor.r, blendFactor.g, blendFactor.b, blendFactor.a);
 }
 
-}
+} //namespace Saba

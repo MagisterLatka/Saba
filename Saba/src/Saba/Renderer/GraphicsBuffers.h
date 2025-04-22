@@ -95,40 +95,42 @@ private:
     BufferLayoutElements m_Elements;
     uint32_t m_Stride;
 };
-enum class BufferUsage : uint8_t { None = 0, Default, Dynamic, Immutable };
+enum class GraphicsBufferUsage : uint8_t { None = 0, Default, Dynamic, Staging, Immutable, Last = Immutable };
 
-class VertexBuffer : public RefCounted {
+class GraphicsBuffer : public RefCounted {
 public:
-    SB_CORE virtual ~VertexBuffer() = default;
+    virtual ~GraphicsBuffer() = default;
 
-    SB_CORE virtual void SetData(const void* data, uint32_t size, uint32_t offset = 0u) = 0;
-    SB_CORE virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) = 0;
-    SB_CORE virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) = 0;
+    virtual void SetData(const void* data, uint32_t size, uint32_t offset = 0u) = 0;
+    virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) = 0;
+    virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) = 0;
 
-    SB_CORE virtual Buffer& GetLocalData() = 0;
-    SB_CORE virtual void UploadCurrent(uint32_t offset = 0u) = 0;
+    virtual Buffer& GetLocalData() = 0;
+    virtual void UploadCurrent(uint32_t offset = 0u) = 0;
 
-    SB_CORE virtual const BufferLayout& GetLayout() const noexcept = 0;
-    SB_CORE virtual uint32_t GetSize() const noexcept = 0;
+    virtual void TransferToBuffer(Ref<GraphicsBuffer> other, uint32_t dataSize, uint32_t offset = 0u, uint32_t otherOffset = 0u) = 0;
 
-    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage = BufferUsage::Default);
-    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, const Buffer& buffer, BufferUsage usage = BufferUsage::Default);
-    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, Buffer&& buffer, BufferUsage usage = BufferUsage::Default);
+    virtual uint32_t GetSize() const noexcept = 0;
 };
-class IndexBuffer : public RefCounted {
+class VertexBuffer : virtual public GraphicsBuffer {
 public:
-    SB_CORE virtual ~IndexBuffer() = default;
+    virtual ~VertexBuffer() = default;
 
-    SB_CORE virtual void SetData(const uint32_t* data, uint32_t size, uint32_t offset = 0u) = 0;
-    SB_CORE virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) = 0;
-    SB_CORE virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) = 0;
+    virtual const BufferLayout& GetLayout() const noexcept = 0;
 
-    SB_CORE virtual uint32_t GetSize() const noexcept = 0;
-    SB_CORE virtual uint32_t GetIndicesCount() const noexcept = 0;
+    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, const void* data, uint32_t size, GraphicsBufferUsage usage = GraphicsBufferUsage::Default);
+    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, const Buffer& buffer, GraphicsBufferUsage usage = GraphicsBufferUsage::Default);
+    SB_CORE static Ref<VertexBuffer> Create(BufferLayout layout, Buffer&& buffer, GraphicsBufferUsage usage = GraphicsBufferUsage::Default);
+};
+class IndexBuffer : virtual public GraphicsBuffer {
+public:
+    virtual ~IndexBuffer() = default;
 
-    SB_CORE static Ref<IndexBuffer> Create(const uint32_t* data, uint32_t size, BufferUsage usage = BufferUsage::Default);
-    SB_CORE static Ref<IndexBuffer> Create(const Buffer& buffer, BufferUsage usage = BufferUsage::Default);
-    SB_CORE static Ref<IndexBuffer> Create(Buffer&& buffer, BufferUsage usage = BufferUsage::Default);
+    virtual uint32_t GetIndicesCount() const noexcept = 0;
+
+    SB_CORE static Ref<IndexBuffer> Create(const uint32_t* data, uint32_t size, GraphicsBufferUsage usage = GraphicsBufferUsage::Default);
+    SB_CORE static Ref<IndexBuffer> Create(const Buffer& buffer, GraphicsBufferUsage usage = GraphicsBufferUsage::Default);
+    SB_CORE static Ref<IndexBuffer> Create(Buffer&& buffer, GraphicsBufferUsage usage = GraphicsBufferUsage::Default);
 };
 
 enum class UniformType : uint8_t {
@@ -151,7 +153,7 @@ struct UniformBufferBase {
 };
 template<uint32_t N, uint32_t U>
 struct UniformBuffer : public UniformBufferBase {
-    static constexpr uint32_t c_Alignment = 16u;    
+    static constexpr uint32_t c_Alignment = 16u;
     static_assert(N % c_Alignment == 0, "Uniform buffer size must be a multiple of 16 bytes");
 
     UniformDecl Uniforms[U];
@@ -250,21 +252,16 @@ struct UniformBuffer : public UniformBufferBase {
 };
 enum class BufferShaderBinding : uint8_t { None = 0, Vertex, Fragment };
 
-class ConstantBuffer : public RefCounted {
+class ConstantBuffer : virtual public GraphicsBuffer {
 public:
-    SB_CORE virtual ~ConstantBuffer() = default;
+    virtual ~ConstantBuffer() = default;
 
-    SB_CORE virtual void SetData(const void* data, uint32_t size) = 0;
-    SB_CORE virtual void SetData(const Buffer& buffer) = 0;
-    SB_CORE virtual void SetData(Buffer&& buffer) = 0;
-    SB_CORE virtual void SetData(const UniformBufferBase& buffer) = 0;
+    void SetData(const void* data, uint32_t size, uint32_t offset = 0u) override = 0;
+    void SetData(const Buffer& buffer, uint32_t offset = 0u) override = 0;
+    void SetData(Buffer&& buffer, uint32_t offset = 0u) override = 0;
+    virtual void SetData(const UniformBufferBase& buffer) = 0;
 
-    SB_CORE virtual Buffer& GetLocalData() = 0;
-    SB_CORE virtual void UploadCurrent() = 0;
-
-    SB_CORE virtual void Bind(uint32_t slot = 0) const = 0;
-
-    SB_CORE virtual uint32_t GetSize() const noexcept = 0;
+    virtual void Bind(uint32_t slot = 0) const = 0;
 
     SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, const void* data, uint32_t size);
     SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, const Buffer& buffer);
@@ -272,4 +269,4 @@ public:
     SB_CORE static Ref<ConstantBuffer> Create(BufferShaderBinding binding, const UniformBufferBase& buffer);
 };
 
-}
+} //namespace Saba

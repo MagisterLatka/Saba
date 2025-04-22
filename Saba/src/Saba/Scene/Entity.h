@@ -8,10 +8,10 @@ namespace Saba {
 class Entity {
     friend class Scene;
 public:
-    SB_CORE Entity() noexcept = default;
-    SB_CORE Entity(entt::entity handle, Scene* scene) noexcept
+    Entity() noexcept = default;
+    Entity(entt::entity handle, Scene* scene) noexcept
         : m_Handle(handle), m_Scene(scene) {}
-    SB_CORE ~Entity() noexcept = default;
+    ~Entity() noexcept = default;
 
     template<Component T>
     bool HasComponent() const {
@@ -48,23 +48,23 @@ public:
         return m_Scene->m_Registry.get<const T>(m_Handle);
     }
 
-    SB_CORE const Scene* GetScene() const noexcept { return m_Scene; }
+    const Scene* GetScene() const noexcept { return m_Scene; }
 
-    SB_CORE UUID GetID() const noexcept { return GetComponent<IDComponent>().ID; }
+    UUID GetID() const noexcept { return GetComponent<IDComponent>().ID; }
 
-    SB_CORE glm::mat4& GetTransform() { return m_Scene->m_Registry.get<TransformComponent>(m_Handle).Transform; }
-    SB_CORE const glm::mat4& GetTransform() const { return m_Scene->m_Registry.get<TransformComponent>(m_Handle).Transform; }
-    SB_CORE TransformComponent& GetTransformComponent() { return m_Scene->m_Registry.get<TransformComponent>(m_Handle); }
-    SB_CORE const TransformComponent& GetTransformComponent() const { return m_Scene->m_Registry.get<TransformComponent>(m_Handle); }
+    glm::mat4& GetTransform() { return m_Scene->m_Registry.get<TransformComponent>(m_Handle).Transform; }
+    const glm::mat4& GetTransform() const { return m_Scene->m_Registry.get<TransformComponent>(m_Handle).Transform; }
+    TransformComponent& GetTransformComponent() { return m_Scene->m_Registry.get<TransformComponent>(m_Handle); }
+    const TransformComponent& GetTransformComponent() const { return m_Scene->m_Registry.get<TransformComponent>(m_Handle); }
 
-    SB_CORE operator uint32_t() const noexcept { return static_cast<uint32_t>(m_Handle); }
-    SB_CORE operator bool() const noexcept { return m_Handle != entt::null && m_Scene != nullptr; }
-    SB_CORE operator entt::entity() const noexcept { return m_Handle; }
+    operator uint32_t() const noexcept { return static_cast<uint32_t>(m_Handle); }
+    operator bool() const noexcept { return m_Handle != entt::null && m_Scene != nullptr; }
+    operator entt::entity() const noexcept { return m_Handle; }
 
-    SB_CORE bool operator==(const Entity& other) const noexcept { return m_Handle == other.m_Handle && m_Scene == other.m_Scene; }
+    bool operator==(const Entity& other) const noexcept { return m_Handle == other.m_Handle && m_Scene == other.m_Scene; }
 private:
     entt::entity m_Handle = entt::null;
     Scene* m_Scene = nullptr;
 };
 
-}
+} //namespace Saba

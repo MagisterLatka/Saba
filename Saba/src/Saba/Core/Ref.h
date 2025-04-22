@@ -2,8 +2,7 @@
 
 namespace Saba {
 
-class SB_CORE RefCounted
-{
+class SB_CORE RefCounted {
 public:
     void IncrementRefCount() const noexcept { ++m_RefCount; }
     void DecrementRefCount() const noexcept { --m_RefCount; }
@@ -14,9 +13,8 @@ private:
 };
 
 template<typename T>
-class Ref
-{
-    static_assert(std::is_base_of_v<RefCounted, T>);
+class Ref {
+    static_assert(std::is_base_of_v<RefCounted, std::remove_cv_t<T>>);
 public:
     Ref() noexcept
         : m_Instance(nullptr) {}
@@ -32,40 +30,41 @@ public:
     {
         Increment();
     }
-    template<typename T2>
-    Ref(const Ref<T2>& other) noexcept
+    Ref(Ref<T>&& other) noexcept
+        : m_Instance(other.m_Instance)
     {
-        static_assert(std::is_base_of_v<RefCounted, T2>);
-        static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
-        m_Instance = static_cast<T*>(other.m_Instance);
+        other.m_Instance = nullptr;
+    }
+    template<typename T2>
+    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
+    Ref(const Ref<T2>& other) noexcept {
+        m_Instance = dynamic_cast<T*>(other.m_Instance);
         Increment();
     }
     template<typename T2>
-    Ref(Ref<T2>&& other) noexcept
-    {
-        static_assert(std::is_base_of_v<RefCounted, T2>);
-        static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
-        m_Instance = static_cast<T*>(other.m_Instance);
+    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
+    Ref(Ref<T2>&& other) noexcept {
+        m_Instance = dynamic_cast<T*>(other.m_Instance);
         other.m_Instance = nullptr;
     }
     ~Ref() { Decrement(); }
 
-    Ref& operator=(std::nullptr_t) noexcept
-    {
+    Ref& operator=(std::nullptr_t) noexcept {
         Decrement();
         m_Instance = nullptr;
         return *this;
     }
-    Ref& operator=(const Ref<T>& other) noexcept
-    {
+    Ref& operator=(const Ref<T>& other) noexcept {
+        if (this == &other)
+            return *this;
+
         other.Increment();
         Decrement();
 
         m_Instance = other.m_Instance;
         return *this;
     }
-    Ref& operator=(Ref<T>&& other) noexcept
-    {
+    Ref& operator=(Ref<T>&& other) noexcept {
         Decrement();
 
         m_Instance = other.m_Instance;
@@ -73,65 +72,59 @@ public:
         return *this;
     }
     template<typename T2>
-    Ref& operator=(const Ref<T2>& other) noexcept
-    {
-        static_assert(std::is_base_of_v<RefCounted, T2>);
-        static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
+    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
+    Ref& operator=(const Ref<T2>& other) noexcept {
         other.Increment();
         Decrement();
 
-        m_Instance = static_cast<T*>(other.m_Instance);
+        m_Instance = dynamic_cast<T*>(other.m_Instance);
         return *this;
     }
     template<typename T2>
-    Ref& operator=(Ref<T2>&& other) noexcept
-    {
-        static_assert(std::is_base_of_v<RefCounted, T2>);
-        static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
+    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
+    Ref& operator=(Ref<T2>&& other) noexcept {
         Decrement();
 
-        m_Instance = static_cast<T*>(other.m_Instance);
+        m_Instance = dynamic_cast<T*>(other.m_Instance);
         other.m_Instance = nullptr;
         return *this;
     }
 
     operator bool() const noexcept { return m_Instance != nullptr; }
     bool operator==(const Ref<T>& other) const noexcept { return m_Instance == other.m_Instance; }
-    T* operator->() noexcept { return m_Instance; }
-    const T* operator->() const noexcept { return m_Instance; }
-    T& operator*() noexcept { return *m_Instance; }
-    const T& operator*() const noexcept { return *m_Instance; }
+    T* operator->() { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
+    const T* operator->() const { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
+    T& operator*() { SB_CORE_ASSERT(m_Instance != nullptr); return *m_Instance; }
+    const T& operator*() const { SB_CORE_ASSERT(m_Instance != nullptr); return *m_Instance; }
 
-    T* Raw() noexcept { return  m_Instance; }
-    const T* Raw() const noexcept { return  m_Instance; }
+    T* Raw() { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
+    const T* Raw() const { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
 
-    void Reset(T* instance = nullptr) noexcept
-    {
+    void Reset(T* instance = nullptr) noexcept {
         Decrement();
         m_Instance = instance;
     }
 
     template<typename T2>
-    static constexpr bool IsConvertible() noexcept { return std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>; }
+    static constexpr bool IsConvertible() noexcept { return std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> ||
+        std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>; }
     template<typename T2>
-    bool CanConvert() noexcept { return dynamic_cast<T2*>(m_Instance) != nullptr; }
+    bool CanConvert() const noexcept { return IsConvertible<T2>() && dynamic_cast<T2*>(m_Instance) != nullptr; }
 
     template<typename T2>
-    Ref<T2> As() const noexcept { return Ref<T2>(*this); }
+    Ref<T2> As() const { return Ref<T2>(*this); }
 
     template<typename ...Args>
-    static Ref<T> Create(Args&& ...args) noexcept
-    {
+    requires (std::is_constructible_v<T, Args...>)
+    static Ref<T> Create(Args&& ...args) noexcept {
         return Ref<T>(new T(std::forward<Args>(args)...));
     }
 private:
-    void Increment() const noexcept
-    {
+    void Increment() const noexcept {
         if (m_Instance)
             m_Instance->IncrementRefCount();
     }
-    void Decrement() const noexcept
-    {
+    void Decrement() const noexcept {
         if (m_Instance)
         {
             m_Instance->DecrementRefCount();

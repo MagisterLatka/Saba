@@ -22,24 +22,37 @@
 #define SB_BIND_EVENT_FN(fn) [this](auto &&...args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 #define BIT(x) (1 << x)
 
-#define SB_CORE_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed"; __VA_OPT__(message += Saba::Format(": {-1}", -1, __VA_ARGS__));\
-    SB_CORE_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, message, true); } }
-#define SB_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed"; __VA_OPT__(message += Saba::Format(": {-1}", -1, __VA_ARGS__));\
-    SB_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, message, false); } }
+#if defined(SB_DEBUG) || defined(SB_RELEASE)
+#   define SB_CORE_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed: "; __VA_OPT__(message += std::format(__VA_ARGS__));\
+        SB_CORE_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, message, true); } }
+#   define SB_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed: "; __VA_OPT__(message += std::format(__VA_ARGS__));\
+        SB_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, message, false); } }
+#else
+#   define SB_CORE_ASSERT(x, ...) { [[maybe_unused]] auto _ = (x); }
+#   define SB_ASSERT(x, ...) { [[maybe_unused]] auto _ = (x); }
+#endif
 
-#define SB_CORE_THROW throw Saba::SabaException(__LINE__, __FILE__, true);
-#define SB_THROW throw Saba::SabaException(__LINE__, __FILE__, false);
+#if defined(SB_DEBUG) || defined(SB_RELEASE)
+#   define SB_CORE_THROW throw Saba::SabaException(__LINE__, __FILE__, true);
+#   define SB_THROW throw Saba::SabaException(__LINE__, __FILE__, false);
 
-#define SB_CORE_THROW_INFO(message) { SB_CORE_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, (message), true); }
-#define SB_THROW_INFO(message) { SB_CRITICAL(message); throw Saba::MessageException(__LINE__, __FILE__, (message), false); }
+#   define SB_CORE_THROW_INFO(...) { SB_CORE_CRITICAL(__VA_ARGS__); throw Saba::MessageException(__LINE__, __FILE__, std::format(__VA_ARGS__), true); }
+#   define SB_THROW_INFO(...) { SB_CRITICAL(__VA_ARGS__); throw Saba::MessageException(__LINE__, __FILE__, std::format(__VA_ARGS__), false); }
+#else
+#   define SB_CORE_THROW
+#   define SB_THROW
+
+#   define SB_CORE_THROW_INFO(...)
+#   define SB_THROW_INFO(...)
+#endif
 
 #include <Saba/Core/Timer.h>
 
 namespace Saba {
 
-void SB_CORE InitializeCore(int argc, char** argv, char** envp);
-void SB_CORE ShutdownCore();
-uint64_t SB_CORE GetTime() noexcept;
+SB_CORE void InitializeCore(int argc, char** argv, char** envp);
+SB_CORE void ShutdownCore();
+SB_CORE uint64_t GetTime() noexcept;
 
 } // namespace Saba
 
@@ -49,5 +62,8 @@ template <typename T> using Scope = std::unique_ptr<T>;
 
 template <typename T, typename... Args>
 Scope<T> CreateScope(Args &&...args) noexcept {
-  return std::make_unique<T>(std::forward<Args>(args)...);
+    return std::make_unique<T>(std::forward<Args>(args)...);
 }
+
+template<typename T, typename... U>
+concept IsOneOf = (std::same_as<T, U> || ...);

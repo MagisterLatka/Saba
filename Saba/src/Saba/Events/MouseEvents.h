@@ -103,4 +103,5 @@ public:
     EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
     EVENT_TYPE(MouseLeft)
 };
+
 } // namespace Saba

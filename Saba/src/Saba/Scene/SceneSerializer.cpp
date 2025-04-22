@@ -3,7 +3,6 @@
 
 #include "Saba/Scene/Entity.h"
 
-#define YAML_CPP_STATIC_DEFINE
 #include <yaml-cpp/yaml.h>
 
 namespace YAML {
@@ -295,4 +294,4 @@ bool SceneSerializer::Deserialize(const std::filesystem::path& filepath) {
     return true;
 }
 
-}
+} //namespace Saba

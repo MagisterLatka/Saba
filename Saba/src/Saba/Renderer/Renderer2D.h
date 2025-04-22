@@ -40,8 +40,8 @@ public:
     SB_CORE static Stats GetStats() noexcept;
     SB_CORE static void ResetStats() noexcept;
 private:
-    SB_CORE static void Init();
-    SB_CORE static void Shutdown();
+    static void Init();
+    static void Shutdown();
 };
 
-}
+} //namespace Saba

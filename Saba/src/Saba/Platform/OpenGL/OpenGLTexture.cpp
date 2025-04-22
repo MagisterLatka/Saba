@@ -166,4 +166,4 @@ void OpenGLTexture2D::Bind(uint32_t slot) const noexcept {
     });
 }
 
-}
+} //namespace Saba

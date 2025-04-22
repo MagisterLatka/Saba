@@ -103,14 +103,3 @@ void ExampleLayer::OnUIRender() {
     ImGui::Text("Frame time: %.3fms (%.1f fps)", static_cast<double>(1000.0f / io.Framerate), static_cast<double>(io.Framerate));
     ImGui::End();
 }
-void ExampleLayer::OnEvent(Saba::Event& e) {
-    Saba::Dispatcher dispatcher(e);
-    dispatcher.Dispatch<Saba::KeyPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
-    dispatcher.Dispatch<Saba::MouseButtonPressedEvent>(SB_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
-}
-bool ExampleLayer::OnKeyPressed(Saba::KeyPressedEvent& e) {
-    return false;
-}
-bool ExampleLayer::OnMouseButtonPressed(Saba::MouseButtonPressedEvent& e) {
-    return false;
-}

@@ -119,7 +119,7 @@ void DX11Shader::CompileFromSource()
     if (errorMsgs != nullptr) {
         std::string errors = "Fragment shader compilation failed: ";
         errors.append(reinterpret_cast<const char*>(errorMsgs->GetBufferPointer()), errorMsgs->GetBufferSize());
-        SB_CORE_THROW_INFO(errors);
+        SB_CORE_THROW_INFO("{0}", errors);
         errorMsgs->Release();
     }
     SB_DX_GRAPHICS_CALL_INFO(device->CreatePixelShader(m_VSource->GetBufferPointer(), m_VSource->GetBufferSize(), nullptr, &m_FShader));
@@ -128,7 +128,7 @@ void DX11Shader::CompileFromSource()
     if (errorMsgs != nullptr) {
         std::string errors = "Vertex shader compilation failed: ";
         errors.append(reinterpret_cast<const char*>(errorMsgs->GetBufferPointer()), errorMsgs->GetBufferSize());
-        SB_CORE_THROW_INFO(errors);
+        SB_CORE_THROW_INFO("{0}", errors);
         errorMsgs->Release();
     }
     SB_DX_GRAPHICS_CALL_INFO(device->CreateVertexShader(m_VSource->GetBufferPointer(), m_VSource->GetBufferSize(), nullptr, &m_VShader));

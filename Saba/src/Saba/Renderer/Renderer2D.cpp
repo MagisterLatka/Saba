@@ -36,6 +36,7 @@ struct Renderer2DData {
     QuadVertexData* quadInsert = nullptr;
     uint32_t quadCount = 0u;
     Ref<InputLayout> quadInputLayout;
+    Ref<VertexBuffer> quadCopyBuffer;
     std::array<Ref<Texture2D>, c_MaxTextures> quadTextures;
     uint32_t quadTextureIndex = 1u;
     Ref<Shader> quadShader;
@@ -44,6 +45,7 @@ struct Renderer2DData {
     CircleVertexData* circleInsert = nullptr;
     uint32_t circleCount = 0u;
     Ref<InputLayout> circleInputLayout;
+    Ref<VertexBuffer> circleCopyBuffer;
     Ref<Shader> circleShader;
 
     Ref<ConstantBuffer> viewProj;
@@ -82,9 +84,10 @@ void Renderer2D::Init() {
         { "TillingFactor", BufferLayoutElementDataType::Float },
         { "EntityID", BufferLayoutElementDataType::UInt4 }
     };
+    Ref<VertexBuffer> quadVBO = VertexBuffer::Create(quadLayout, nullptr, c_QuadBufferSize, GraphicsBufferUsage::Default);
     Buffer quadVertexDataBuffer = Buffer(new QuadVertexData[static_cast<uint64_t>(c_MaxQuads) * 4], c_QuadBufferSize, true);
-    Ref<VertexBuffer> quadVBO = VertexBuffer::Create(quadLayout, std::move(quadVertexDataBuffer), BufferUsage::Dynamic);
-    s_Data.quadVertexData = reinterpret_cast<QuadVertexData*>(quadVBO->GetLocalData().Data);
+    s_Data.quadCopyBuffer = VertexBuffer::Create(BufferLayout{}, std::move(quadVertexDataBuffer), GraphicsBufferUsage::Staging);
+    s_Data.quadVertexData = reinterpret_cast<QuadVertexData*>(s_Data.quadCopyBuffer->GetLocalData().Data);
     s_Data.quadInsert = s_Data.quadVertexData;
 
     static constexpr auto uv = std::to_array<glm::vec2>({
@@ -115,9 +118,10 @@ void Renderer2D::Init() {
         { "Fade", BufferLayoutElementDataType::Float },
         { "EntityID", BufferLayoutElementDataType::UInt2 }
     };
+    Ref<VertexBuffer> circleVBO = VertexBuffer::Create(circleLayout, nullptr, c_CircleBufferSize, GraphicsBufferUsage::Default);
     Buffer circleVertexBufferBuffer = Buffer(new CircleVertexData[static_cast<uint64_t>(c_MaxCircles) * 4], c_CircleBufferSize, true);
-    Ref<VertexBuffer> circleVBO = VertexBuffer::Create(circleLayout, std::move(circleVertexBufferBuffer), BufferUsage::Dynamic);
-    s_Data.circleVertexData = reinterpret_cast<CircleVertexData*>(circleVBO->GetLocalData().Data);
+    s_Data.circleCopyBuffer = VertexBuffer::Create(circleLayout, std::move(circleVertexBufferBuffer), GraphicsBufferUsage::Staging);
+    s_Data.circleVertexData = reinterpret_cast<CircleVertexData*>(s_Data.circleCopyBuffer->GetLocalData().Data);
     s_Data.circleInsert = s_Data.circleVertexData;
 
     Ref<IndexBuffer> circleIBO = IndexBuffer::Create(indices, c_MaxCircles * 6 * static_cast<uint32_t>(sizeof(uint32_t)));
@@ -137,7 +141,7 @@ void Renderer2D::Init() {
         { "UV", BufferLayoutElementDataType::Float2 }
     };
     Ref<VertexBuffer> fullscreenVBO = VertexBuffer::Create(fullscreenQuadLayout, fullscreenQuadData.data(),
-        fullscreenQuadData.size() * static_cast<uint32_t>(sizeof(float)), BufferUsage::Immutable);
+        fullscreenQuadData.size() * static_cast<uint32_t>(sizeof(float)), GraphicsBufferUsage::Immutable);
     s_Data.fullscreenQuadInputLayout = InputLayout::Create({ fullscreenVBO }, Renderer::GetShaderLibrary().Get("fullscreenQuadShader"));
 }
 void Renderer2D::Shutdown() {
@@ -177,7 +181,7 @@ void Renderer2D::Draw() {
 void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation,
     const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor, uint32_t entityID)
 {
-    SubmitQuad(glm::vec3(pos, 0.0f), size, rotation, color, texture, tillingFactor, entityID);
+    SubmitQuad(glm::vec3(pos, 0.0f), size, rotation, color, std::move(texture), tillingFactor, entityID);
 }
 void Renderer2D::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float rotation,
     const glm::vec4& color, Ref<Texture2D> texture, float tillingFactor, uint32_t entityID)
@@ -202,7 +206,7 @@ void Renderer2D::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float r
             }
 
             tid = s_Data.quadTextureIndex++;
-            s_Data.quadTextures[tid] = texture;
+            s_Data.quadTextures[tid] = std::move(texture);
         }
     }
 
@@ -247,7 +251,7 @@ void Renderer2D::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, 
             }
 
             tid = s_Data.quadTextureIndex++;
-            s_Data.quadTextures[tid] = texture;
+            s_Data.quadTextures[tid] = std::move(texture);
         }
     }
 
@@ -274,7 +278,8 @@ void Renderer2D::DrawQuads()
     if (s_Data.quadCount == 0u)
         return;
 
-    s_Data.quadInputLayout->GetVertexBuffer()->UploadCurrent();
+    s_Data.quadCopyBuffer->UploadCurrent();
+    s_Data.quadCopyBuffer->TransferToBuffer(s_Data.quadInputLayout->GetVertexBuffer(), c_QuadBufferSize);
     s_Data.quadShader->Bind();
     s_Data.viewProj->Bind(0);
 
@@ -346,7 +351,8 @@ void Renderer2D::DrawCircles() {
     if (s_Data.circleCount == 0u)
         return;
 
-    s_Data.circleInputLayout->GetVertexBuffer()->UploadCurrent();
+    s_Data.circleCopyBuffer->UploadCurrent();
+    s_Data.circleCopyBuffer->TransferToBuffer(s_Data.circleInputLayout->GetVertexBuffer(), c_CircleBufferSize);
     s_Data.circleShader->Bind();
     s_Data.viewProj->Bind();
     s_Data.circleInputLayout->Bind();
@@ -374,4 +380,4 @@ void Renderer2D::ResetStats() noexcept {
     s_Data.stats.DrawCalls = 0u;
 }
 
-}
+} //namespace Saba

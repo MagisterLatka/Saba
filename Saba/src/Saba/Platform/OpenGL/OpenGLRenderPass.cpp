@@ -97,4 +97,4 @@ void OpenGLRenderPass::Resize(uint32_t width, uint32_t height) {
         m_DepthStencilTarget->Resize(m_Width, m_Height);
 }
 
-}
+} //namespace Saba

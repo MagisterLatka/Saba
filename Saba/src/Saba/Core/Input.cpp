@@ -5,28 +5,23 @@
 
 namespace Saba {
 
-bool Input::IsKeyPressed(KeyCode key) {
+bool Input::IsKeyPressed(KeyCode key) noexcept {
     return Application::Get().GetWindow()->GetKeyboard().IsKeyPressed(static_cast<uint8_t>(key));
 }
-bool Input::IsMouseButtonPressed(MouseCode button) {
+bool Input::IsMouseButtonPressed(MouseCode button) noexcept{
     const auto& mouse = Application::Get().GetWindow()->GetMouse();
     switch (button) {
         case MouseCode::Button0:
             return mouse.IsLeftButtonPressed();
         case MouseCode::Button1:
             return mouse.IsRightButtonPressed();
-        case MouseCode::Button2:
-        case MouseCode::Button3:
-        case MouseCode::Button4:
-        case MouseCode::Button5:
-        case MouseCode::Button6:
-        case MouseCode::Button7:
+        default:
             return false;
     }
     return false;
 }
-glm::vec2 Input::GetMousePos() {
+glm::vec2 Input::GetMousePos() noexcept {
     return Application::Get().GetWindow()->GetMouse().GetPos();
 }
 
-}
+} //namespace Saba

@@ -92,8 +92,7 @@ void Application::Close() noexcept {
 int Application::Run() {
     m_Timer.Reset();
     int returnVal = 0; //return val from quit message
-    while (m_Running)
-    {
+    while (m_Running) {
         //calc time since last frame
         m_Timestep = m_Timer.Elapsed();
         m_Timer.Reset();
@@ -151,67 +150,67 @@ bool Application::OnWindowResize(WindowResizeEvent& e) noexcept {
 }
 
 void Application::ImGuiRender() {
-    if (m_Specs.DrawUI) {
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    if (!m_Specs.DrawUI) {
+        for (auto *layer : *m_LayerStack)
+        layer->OnUIRender();
+        return;
+    }
 
-        if (!m_Specs.CustomTitleBar && m_MenuBarCallback)
-            windowFlags |= ImGuiWindowFlags_MenuBar;
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-        const bool isMaximized = m_Window->IsMaximized();
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
-        ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+    if (!m_Specs.CustomTitleBar && m_MenuBarCallback)
+        windowFlags |= ImGuiWindowFlags_MenuBar;
 
-        ImGui::Begin("DockSpaceWindow", nullptr, windowFlags);
+    const bool isMaximized = m_Window->IsMaximized();
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
+    ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
 
+    ImGui::Begin("DockSpaceWindow", nullptr, windowFlags);
+
+    ImGui::PopStyleColor();
+    ImGui::PopStyleVar(4);
+
+    if (!m_Window->IsMaximized()) {
+        ImGui::PushStyleColor(ImGuiCol_Border, 0xff303030u);
+        UI::RenderWindowOuterBorders(ImGui::GetCurrentWindow());
         ImGui::PopStyleColor();
-        ImGui::PopStyleVar(4);
-
-        if (!m_Window->IsMaximized()) {
-            ImGui::PushStyleColor(ImGuiCol_Border, IM_COL32(0x30u, 0x30u, 0x30u, 0xffu));
-            UI::RenderWindowOuterBorders(ImGui::GetCurrentWindow());
-            ImGui::PopStyleColor();
-        }
-
-        if (m_Specs.CustomTitleBar) {
-            float titlebarHeight;
-            DrawTitleBar(titlebarHeight);
-            ImGui::SetCursorPosY(titlebarHeight);
-        }
-
-        ImGuiStyle& style = ImGui::GetStyle();
-        float minWinSizeX = style.WindowMinSize.x;
-        style.WindowMinSize.x = 370.0f;
-        ImGui::DockSpace(ImGui::GetID("MyDockspace"));
-        style.WindowMinSize.x = minWinSizeX;
-
-        if (!m_Specs.CustomTitleBar)
-            DrawMenuBarUI();
-
-        for (auto *layer : *m_LayerStack)
-            layer->OnUIRender();
-
-        ImGui::End();
     }
-    else {
-        for (auto *layer : *m_LayerStack)
-            layer->OnUIRender();
+
+    if (m_Specs.CustomTitleBar) {
+        float titlebarHeight;
+        DrawTitleBar(titlebarHeight);
+        ImGui::SetCursorPosY(titlebarHeight);
     }
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    float minWinSizeX = style.WindowMinSize.x;
+    style.WindowMinSize.x = 370.0f;
+    ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+    style.WindowMinSize.x = minWinSizeX;
+
+    if (!m_Specs.CustomTitleBar)
+        DrawMenuBarUI();
+
+    for (auto *layer : *m_LayerStack)
+        layer->OnUIRender();
+
+    ImGui::End();
 }
 void Application::DrawTitleBar(float& outTitlebarHeight)
 {
     constexpr float titlebarHeight = 58.0f;
     const bool isMaximized = m_Window->IsMaximized();
-    float titlebarVerticalOffset = isMaximized ? -6.0f : 0.0f;
+    const float titlebarVerticalOffset = isMaximized ? -6.0f : 0.0f;
     const ImVec2 windowPadding = ImGui::GetCurrentWindow()->WindowPadding;
-    constexpr ImU32 debugColor = IM_COL32(0xffu, 0x20u, 0x20u, 0xffu);
+    //constexpr ImU32 debugColor = 0xff2020ffu;
 
     ImGui::SetCursorPos(ImVec2(windowPadding.x, windowPadding.y + titlebarVerticalOffset));
     const ImVec2 titlebarMin = ImGui::GetCursorScreenPos();
@@ -219,7 +218,7 @@ void Application::DrawTitleBar(float& outTitlebarHeight)
                                  ImGui::GetCursorScreenPos().y + titlebarHeight };
     auto* backgroundDrawList = ImGui::GetBackgroundDrawList();
     auto* foregroundDrawList = ImGui::GetForegroundDrawList();
-    backgroundDrawList->AddRectFilled(titlebarMin, titlebarMax, IM_COL32(0x18u, 0x18u, 0x18u, 0xffu));
+    backgroundDrawList->AddRectFilled(titlebarMin, titlebarMax, 0xff181818u);
     //debug title bar bounds
     // foregroundDrawList->AddRect(titlebarMin, titlebarMax, debugColor);
 
@@ -228,7 +227,7 @@ void Application::DrawTitleBar(float& outTitlebarHeight)
     const ImVec2 iconOffset(16.0f + windowPadding.x, 5.0f + windowPadding.y + titlebarVerticalOffset);
     const ImVec2 iconRectMin = { ImGui::GetItemRectMin().x + iconOffset.x, ImGui::GetItemRectMin().y + iconOffset.y };
     const ImVec2 iconRectMax = { iconRectMin.x + static_cast<float>(iconWidth), iconRectMin.y + static_cast<float>(iconHeight) };
-    foregroundDrawList->AddImage((uint64_t)(m_TitleBarIcon->GetRawPointer()), iconRectMin, iconRectMax);
+    foregroundDrawList->AddImage(m_TitleBarIcon->GetRawPointer(), iconRectMin, iconRectMax);
 
     ImGui::BeginHorizontal("Titlebar", { ImGui::GetWindowWidth() - windowPadding.y * 2.0f, ImGui::GetFrameHeightWithSpacing() });
 
@@ -269,9 +268,9 @@ void Application::DrawTitleBar(float& outTitlebarHeight)
     ImGui::Text("%s", m_Specs.Name.c_str());
     ImGui::SetCursorPos(currentCursorPos);
 
-    const ImU32 buttonNormalColor = IM_COL32(0xb0u, 0xb0u, 0xb0u, 0xffu);
-    const ImU32 buttonHoveredColor = IM_COL32(0xd0u, 0xd0u, 0xd0u, 0xffu);
-    const ImU32 buttonPressedColor = IM_COL32(0xd8u, 0xd8u, 0xd8u, 0xffu);
+    const ImU32 buttonNormalColor = 0xffb0b0b0u;
+    const ImU32 buttonHoveredColor = 0xffd0d0d0u;
+    const ImU32 buttonPressedColor = 0xffd8d8d8u;
     const float buttonWidth = 14.0f;
     const float buttonHeight = 14.0f;
 
@@ -294,8 +293,7 @@ void Application::DrawTitleBar(float& outTitlebarHeight)
         iconHeight = m_MaximizeIcon->GetHeight();
         const bool maximized = m_Window->IsMaximized();
 
-        if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight)))
-        {
+        if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight))) {
             if (maximized)
                 m_Window->Restore();
             else

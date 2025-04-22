@@ -179,7 +179,7 @@ namespace IMGUIZMO_NAMESPACE
 	// Needs view and projection matrices. 
 	// matrix parameter is the source matrix (where will be gizmo be drawn) and might be transformed by the function. Return deltaMatrix is optional
 	// translation is applied in world space
-	enum OPERATION
+	enum OPERATION : uint16_t
 	{
 		TRANSLATE_X      = (1u << 0),
 		TRANSLATE_Y      = (1u << 1),
@@ -208,7 +208,7 @@ namespace IMGUIZMO_NAMESPACE
 		return static_cast<OPERATION>(static_cast<int>(lhs) | static_cast<int>(rhs));
 	}
 
-	enum MODE
+	enum MODE : uint8_t
 	{
 		LOCAL,
 		WORLD
@@ -241,7 +241,7 @@ namespace IMGUIZMO_NAMESPACE
 	// Configure the limit where planes are hiden
 	IMGUI_API void SetPlaneLimit(float value);
 
-	enum COLOR
+	enum COLOR : uint8_t
 	{
 		DIRECTION_X,      // directionColor[0]
 		DIRECTION_Y,      // directionColor[1]

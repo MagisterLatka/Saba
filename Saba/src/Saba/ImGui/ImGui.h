@@ -47,4 +47,4 @@ SB_CORE void DrawButtonImage(Ref<Texture2D>& image, ImU32 tintNormal, ImU32 tint
 
 SB_CORE void RenderWindowOuterBorders(ImGuiWindow* window);
 
-}
+} //namespace Saba::UI

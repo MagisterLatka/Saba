@@ -18,18 +18,18 @@ public:
         DestinationColor, DestinationColorInvert, DestinationAlpha, DestinationAlphaInvert, BlendFactor, BlendFactorInvert };
     enum class BlendOperation : uint8_t { None = 0, Add, Subtract, ReverseSubtract, Min, Max };
 public:
-    SB_CORE virtual ~RendererAPI() = default;
+    virtual ~RendererAPI() = default;
 
     SB_CORE static API GetAPI() { return s_API; }
 private:
-    SB_CORE virtual void Init() = 0;
-    SB_CORE virtual void Shutdown() = 0;
+    virtual void Init() = 0;
+    virtual void Shutdown() = 0;
 
-    SB_CORE virtual void Draw(Topology topology, uint32_t verticesCount) = 0;
-    SB_CORE virtual void DrawIndexed(Topology topology, uint32_t indicesCount) = 0;
-    SB_CORE virtual void DrawIndexedInstanced(RendererAPI::Topology topology, uint32_t indicesCount, uint32_t instancesCount) = 0;
+    virtual void Draw(Topology topology, uint32_t verticesCount) = 0;
+    virtual void DrawIndexed(Topology topology, uint32_t indicesCount) = 0;
+    virtual void DrawIndexedInstanced(RendererAPI::Topology topology, uint32_t indicesCount, uint32_t instancesCount) = 0;
 
-    SB_CORE virtual void SetDepthTestOptions(bool enable, bool writeMask = true, ComparisonFunc compFunc = RendererAPI::ComparisonFunc::Less) = 0;
+    virtual void SetDepthTestOptions(bool enable, bool writeMask = true, ComparisonFunc compFunc = RendererAPI::ComparisonFunc::Less) = 0;
     virtual void SetStencilTestOptions(bool enable, uint8_t writeMask = 0xffu, uint8_t readMask = 0xffu,
         ComparisonFunc frontFaceFunc = ComparisonFunc::Always, ComparisonFunc backFaceFunc = ComparisonFunc::Always, uint32_t stencilRefVal = 0u) = 0;
     virtual void SetFrontFaceStencilOperations(StencilOperation stencilFail = StencilOperation::Keep, StencilOperation depthFail = StencilOperation::Keep,
@@ -44,9 +44,9 @@ private:
         BlendOperation operation = BlendOperation::Add, BlendOption sourceAlphaBlend = BlendOption::One, BlendOption destinationAlphaBlend = BlendOption::Zero,
         BlendOperation alphaOperation = BlendOperation::Add, uint8_t writeMask = 1 | 2 | 4 | 8, glm::vec4 blendFactor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) = 0;
 
-    SB_CORE static Scope<RendererAPI> Create();
+    static Scope<RendererAPI> Create();
 private:
     SB_CORE static API s_API;
 };
 
-}
+} //namespace Saba

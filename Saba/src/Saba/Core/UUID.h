@@ -5,14 +5,15 @@ namespace Saba {
 class UUID {
 public:
     SB_CORE UUID();
-    SB_CORE UUID(uint64_t uuid) noexcept : m_ID(uuid) {}
+    UUID(uint64_t uuid) noexcept
+        : m_ID(uuid) {}
 
-    SB_CORE operator uint64_t() const { return m_ID; }
+    operator uint64_t() const { return m_ID; }
 private:
     uint64_t m_ID;
 };
 
-}
+} //namespace Saba
 
 namespace std {
 
@@ -23,4 +24,4 @@ struct hash<Saba::UUID> {
     }
 };
 
-}
+} //namespace std

@@ -25,9 +25,9 @@ public:
     SB_CORE static void SubmitLight(const glm::vec3& lightPos, const glm::vec3& lightColor, float radius);
     SB_CORE static void ResetLights();
 private:
-    SB_CORE static void Init();
-    SB_CORE static void InitMesh(Ref<Mesh> mesh);
-    SB_CORE static void Shutdown();
+    static void Init();
+    static void InitMesh(Ref<Mesh> mesh);
+    static void Shutdown();
 };
 
-}
+} //namespace Saba

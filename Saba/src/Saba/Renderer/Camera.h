@@ -6,20 +6,20 @@ namespace Saba {
 
 class Camera : public RefCounted {
 public:
-    SB_CORE Camera() = default;
-    SB_CORE Camera(glm::mat4 projectionMatrix) noexcept
+    Camera() = default;
+    Camera(glm::mat4 projectionMatrix) noexcept
         : m_ProjMat(projectionMatrix) {}
-    SB_CORE virtual ~Camera() = default;
+    virtual ~Camera() = default;
 
-    SB_CORE virtual void SetViewportSize(uint32_t width, uint32_t height) = 0;
-    SB_CORE virtual void SetAspectRatio(float aspectRatio) = 0;
-    SB_CORE float GetAspectRatio() const noexcept { return m_AspectRatio; }
+    virtual void SetViewportSize(uint32_t width, uint32_t height) = 0;
+    virtual void SetAspectRatio(float aspectRatio) = 0;
+    float GetAspectRatio() const noexcept { return m_AspectRatio; }
 
-    SB_CORE virtual void SetZClips(float nearClip, float farClip) = 0;
-    SB_CORE float GetNearClip() const noexcept { return m_NearClip; }
-    SB_CORE float GetFarClip() const noexcept { return m_FarClip; }
+    virtual void SetZClips(float nearClip, float farClip) = 0;
+    float GetNearClip() const noexcept { return m_NearClip; }
+    float GetFarClip() const noexcept { return m_FarClip; }
 
-    SB_CORE const glm::mat4& GetProjectionMatrix() const noexcept { return m_ProjMat; }
+    const glm::mat4& GetProjectionMatrix() const noexcept { return m_ProjMat; }
 protected:
     glm::mat4 m_ProjMat = glm::mat4(1.0f);
     float m_AspectRatio = 1.0f, m_NearClip = -1.0f, m_FarClip = 1.0f;
@@ -28,21 +28,21 @@ protected:
 class OrthographicCamera : public Camera {
     friend class SceneHierarchyPanel;
 public:
-    SB_CORE OrthographicCamera() = default;
-    SB_CORE OrthographicCamera(glm::mat4 projectionMatrix) noexcept
+    OrthographicCamera() = default;
+    OrthographicCamera(glm::mat4 projectionMatrix) noexcept
         : Camera(projectionMatrix) {}
     SB_CORE OrthographicCamera(uint32_t width, uint32_t height, float nearClip = -1.0f, float farClip = 1.0f);
     SB_CORE OrthographicCamera(float aspectRatio, float nearClip = -1.0f, float farClip = 1.0f);
-    SB_CORE ~OrthographicCamera() = default;
+    ~OrthographicCamera() = default;
 
     SB_CORE void SetViewportSize(uint32_t width, uint32_t height) override;
     SB_CORE void SetAspectRatio(float aspectRatio) override;
     SB_CORE void SetZClips(float nearClip, float farClip) override;
 
     SB_CORE void SetSize(float size);
-    SB_CORE float GetSize() const noexcept { return m_Size; }
-    SB_CORE float GetWidth() const noexcept { return m_Size * m_AspectRatio; }
-    SB_CORE float GetHeight() const noexcept { return m_Size; }
+    float GetSize() const noexcept { return m_Size; }
+    float GetWidth() const noexcept { return m_Size * m_AspectRatio; }
+    float GetHeight() const noexcept { return m_Size; }
 private:
     void Recalc();
 private:
@@ -52,23 +52,23 @@ private:
 class PerspectiveCamera : public Camera {
     friend class SceneHierarchyPanel;
 public:
-    SB_CORE PerspectiveCamera() = default;
-    SB_CORE PerspectiveCamera(glm::mat4 projectionMatrix) noexcept
+    PerspectiveCamera() = default;
+    PerspectiveCamera(glm::mat4 projectionMatrix) noexcept
         : Camera(projectionMatrix) {}
     SB_CORE PerspectiveCamera(uint32_t width, uint32_t height, float fov = glm::half_pi<float>(), float nearClip = 0.1f, float farClip = 100.0f);
     SB_CORE PerspectiveCamera(float aspectRatio, float fov = glm::half_pi<float>(), float nearClip = 0.1f, float farClip = 100.0f);
-    SB_CORE ~PerspectiveCamera() = default;
+    ~PerspectiveCamera() = default;
 
     SB_CORE void SetViewportSize(uint32_t width, uint32_t height) override;
     SB_CORE void SetAspectRatio(float aspectRatio) override;
     SB_CORE void SetZClips(float nearClip, float farClip) override;
 
     SB_CORE void SetFOV(float fov);
-    SB_CORE float GetFOV() const noexcept { return m_Fov; }
+    float GetFOV() const noexcept { return m_Fov; }
 private:
     void Recalc();
 private:
     float m_Fov = glm::half_pi<float>();
 };
 
-}
+} //namespace Saba

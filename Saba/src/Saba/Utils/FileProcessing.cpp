@@ -15,7 +15,7 @@ std::string FileProcessing::ReadFromFile(const std::filesystem::path& filepath) 
         in.seekg(0, std::ios::beg);
         in.read(result.data(), static_cast<int64_t>(result.size()));
     }
-    else SB_CORE_THROW_INFO("Could not load from " + filepath.string());
+    else SB_CORE_THROW_INFO("Could not load from {0}", filepath.string());
 
     in.close();
     return result;

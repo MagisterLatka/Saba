@@ -25,9 +25,9 @@ public:
     SB_CORE static ShaderLibrary& GetShaderLibrary() noexcept;
     SB_CORE static MeshLibrary& GetMeshLibrary() noexcept;
 private:
-    SB_CORE static void Init();
-    SB_CORE static void Shutdown();
+    static void Init();
+    static void Shutdown();
     SB_CORE static RenderCommandQueue& GetRenderCommandQueue() noexcept;
 };
 
-}
+} //namespace Saba

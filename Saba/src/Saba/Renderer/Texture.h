@@ -31,16 +31,16 @@ struct Texture2DProps {
 class Texture2D : public RefCounted
 {
 public:
-    SB_CORE virtual ~Texture2D() = default;
+    virtual ~Texture2D() = default;
 
-    SB_CORE virtual void Bind(uint32_t slot) const noexcept = 0;
+    virtual void Bind(uint32_t slot) const noexcept = 0;
 
-    SB_CORE virtual const Texture2DProps& GetProps() const noexcept = 0;
-    SB_CORE virtual uint32_t GetWidth() const noexcept = 0;
-    SB_CORE virtual uint32_t GetHeight() const noexcept = 0;
-    SB_CORE virtual void* GetRawPointer() const noexcept = 0;
+    virtual const Texture2DProps& GetProps() const noexcept = 0;
+    virtual uint32_t GetWidth() const noexcept = 0;
+    virtual uint32_t GetHeight() const noexcept = 0;
+    virtual uint64_t GetRawPointer() const noexcept = 0;
 
-    SB_CORE virtual bool IsLoaded() const noexcept = 0;
+    virtual bool IsLoaded() const noexcept = 0;
 
     SB_CORE static Ref<Texture2D> Create(Texture2DProps props);
     SB_CORE static Ref<Texture2D> Create(uint32_t width, uint32_t height, void* data = nullptr, TextureFormat format = TextureFormat::RGBA8);
@@ -50,4 +50,4 @@ public:
     SB_CORE static void* Decode(const void* data, uint32_t size, uint32_t& width, uint32_t& height);
 };
 
-}
+} //namespace Saba

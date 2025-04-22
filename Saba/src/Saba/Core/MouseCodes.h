@@ -2,8 +2,7 @@
 
 namespace Saba {
 
-enum class MouseCode : uint16_t
-{
+enum class MouseCode : uint8_t {
     Button0 = 0u,
     Button1 = 1u,
     Button2 = 2u,
@@ -19,8 +18,7 @@ enum class MouseCode : uint16_t
     ButtonMiddle = Button2
 };
 
-inline std::ostream& operator<<(std::ostream& os, MouseCode mouseCode) noexcept
-{
+inline std::ostream& operator<<(std::ostream& os, MouseCode mouseCode) noexcept {
     os << static_cast<uint32_t>(mouseCode);
     return os;
 }

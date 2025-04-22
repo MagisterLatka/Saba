@@ -226,7 +226,7 @@ void EditorLayer::OnUIRender() {
     float size = ImGui::GetWindowHeight() - 16.0f;
     Ref<Saba::Texture2D> icon = m_SceneState == SceneState::Edit ? m_PlayButton : m_StopButton;
     ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
-    if (ImGui::ImageButton("###button", (uint64_t)icon->GetRawPointer(), ImVec2(size, size))) {
+    if (ImGui::ImageButton("###button", icon->GetRawPointer(), ImVec2(size, size))) {
         switch (m_SceneState) {
             case EditorLayer::SceneState::Edit:
                 OnScenePlay();

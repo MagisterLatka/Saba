@@ -31,10 +31,10 @@ public:
         RendererAPI::TriangleCullMode cullMode = RendererAPI::TriangleCullMode::DrawFrontFace,
         bool isFrontFaceCounterClockwise = false);
 private:
-    SB_CORE static void Init();
-    SB_CORE static void Shutdown();
+    static void Init();
+    static void Shutdown();
 private:
     SB_CORE static Scope<RendererAPI> s_API;
 };
 
-}
+} //namespace Saba

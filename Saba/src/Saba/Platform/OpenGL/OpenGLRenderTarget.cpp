@@ -145,8 +145,8 @@ void OpenGLRenderTarget::ReadPixel(void* data, uint32_t bufferSize, uint32_t xCo
                 type = GL_FLOAT;
                 break;
         }
-        glGetTextureImage(instance->m_ReadBuffer, 0u, format, type, bufferSize, data);
+        glGetTextureImage(instance->m_ReadBuffer, 0u, format, type, static_cast<int>(bufferSize), data);
     });
 }
 
-}
+} //namespace Saba

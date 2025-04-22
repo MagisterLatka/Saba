@@ -8,7 +8,7 @@ namespace Saba {
 class ScriptableEntity {
     friend class Scene;
 public:
-    SB_CORE virtual ~ScriptableEntity() noexcept = default;
+    virtual ~ScriptableEntity() noexcept = default;
 protected:
     template<Component T>
     bool HasComponent() {
@@ -27,18 +27,18 @@ protected:
         return m_Entity.GetComponent<T>();
     }
 
-    SB_CORE const Scene* GetScene() { return m_Entity.GetScene(); }
-    SB_CORE glm::mat4& GetTransform() { return m_Entity.GetTransform(); }
+    const Scene* GetScene() { return m_Entity.GetScene(); }
+    glm::mat4& GetTransform() { return m_Entity.GetTransform(); }
 
-    SB_CORE TransformComponent& GetTransformComponent() { return m_Entity.GetTransformComponent(); }
+    TransformComponent& GetTransformComponent() { return m_Entity.GetTransformComponent(); }
 
-    SB_CORE virtual void OnCreate() {}
-    SB_CORE virtual void OnDestroy() {}
-    SB_CORE virtual void OnEvent([[maybe_unused]] Event& e) {}
-    SB_CORE virtual void OnUpdate([[maybe_unused]] Timestep ts) {}
-    SB_CORE virtual void OnViewportResize([[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height) {}
+    virtual void OnCreate() {}
+    virtual void OnDestroy() {}
+    virtual void OnEvent([[maybe_unused]] Event& e) {}
+    virtual void OnUpdate([[maybe_unused]] Timestep ts) {}
+    virtual void OnViewportResize([[maybe_unused]] uint32_t width, [[maybe_unused]] uint32_t height) {}
 private:
     Entity m_Entity;
 };
 
-}
+} //namespace Saba

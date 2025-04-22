@@ -24,6 +24,7 @@ Diagnostics:
             - readability-math-missing-parentheses
             - readability-magic-numbers
             - readability-enum-initial-value
+            - readability-avoid-const-params-in-decls
     UnusedIncludes: Strict
 
 InlayHints:

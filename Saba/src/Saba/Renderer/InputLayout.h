@@ -8,15 +8,15 @@ namespace Saba {
 
 class InputLayout : public RefCounted {
 public:
-    SB_CORE virtual ~InputLayout() = default;
+    virtual ~InputLayout() = default;
 
-    SB_CORE virtual Ref<VertexBuffer> GetVertexBuffer(uint32_t index = 0) const = 0;
-    SB_CORE virtual Ref<IndexBuffer> GetIndexBuffer() const noexcept = 0;
+    virtual Ref<VertexBuffer> GetVertexBuffer(uint32_t index = 0) = 0;
+    virtual Ref<IndexBuffer> GetIndexBuffer() noexcept = 0;
 
-    SB_CORE virtual void Bind() const noexcept = 0;
+    virtual void Bind() const noexcept = 0;
 
     SB_CORE static Ref<InputLayout> Create(const std::initializer_list<Ref<VertexBuffer>>& vertexBuffers,
         const Ref<Shader>& shader = {}, const Ref<IndexBuffer>& indexBuffer = {});
 };
 
-}
+} //namespace Saba

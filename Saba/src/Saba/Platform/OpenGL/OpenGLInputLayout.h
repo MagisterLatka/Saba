@@ -7,20 +7,20 @@ namespace Saba {
 
 class OpenGLInputLayout : public InputLayout {
 public:
-    SB_CORE OpenGLInputLayout(const std::initializer_list<Ref<VertexBuffer>>& vertexBuffers,
+    OpenGLInputLayout(const std::initializer_list<Ref<VertexBuffer>>& vertexBuffers,
         const Ref<Shader>& shader, const Ref<IndexBuffer>& indexBuffer);
-    SB_CORE ~OpenGLInputLayout();
+    ~OpenGLInputLayout();
 
-    SB_CORE Ref<VertexBuffer> GetVertexBuffer(uint32_t index) const override { return m_VertexBuffers[index]; }
-    SB_CORE Ref<IndexBuffer> GetIndexBuffer() const noexcept override { return m_IndexBuffer; }
+    Ref<VertexBuffer> GetVertexBuffer(uint32_t index) override { return m_VertexBuffers[index].As<VertexBuffer>(); }
+    Ref<IndexBuffer> GetIndexBuffer() noexcept override { return m_IndexBuffer.As<IndexBuffer>(); }
 
-    SB_CORE void Bind() const noexcept override;
+    void Bind() const noexcept override;
 private:
-    SB_CORE void Create();
+    void Create();
 private:
     std::vector<Ref<OpenGLVertexBuffer>> m_VertexBuffers;
     Ref<OpenGLIndexBuffer> m_IndexBuffer;
     uint32_t m_ID;
 };
 
-}
+} //namespace Saba

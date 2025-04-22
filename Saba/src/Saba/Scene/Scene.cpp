@@ -266,4 +266,4 @@ SB_CORE void Scene::OnComponentAdd<CameraComponent>([[maybe_unused]] Entity enti
 template<>
 SB_CORE void Scene::OnComponentAdd<NativeScriptComponent>([[maybe_unused]] Entity entity, [[maybe_unused]] NativeScriptComponent& component) {}
 
-}
+} //namespace Saba

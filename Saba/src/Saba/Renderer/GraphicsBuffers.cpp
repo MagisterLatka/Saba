@@ -9,7 +9,7 @@
 
 namespace Saba {
 
-Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const void* data, uint32_t size, BufferUsage usage) {
+Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const void* data, uint32_t size, GraphicsBufferUsage usage) {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(layout, data, size, usage);
@@ -26,7 +26,7 @@ Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const void* data, ui
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const Buffer& buffer, BufferUsage usage) {
+Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const Buffer& buffer, GraphicsBufferUsage usage) {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(layout, buffer, usage);
@@ -43,7 +43,7 @@ Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, const Buffer& buffer
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, Buffer&& buffer, BufferUsage usage) {
+Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, Buffer&& buffer, GraphicsBufferUsage usage) {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLVertexBuffer>::Create(layout, std::move(buffer), usage);
@@ -63,7 +63,7 @@ Ref<VertexBuffer> VertexBuffer::Create(BufferLayout layout, Buffer&& buffer, Buf
 
 
 
-Ref<IndexBuffer> IndexBuffer::Create(const uint32_t* data, uint32_t size, BufferUsage usage) {
+Ref<IndexBuffer> IndexBuffer::Create(const uint32_t* data, uint32_t size, GraphicsBufferUsage usage) {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(data, size, usage);
@@ -80,7 +80,7 @@ Ref<IndexBuffer> IndexBuffer::Create(const uint32_t* data, uint32_t size, Buffer
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<IndexBuffer> IndexBuffer::Create(const Buffer& buffer, BufferUsage usage) {
+Ref<IndexBuffer> IndexBuffer::Create(const Buffer& buffer, GraphicsBufferUsage usage) {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(buffer, usage);
@@ -97,7 +97,7 @@ Ref<IndexBuffer> IndexBuffer::Create(const Buffer& buffer, BufferUsage usage) {
     SB_CORE_THROW_INFO("Unknown API");
     return nullptr;
 }
-Ref<IndexBuffer> IndexBuffer::Create(Buffer&& buffer, BufferUsage usage) {
+Ref<IndexBuffer> IndexBuffer::Create(Buffer&& buffer, GraphicsBufferUsage usage) {
     switch (RendererAPI::GetAPI()) {
         case RendererAPI::API::None:    SB_CORE_THROW_INFO("None API is not supported"); return nullptr;
         case RendererAPI::API::OpenGL:  return Ref<OpenGLIndexBuffer>::Create(std::move(buffer), usage);
@@ -186,4 +186,4 @@ Ref<ConstantBuffer> ConstantBuffer::Create(BufferShaderBinding binding, const Un
     return nullptr;
 }
 
-}
+} //namespace Saba

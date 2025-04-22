@@ -16,7 +16,7 @@ ContentBrowserPanel::ContentBrowserPanel()
     m_FileIcon = Texture2D::Create(props);
 }
 
-void ContentBrowserPanel::Open() {
+void ContentBrowserPanel::Open() noexcept {
     m_Open = true;
 }
 
@@ -46,7 +46,7 @@ void ContentBrowserPanel::OnUIRender() {
         const Ref<Texture2D>& icon = dir.is_directory() ? m_DirIcon : m_FileIcon;
         ImGui::PushID(filenameString.c_str());
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-        ImGui::ImageButton(filenameString.c_str(), (uint64_t)icon->GetRawPointer(), { iconSize, iconSize });
+        ImGui::ImageButton(filenameString.c_str(), icon->GetRawPointer(), { iconSize, iconSize });
 
         if (ImGui::BeginDragDropSource()) {
             const auto relPathString = relativePath.string();
@@ -75,4 +75,4 @@ void ContentBrowserPanel::OnUIRender() {
     ImGui::End();
 }
 
-}
+} //namespace Saba

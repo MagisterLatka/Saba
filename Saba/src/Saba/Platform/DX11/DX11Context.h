@@ -28,13 +28,13 @@ public:
         std::string m_Info;
     };
 public:
-    SB_CORE DX11Context() = default;
-    SB_CORE ~DX11Context() = default;
+   DX11Context() = default;
+   ~DX11Context() = default;
 
-    SB_CORE void Init() override;
-    SB_CORE void Shutdown() override {}
-    SB_CORE void InitForWindow(Window* window) override;
-    SB_CORE void ShutdownForWindow(Window *window) override;
+    void Init() override;
+    void Shutdown() override {}
+    void InitForWindow(Window* window) override;
+    void ShutdownForWindow(Window *window) override;
 
     SB_CORE void SwapBuffers(Window *window) override;
     SB_CORE void RecreateSwapChain(Window *window) override;

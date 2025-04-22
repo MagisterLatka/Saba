@@ -8,9 +8,9 @@ namespace Saba {
 
 class SB_CORE Input {
 public:
-    static bool IsKeyPressed(KeyCode key);
-    static bool IsMouseButtonPressed(MouseCode button);
-    static glm::vec2 GetMousePos();
+    static bool IsKeyPressed(KeyCode key) noexcept;
+    static bool IsMouseButtonPressed(MouseCode button) noexcept;
+    static glm::vec2 GetMousePos() noexcept;
 };
 
-}
+} //namespace Saba

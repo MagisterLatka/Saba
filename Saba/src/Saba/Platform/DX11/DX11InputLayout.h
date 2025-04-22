@@ -11,15 +11,15 @@ namespace Saba {
 class DX11InputLayout : public InputLayout
 {
 public:
-    SB_CORE DX11InputLayout(const std::initializer_list<Ref<VertexBuffer>>& vertexBuffers, const Ref<Shader>& shader, const Ref<IndexBuffer>& indexBuffer);
-    SB_CORE ~DX11InputLayout();
+    DX11InputLayout(const std::initializer_list<Ref<VertexBuffer>>& vertexBuffers, const Ref<Shader>& shader, const Ref<IndexBuffer>& indexBuffer);
+    ~DX11InputLayout();
 
-    SB_CORE Ref<VertexBuffer> GetVertexBuffer(uint32_t index) const noexcept override { return m_VertexBuffers[index]; }
-    SB_CORE Ref<IndexBuffer> GetIndexBuffer() const noexcept override { return m_IndexBuffer; }
+    Ref<VertexBuffer> GetVertexBuffer(uint32_t index) noexcept override { return m_VertexBuffers[index].As<VertexBuffer>(); }
+    Ref<IndexBuffer> GetIndexBuffer() noexcept override { return m_IndexBuffer.As<IndexBuffer>(); }
 
-    SB_CORE void Bind() const noexcept override;
+    void Bind() const noexcept override;
 private:
-    SB_CORE void Create();
+    void Create();
 private:
     std::vector<Ref<DX11VertexBuffer>> m_VertexBuffers;
     Ref<DX11Shader> m_Shader;

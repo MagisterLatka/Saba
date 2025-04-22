@@ -15,23 +15,23 @@ enum class RenderTargetFormat : uint8_t {
 };
 class RenderTarget : public RefCounted {
 public:
-    SB_CORE virtual ~RenderTarget() = default;
+    virtual ~RenderTarget() = default;
 
-    SB_CORE virtual void Resize(uint32_t width, uint32_t height, bool forceResize = false) = 0;
+    virtual void Resize(uint32_t width, uint32_t height, bool forceResize = false) = 0;
 
-    SB_CORE virtual void BindTexture(uint32_t slot = 0u) const = 0;
-    SB_CORE virtual void* GetRawTexturePointer() const noexcept = 0;
-    SB_CORE virtual void ReadPixel(void* data, uint32_t bufferSize, uint32_t xCoord, uint32_t yCoord) = 0;
+    virtual void BindTexture(uint32_t slot = 0u) const = 0;
+    virtual uint64_t GetRawTexturePointer() const noexcept = 0;
+    virtual void ReadPixel(void* data, uint32_t bufferSize, uint32_t xCoord, uint32_t yCoord) = 0;
 
-    SB_CORE virtual uint32_t GetWidth() const noexcept = 0;
-    SB_CORE virtual uint32_t GetHeight() const noexcept = 0;
+    virtual uint32_t GetWidth() const noexcept = 0;
+    virtual uint32_t GetHeight() const noexcept = 0;
 
     SB_CORE static Ref<RenderTarget> Create(uint32_t width, uint32_t height, RenderTargetFormat format = RenderTargetFormat::RGBA8,
         glm::vec4 clearVal = { 0.0f, 0.0f, 0.0f, 1.0f});
 protected:
-    SB_CORE virtual void SetClearValue(glm::vec4 clearVal) noexcept = 0;
-    SB_CORE virtual void SetDepthStencilClearValue(float depth, uint8_t = 0u) noexcept = 0;
-    SB_CORE virtual void Clear() const noexcept = 0;
+    virtual void SetClearValue(glm::vec4 clearVal) noexcept = 0;
+    virtual void SetDepthStencilClearValue(float depth, uint8_t = 0u) noexcept = 0;
+    virtual void Clear() const noexcept = 0;
 };
 
-}
+} //namespace Saba

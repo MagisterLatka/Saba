@@ -14,18 +14,18 @@ int main(int argc, char** argv, char** envp);
 
 namespace Saba {
 
-struct ApplicationSpecifications
-{
+struct ApplicationSpecifications {
     std::string Name = "Saba Engine";
     uint32_t Width = 1280u, Height = 720u;
     std::filesystem::path WindowIconPath;
     Buffer TitleBarIconData;
     bool ResizableWindow = true, CustomTitleBar = false, DrawUI = true;
 
+    RendererAPI::API GraphicsAPI
 #if defined(SB_PLATFORM_WINDOWS)
-    RendererAPI::API GraphicsAPI = RendererAPI::API::DX11;
+    = RendererAPI::API::DX11;
 #else
-    RendererAPI::API GraphicsAPI = RendererAPI::API::OpenGL;
+    = RendererAPI::API::OpenGL;
 #endif
 };
 
@@ -36,33 +36,33 @@ public:
     using MenuBarCallbackFn = std::function<void()>;
 
     SB_CORE Application(ApplicationSpecifications applicationSpecifications = ApplicationSpecifications());
-    SB_CORE virtual ~Application() = default;
+    virtual ~Application() = default;
 
     SB_CORE void Close() noexcept;
 
-    SB_CORE Layer* PushLayer(Layer* layer) { return m_LayerStack->PushLayer(layer); }
-    SB_CORE Layer* PushOverlay(Layer* overlay) { return m_LayerStack->PushOverlay(overlay); }
+    Layer* PushLayer(Layer* layer) { return m_LayerStack->PushLayer(layer); }
+    Layer* PushOverlay(Layer* overlay) { return m_LayerStack->PushOverlay(overlay); }
 
-    SB_CORE Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
-    SB_CORE Ref<Window> GetWindow() const noexcept { return m_Window; }
-    SB_CORE ImGuiLayer* GetImGuiLayer() const noexcept { return m_ImGuiLayer; }
-    SB_CORE void SetMenuBarCallback(MenuBarCallbackFn callback) noexcept { m_MenuBarCallback = std::move(callback); }
+    Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
+    Ref<Window> GetWindow() const noexcept { return m_Window; }
+    ImGuiLayer* GetImGuiLayer() const noexcept { return m_ImGuiLayer; }
+    void SetMenuBarCallback(MenuBarCallbackFn callback) noexcept { m_MenuBarCallback = std::move(callback); }
 
-    SB_CORE const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
+    const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
-    SB_CORE static Application& Get() noexcept { return *s_Application; }
+    static Application& Get() noexcept { return *s_Application; }
 private:
     SB_CORE void Init();
     SB_CORE void Shutdown();
     SB_CORE int Run();
 
-    SB_CORE void OnEvent(Event& e);
-    SB_CORE bool OnWindowClose(WindowCloseEvent& e) noexcept;
-    SB_CORE bool OnWindowResize(WindowResizeEvent& e) noexcept;
+    void OnEvent(Event& e);
+    bool OnWindowClose(WindowCloseEvent& e) noexcept;
+    bool OnWindowResize(WindowResizeEvent& e) noexcept;
 
-    SB_CORE void ImGuiRender();
-    SB_CORE void DrawTitleBar(float& titleBarHeight);
-    SB_CORE void DrawMenuBarUI();
+    void ImGuiRender();
+    void DrawTitleBar(float& titleBarHeight);
+    void DrawMenuBarUI();
 private:
     ApplicationSpecifications m_Specs;
 

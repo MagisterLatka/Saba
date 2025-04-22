@@ -151,4 +151,4 @@ void OpenGLContext::Clear([[maybe_unused]] Window* window, const glm::vec4& colo
     });
 }
 
-}
+} //namespace Saba

@@ -7,23 +7,23 @@ namespace Saba {
 
 class EditorCamera : public RefCounted {
 public:
-    SB_CORE EditorCamera() = default;
+    EditorCamera() = default;
     SB_CORE EditorCamera(float fov, float aspectRatio, float nearClip = 0.1f, float farClip = 100.0f);
 
     SB_CORE void OnUpdate();
     SB_CORE void OnEvent(Event& e);
 
     SB_CORE void SetViewportSize(uint32_t width, uint32_t height);
-    SB_CORE float GetDistance() const noexcept { return m_Distance; }
-    SB_CORE float& GetDistance() noexcept { return m_Distance; }
-    SB_CORE const glm::vec3& GetPosition() const noexcept { return m_Pos; }
-    SB_CORE glm::vec3& GetPosition() noexcept { return m_Pos; };
-    SB_CORE float GetPitch() const noexcept { return m_Pitch; }
-    SB_CORE float GetYaw() const noexcept { return m_Yaw; }
+    float GetDistance() const noexcept { return m_Distance; }
+    float& GetDistance() noexcept { return m_Distance; }
+    const glm::vec3& GetPosition() const noexcept { return m_Pos; }
+    glm::vec3& GetPosition() noexcept { return m_Pos; };
+    float GetPitch() const noexcept { return m_Pitch; }
+    float GetYaw() const noexcept { return m_Yaw; }
 
-    SB_CORE const glm::mat4& GetProjectionMatrix() const noexcept { return m_ProjMat; }
-    SB_CORE const glm::mat4& GetViewMatrix() const noexcept { return m_ViewMat; }
-    SB_CORE glm::mat4 GetProjectionViewMatrix() const noexcept { return m_ProjMat * m_ViewMat; }
+    const glm::mat4& GetProjectionMatrix() const noexcept { return m_ProjMat; }
+    const glm::mat4& GetViewMatrix() const noexcept { return m_ViewMat; }
+    glm::mat4 GetProjectionViewMatrix() const noexcept { return m_ProjMat * m_ViewMat; }
 private:
     void UpdateProj();
     void UpdateView();
@@ -39,4 +39,4 @@ private:
     uint32_t m_ViewportWidth = 1280u, m_ViewportHeight = 720u;
 };
 
-}
+} //namespace Saba

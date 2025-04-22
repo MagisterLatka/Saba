@@ -8,14 +8,14 @@ class Shader : public RefCounted {
 public:
     using ShaderReloadedCallback = std::function<void()>;
 
-    SB_CORE virtual ~Shader() = default;
+    virtual ~Shader() = default;
 
-    SB_CORE virtual void Reload() = 0;
-    SB_CORE virtual void Reload(std::string vertexSource, std::string fragmentSource) = 0;
-    SB_CORE virtual void Bind() const noexcept = 0;
+    virtual void Reload() = 0;
+    virtual void Reload(std::string vertexSource, std::string fragmentSource) = 0;
+    virtual void Bind() const noexcept = 0;
 
-    SB_CORE virtual const std::string& GetName() const noexcept = 0;
-    SB_CORE virtual void AddReloadedCallback(ShaderReloadedCallback callback) noexcept = 0;
+    virtual const std::string& GetName() const noexcept = 0;
+    virtual void AddReloadedCallback(ShaderReloadedCallback callback) noexcept = 0;
 
     SB_CORE static Ref<Shader> Create(std::filesystem::path vertexPath, std::filesystem::path fragmentPath);
     SB_CORE static Ref<Shader> Create(std::filesystem::path path);
@@ -24,8 +24,8 @@ public:
 
 class ShaderLibrary : public RefCounted {
 public:
-    SB_CORE ShaderLibrary() = default;
-    SB_CORE ~ShaderLibrary() = default;
+    ShaderLibrary() = default;
+    ~ShaderLibrary() = default;
 
     SB_CORE Ref<Shader> Add(Ref<Shader> shader);
     SB_CORE Ref<Shader> Add(const std::string& name, Ref<Shader> shader);
@@ -41,4 +41,4 @@ private:
     std::unordered_map<std::string, Ref<Shader>> m_Shaders;
 };
 
-}
+} //namespace Saba
