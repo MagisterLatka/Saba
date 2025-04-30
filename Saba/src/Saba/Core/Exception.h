@@ -35,7 +35,7 @@ private:
 class MessageException : public SabaException
 {
 public:
-    MessageException(int line, const char* file, std::string  message, bool core = false) noexcept
+    MessageException(int line, const char* file, std::string message, bool core = false) noexcept
         : SabaException(line, file, core), m_Message(std::move(message)) {}
     const char* what() const noexcept override {
         std::ostringstream oss;

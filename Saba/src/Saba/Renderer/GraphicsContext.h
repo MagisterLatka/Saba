@@ -13,8 +13,6 @@ public:
 protected:
     virtual void Init() = 0;
     virtual void Shutdown() = 0;
-    virtual void InitForWindow(Window* window) = 0;
-    virtual void ShutdownForWindow(Window* window) = 0;
 
     virtual void SwapBuffers(Window* window) = 0;
     virtual void RecreateSwapChain(Window* window) = 0;

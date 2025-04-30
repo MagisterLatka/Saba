@@ -22,6 +22,7 @@
 #include <unordered_set>
 #include <vector>
 #include <ranges>
+#include <set>
 
 #include <Saba/Core/Log.h>
 
