@@ -13,6 +13,11 @@ enum class RenderTargetFormat : uint8_t {
     Depth32F = 0x10, Depth24Stencil8 = 0x20,
     Last = Depth24Stencil8
 };
+enum class RenderTargetUsage : uint8_t {
+    None = 0,
+    CopySource = BIT(0), CopyDestination = BIT(1),
+    TextureAttachment = BIT(2)
+};
 class RenderTarget : public RefCounted {
 public:
     virtual ~RenderTarget() = default;
@@ -27,7 +32,7 @@ public:
     virtual uint32_t GetHeight() const noexcept = 0;
 
     SB_CORE static Ref<RenderTarget> Create(uint32_t width, uint32_t height, RenderTargetFormat format = RenderTargetFormat::RGBA8,
-        glm::vec4 clearVal = { 0.0f, 0.0f, 0.0f, 1.0f});
+        RenderTargetUsage additionalUsage = RenderTargetUsage::CopyDestination , glm::vec4 clearVal = { 0.0f, 0.0f, 0.0f, 1.0f});
 protected:
     virtual void SetClearValue(glm::vec4 clearVal) noexcept = 0;
     virtual void SetDepthStencilClearValue(float depth, uint8_t = 0u) noexcept = 0;

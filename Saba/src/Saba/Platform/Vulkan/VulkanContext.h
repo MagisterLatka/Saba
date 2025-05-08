@@ -8,11 +8,8 @@ namespace Saba {
 
 class VulkanContext : public GraphicsContext {
 public:
-    VulkanContext() = default;
-    ~VulkanContext() = default;
-
-    void Init() override;
-    void Shutdown() override;
+    VulkanContext();
+    ~VulkanContext();
 
     VkInstance GetInstance() const { return m_Instance; }
     VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
@@ -22,6 +19,8 @@ public:
 
     static Ref<VulkanContext> GetContextFromApplication() { return Application::Get().GetGraphicsContext().As<VulkanContext>(); }
 private:
+    void Init();
+
     void CreateInstance();
     void SetupDebugMessenger();
     void PickPhysicalDevice();

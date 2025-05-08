@@ -128,13 +128,10 @@ static void PopulateDebugMessengerData(VkDebugUtilsMessengerCreateInfoEXT& creat
     createInfo.pfnUserCallback = DebugCallback;
 }
 
-void VulkanContext::Init() {
-    CreateInstance();
-    SetupDebugMessenger();
-    PickPhysicalDevice();
-    CreateLogicalDevice();
+VulkanContext::VulkanContext() {
+    Init();
 }
-void VulkanContext::Shutdown() {
+VulkanContext::~VulkanContext() {
     vkDestroyDevice(m_Device, nullptr);
 
     if constexpr (c_EnableValidationLayers) {
@@ -143,6 +140,12 @@ void VulkanContext::Shutdown() {
     vkDestroyInstance(m_Instance, nullptr);
 }
 
+void VulkanContext::Init() {
+    CreateInstance();
+    SetupDebugMessenger();
+    PickPhysicalDevice();
+    CreateLogicalDevice();
+}
 void VulkanContext::CreateInstance() {
     SB_CORE_ASSERT(!c_EnableValidationLayers || CheckValidationLayerSupport(),
         "Requested Vulkan validation layers not available");
