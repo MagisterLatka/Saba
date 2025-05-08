@@ -14,7 +14,7 @@ private:
 
 template<typename T>
 class Ref {
-    static_assert(std::is_base_of_v<RefCounted, std::remove_cv_t<T>>);
+    static_assert(std::is_base_of_v<RefCounted, T> && !std::is_reference_v<T>);
 public:
     Ref() noexcept
         : m_Instance(nullptr) {}
@@ -36,13 +36,13 @@ public:
         other.m_Instance = nullptr;
     }
     template<typename T2>
-    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
-    Ref(const Ref<T2>& other) noexcept {
+    requires (std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>)
+    Ref(const Ref<T2>& other) {
         m_Instance = dynamic_cast<T*>(other.m_Instance);
         Increment();
     }
     template<typename T2>
-    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
+    requires (std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>)
     Ref(Ref<T2>&& other) noexcept {
         m_Instance = dynamic_cast<T*>(other.m_Instance);
         other.m_Instance = nullptr;
@@ -72,7 +72,7 @@ public:
         return *this;
     }
     template<typename T2>
-    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
+    requires (std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>)
     Ref& operator=(const Ref<T2>& other) noexcept {
         other.Increment();
         Decrement();
@@ -81,7 +81,7 @@ public:
         return *this;
     }
     template<typename T2>
-    requires (std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> || std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>)
+    requires (std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>)
     Ref& operator=(Ref<T2>&& other) noexcept {
         Decrement();
 
@@ -90,15 +90,17 @@ public:
         return *this;
     }
 
-    operator bool() const noexcept { return m_Instance != nullptr; }
-    bool operator==(const Ref<T>& other) const noexcept { return m_Instance == other.m_Instance; }
-    T* operator->() { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
-    const T* operator->() const { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
-    T& operator*() { SB_CORE_ASSERT(m_Instance != nullptr); return *m_Instance; }
-    const T& operator*() const { SB_CORE_ASSERT(m_Instance != nullptr); return *m_Instance; }
+    bool HasValue() const noexcept { return m_Instance != nullptr; }
 
-    T* Raw() { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
-    const T* Raw() const { SB_CORE_ASSERT(m_Instance != nullptr); return m_Instance; }
+    operator bool() const noexcept { return HasValue(); }
+    bool operator==(const Ref<T>& other) const noexcept { return m_Instance == other.m_Instance; }
+    T* operator->() { SB_CORE_ASSERT(HasValue()); return m_Instance; }
+    const T* operator->() const { SB_CORE_ASSERT(HasValue()); return m_Instance; }
+    T& operator*() { SB_CORE_ASSERT(HasValue()); return *m_Instance; }
+    const T& operator*() const { SB_CORE_ASSERT(HasValue()); return *m_Instance; }
+
+    T* Raw() { SB_CORE_ASSERT(HasValue()); return m_Instance; }
+    const T* Raw() const { SB_CORE_ASSERT(HasValue()); return m_Instance; }
 
     void Reset(T* instance = nullptr) noexcept {
         Decrement();
@@ -106,8 +108,7 @@ public:
     }
 
     template<typename T2>
-    static constexpr bool IsConvertible() noexcept { return std::is_convertible_v<std::remove_cv_t<T2>*, std::remove_cv_t<T>*> ||
-        std::is_convertible_v<std::remove_cv_t<T>*, std::remove_cv_t<T2>*>; }
+    static constexpr bool IsConvertible() noexcept { return std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>; }
     template<typename T2>
     bool CanConvert() const noexcept { return IsConvertible<T2>() && dynamic_cast<T2*>(m_Instance) != nullptr; }
 
@@ -116,7 +117,7 @@ public:
 
     template<typename ...Args>
     requires (std::is_constructible_v<T, Args...>)
-    static Ref<T> Create(Args&& ...args) noexcept {
+    static Ref<T> Create(Args&& ...args) {
         return Ref<T>(new T(std::forward<Args>(args)...));
     }
 private:

@@ -8,20 +8,22 @@ namespace Saba {
 
 class VulkanContext : public GraphicsContext {
 public:
-    VulkanContext() = default;
-    ~VulkanContext() = default;
-
-    void Init() override;
-    void Shutdown() override;
+    VulkanContext();
+    ~VulkanContext();
 
     VkInstance GetInstance() const { return m_Instance; }
     VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
     VkDevice GetLogicalDevice() const { return m_Device; }
     uint32_t GetGraphicsFamilyIndex() const { return m_GraphicsQueueFamilyIndex; }
     VkQueue GetGrahicsQueue() const { return m_GraphicsQueue; }
+    VkQueue GetTransferQueue() const { return m_TransferQueue; }
+
+    uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
     static Ref<VulkanContext> GetContextFromApplication() { return Application::Get().GetGraphicsContext().As<VulkanContext>(); }
 private:
+    void Init();
+
     void CreateInstance();
     void SetupDebugMessenger();
     void PickPhysicalDevice();
@@ -34,7 +36,7 @@ private:
     VkDevice m_Device = nullptr;
 
     uint32_t m_GraphicsQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
-    VkQueue m_GraphicsQueue = nullptr;
+    VkQueue m_GraphicsQueue = nullptr, m_TransferQueue = nullptr;
 };
 
 #if defined(SB_DEBUG) || defined(SB_RELEASE)

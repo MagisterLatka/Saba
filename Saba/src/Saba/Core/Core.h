@@ -61,7 +61,7 @@ SB_CORE uint64_t GetTime() noexcept;
 template <typename T> using Scope = std::unique_ptr<T>;
 
 template <typename T, typename... Args>
-Scope<T> CreateScope(Args &&...args) noexcept {
+Scope<T> CreateScope(Args&&...args) noexcept {
     return std::make_unique<T>(std::forward<Args>(args)...);
 }
 

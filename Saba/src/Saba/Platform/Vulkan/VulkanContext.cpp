@@ -12,9 +12,6 @@ namespace Saba {
 static constexpr auto c_ValidationLayers = std::to_array<const char*>({
     "VK_LAYER_KHRONOS_validation"
 });
-static constexpr auto c_DeviceExtensions = std::to_array<const char*>({
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME
-});
 static bool CheckValidationLayerSupport() {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -28,6 +25,10 @@ static bool CheckValidationLayerSupport() {
 
     return true;
 }
+
+static constexpr auto c_DeviceExtensions = std::to_array<const char*>({
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME
+});
 static bool CheckDeviceExtensionSupport(VkPhysicalDevice device) {
     uint32_t extensionCount = 0u;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -40,6 +41,7 @@ static bool CheckDeviceExtensionSupport(VkPhysicalDevice device) {
     }
     return requiredExtensions.empty();
 }
+
 std::optional<uint32_t> FindGraphicsQueueFamily(VkPhysicalDevice device) {
     uint32_t queueFamilyCount = 0u;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -128,21 +130,24 @@ static void PopulateDebugMessengerData(VkDebugUtilsMessengerCreateInfoEXT& creat
     createInfo.pfnUserCallback = DebugCallback;
 }
 
+VulkanContext::VulkanContext() {
+    Init();
+}
+VulkanContext::~VulkanContext() {
+    vkDestroyDevice(m_Device, nullptr);
+
+    if constexpr (c_EnableValidationLayers)
+        DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
+
+    vkDestroyInstance(m_Instance, nullptr);
+}
+
 void VulkanContext::Init() {
     CreateInstance();
     SetupDebugMessenger();
     PickPhysicalDevice();
     CreateLogicalDevice();
 }
-void VulkanContext::Shutdown() {
-    vkDestroyDevice(m_Device, nullptr);
-
-    if constexpr (c_EnableValidationLayers) {
-        DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
-    }
-    vkDestroyInstance(m_Instance, nullptr);
-}
-
 void VulkanContext::CreateInstance() {
     SB_CORE_ASSERT(!c_EnableValidationLayers || CheckValidationLayerSupport(),
         "Requested Vulkan validation layers not available");
@@ -215,11 +220,11 @@ void VulkanContext::PickPhysicalDevice() {
 }
 void VulkanContext::CreateLogicalDevice() {
     VkDeviceQueueCreateInfo queueCreateInfo;
-    float queuePriority = 1.0f;
+    auto queuePriorities = std::to_array<float>({ 0.9f, 1.0f });
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = m_GraphicsQueueFamilyIndex;
-    queueCreateInfo.queueCount = 1u;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    queueCreateInfo.queueCount = static_cast<uint32_t>(queuePriorities.size());
+    queueCreateInfo.pQueuePriorities = queuePriorities.data();
 
     VkPhysicalDeviceFeatures deviceFeatures{};
 
@@ -240,6 +245,19 @@ void VulkanContext::CreateLogicalDevice() {
         "Failed to create Vulkan logical device");
 
     vkGetDeviceQueue(m_Device, m_GraphicsQueueFamilyIndex, 0u, &m_GraphicsQueue);
+    vkGetDeviceQueue(m_Device, m_GraphicsQueueFamilyIndex, 1u, &m_TransferQueue);
+}
+
+uint32_t VulkanContext::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+    SB_CORE_THROW_INFO("Failed to find suitable Vulkan memory type");
 }
 
 }

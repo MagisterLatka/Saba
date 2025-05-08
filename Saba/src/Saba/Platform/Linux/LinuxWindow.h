@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Saba/Core/Window.h"
+#include "Saba/Platform/Vulkan/VulkanSwapChain.h"
+
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
@@ -51,14 +53,6 @@ private:
     void Init(const WindowProps& props);
     void Shutdown();
 
-    struct SwapChainSupportDetails {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
-    };
-    void CreateSwapChain(SwapChainSupportDetails& swapChainSupport);
-    SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
-
     void DefaultEventCallback([[maybe_unused]] Event& e) {}
 private:
     struct WindowData {
@@ -67,20 +61,16 @@ private:
         TitleBarHitTestCallbackFn titlebarHitTest;
         uint32_t width, height;
         glm::ivec2 pos;
-        bool vSync = false, maximized = false, minimized = false, titlebar = true, resized = false;
+        bool vSync = false, maximized = false, minimized = false, titlebar = true;
+
+        Scope<VulkanSwapChain> swapChain;
 
         Keyboard keyboard;
         Mouse mouse;
     } m_Data;
 
     GLFWwindow* m_Window = nullptr;
-    VkSurfaceKHR m_Surface;
-    VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
-    VkExtent2D m_SwapChainExtent;
-    VkFormat m_SwapChainImageFormat;
-    std::vector<VkImage> m_SwapChainImages;
-    std::vector<VkImageView> m_SwapChainImageViews;
-    std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+    VkSurfaceKHR m_Surface = nullptr;
 };
 
 } //namespace Saba
