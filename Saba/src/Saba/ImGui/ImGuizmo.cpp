@@ -311,14 +311,14 @@ namespace IMGUIZMO_NAMESPACE
 	{
 	public:
 
+		struct asDir {
+			vec_t right, up, dir, position;
+		};
 		union
 		{
 			float m[4][4];
 			float m16[16];
-			struct
-			{
-				vec_t right, up, dir, position;
-			} v;
+			asDir v;
 			vec_t component[4];
 		};
 
@@ -770,17 +770,46 @@ namespace IMGUIZMO_NAMESPACE
 	static Context gContext;
 
 	static const vec_t directionUnary[3] = { makeVect(1.f, 0.f, 0.f), makeVect(0.f, 1.f, 0.f), makeVect(0.f, 0.f, 1.f) };
-	static const char* translationInfoMask[] = { "X : %5.3f", "Y : %5.3f", "Z : %5.3f",
-		"Y : %5.3f Z : %5.3f", "X : %5.3f Z : %5.3f", "X : %5.3f Y : %5.3f",
-		"X : %5.3f Y : %5.3f Z : %5.3f" };
-	static const char* scaleInfoMask[] = { "X : %5.2f", "Y : %5.2f", "Z : %5.2f", "XYZ : %5.2f" };
-	static const char* rotationInfoMask[] = { "X : %5.2f deg %5.2f rad", "Y : %5.2f deg %5.2f rad", "Z : %5.2f deg %5.2f rad", "Screen : %5.2f deg %5.2f rad" };
 	static const int translationInfoIndex[] = { 0,0,0, 1,0,0, 2,0,0, 1,2,0, 0,2,0, 0,1,0, 0,1,2 };
 	static const float quadMin = 0.5f;
 	static const float quadMax = 0.8f;
 	static const float quadUV[8] = { quadMin, quadMin, quadMin, quadMax, quadMax, quadMax, quadMax, quadMin };
 	static const int halfCircleSegmentCount = 64;
 	static const float snapTension = 0.5f;
+
+	static int FormatTranslation(char* buf, size_t buf_size, int type, double a, double b = 0.0, double c = 0.0) {
+		switch (type) {
+			default: break;
+			case 0: return ImFormatString(buf, buf_size, "X : %5.3f", a);
+			case 1: return ImFormatString(buf, buf_size, "Y : %5.3f", a);
+			case 2: return ImFormatString(buf, buf_size, "Z : %5.3f", a);
+			case 3: return ImFormatString(buf, buf_size, "Y : %5.3f Z : %5.3f", a, b);
+			case 4: return ImFormatString(buf, buf_size, "X : %5.3f Z : %5.3f", a, b);
+			case 5: return ImFormatString(buf, buf_size, "X : %5.3f Y : %5.3f", a, b);
+			case 6: return ImFormatString(buf, buf_size, "X : %5.3f Y : %5.3f Z : %5.3f", a, b, c);
+		}
+		return 0;
+	}
+	static int FormatScale(char* buf, size_t buf_size, int type, double a) {
+		switch (type) {
+			default: break;
+			case 0: return ImFormatString(buf, buf_size, "X : %5.2f", a);
+			case 1: return ImFormatString(buf, buf_size, "Y : %5.2f", a);
+			case 2: return ImFormatString(buf, buf_size, "Z : %5.2f", a);
+			case 3: return ImFormatString(buf, buf_size, "XYZ : %5.2f", a);
+		}
+		return 0;
+	}
+	static int FormatRotation(char* buf, size_t buf_size, int type, double a, double b) {
+		switch (type) {
+			default: break;
+			case 0: return ImFormatString(buf, buf_size, "X : %5.2f deg %5.2f rad", a, b);
+			case 1: return ImFormatString(buf, buf_size, "Y : %5.2f deg %5.2f rad", a, b);
+			case 2: return ImFormatString(buf, buf_size, "Z : %5.2f deg %5.2f rad", a, b);
+			case 3: return ImFormatString(buf, buf_size, "Screen : %5.2f deg %5.2f rad", a, b);
+		}
+		return 0;
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -1319,7 +1348,7 @@ namespace IMGUIZMO_NAMESPACE
 
 			ImVec2 destinationPosOnScreen = circlePos[1];
 			char tmps[512];
-			ImFormatString(tmps, sizeof(tmps), rotationInfoMask[type - MT_ROTATE_X], static_cast<double>(gContext.mRotationAngle / ZPI) * 180., static_cast<double>(gContext.mRotationAngle));
+			FormatRotation(tmps, sizeof(tmps), type - MT_ROTATE_X, static_cast<double>(gContext.mRotationAngle / ZPI) * 180., static_cast<double>(gContext.mRotationAngle));
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 15, destinationPosOnScreen.y + 15), GetColorU32(TEXT_SHADOW), tmps);
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 14, destinationPosOnScreen.y + 14), GetColorU32(TEXT), tmps);
 		}
@@ -1421,7 +1450,7 @@ namespace IMGUIZMO_NAMESPACE
 			char tmps[512];
 			//vec_t deltaInfo = gContext.mModel.v.position - gContext.mMatrixOrigin;
 			int componentInfoIndex = (type - MT_SCALE_X) * 3;
-			ImFormatString(tmps, sizeof(tmps), scaleInfoMask[type - MT_SCALE_X], static_cast<double>(scaleDisplay[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex])]));
+			FormatScale(tmps, sizeof(tmps), type - MT_SCALE_X, static_cast<double>(scaleDisplay[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex])]));
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 15, destinationPosOnScreen.y + 15), GetColorU32(TEXT_SHADOW), tmps);
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 14, destinationPosOnScreen.y + 14), GetColorU32(TEXT), tmps);
 		}
@@ -1506,7 +1535,7 @@ namespace IMGUIZMO_NAMESPACE
 			char tmps[512];
 			//vec_t deltaInfo = gContext.mModel.v.position - gContext.mMatrixOrigin;
 			int componentInfoIndex = (type - MT_SCALE_X) * 3;
-			ImFormatString(tmps, sizeof(tmps), scaleInfoMask[type - MT_SCALE_X], static_cast<double>(scaleDisplay[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex])]));
+			FormatScale(tmps, sizeof(tmps), type - MT_SCALE_X, static_cast<double>(scaleDisplay[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex])]));
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 15, destinationPosOnScreen.y + 15), GetColorU32(TEXT_SHADOW), tmps);
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 14, destinationPosOnScreen.y + 14), GetColorU32(TEXT), tmps);
 		}
@@ -1602,7 +1631,7 @@ namespace IMGUIZMO_NAMESPACE
 			char tmps[512];
 			vec_t deltaInfo = gContext.mModel.v.position - gContext.mMatrixOrigin;
 			int componentInfoIndex = (type - MT_MOVE_X) * 3;
-			ImFormatString(tmps, sizeof(tmps), translationInfoMask[type - MT_MOVE_X], static_cast<double>(deltaInfo[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex])]), static_cast<double>(deltaInfo[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex + 1])]), static_cast<double>(deltaInfo[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex + 2])]));
+			FormatTranslation(tmps, sizeof(tmps), type - MT_MOVE_X, static_cast<double>(deltaInfo[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex])]), static_cast<double>(deltaInfo[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex + 1])]), static_cast<double>(deltaInfo[static_cast<uint64_t>(translationInfoIndex[componentInfoIndex + 2])]));
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 15, destinationPosOnScreen.y + 15), GetColorU32(TEXT_SHADOW), tmps);
 			drawList->AddText(ImVec2(destinationPosOnScreen.x + 14, destinationPosOnScreen.y + 14), GetColorU32(TEXT), tmps);
 		}

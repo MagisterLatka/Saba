@@ -2,7 +2,7 @@ include(CMakeDependentOption)
 include(CheckCXXCompilerFlag)
 
 macro(SabaOptionsSetup)
-    option(SabaWarningsAsErrors "Treat Warnings As Errors" OFF)
+    option(SabaWarningsAsErrors "Treat Warnings As Errors" ON)
     option(SabaEnableCppCheck "Enable cpp-check analysis" OFF)
     option(SabaEnablePCH "Enable precompiled headers" ON)
 

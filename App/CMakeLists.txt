@@ -46,12 +46,21 @@ if (WIN32)
     endforeach()
 endif()
 
-add_custom_target(CopyAssets ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets
-    COMMENT "Copy assets folder to executable"
-)
-add_custom_target(CopyImguiIni ALL
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMENT "Copy imgui.ini file to executable"
-)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+    add_custom_target(CopyAssets ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets
+        COMMENT "Copy assets folder to executable"
+    )
+else()
+    add_custom_target(CopyAssets ALL)
+endif()
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini)
+    add_custom_target(CopyImguiIni ALL
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+        COMMENT "Copy imgui.ini file to executable"
+    )
+else()
+    add_custom_target(CopyImguiIni ALL)
+endif()
 
