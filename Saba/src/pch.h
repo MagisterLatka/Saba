@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <set>
 #include <ranges>
 
 #include <Saba/Core/Log.h>
