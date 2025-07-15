@@ -248,6 +248,23 @@ VulkanContext::DeviceScore VulkanContext::RatePhysicalDevices(const std::vector<
     return devices;
 }
 
+std::optional<uint32_t> VulkanContext::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
+
+    for (uint32_t i = 0u; i < memProperties.memoryTypeCount; ++i) {
+        if ((typeFilter & (1 << i)) != 0u && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+            return i;
+    }
+    return {};
+}
+
+VkPhysicalDeviceProperties VulkanContext::GetDeviceProperties() const {
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
+    return deviceProperties;
+}
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, [[maybe_unused]] void* pUserData)

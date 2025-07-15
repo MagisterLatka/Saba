@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Saba/Renderer/GraphicsContext.h"
+#include "Saba/Core/Application.h"
 #include <vulkan/vulkan.h>
 
 namespace Saba {
@@ -32,6 +33,11 @@ public:
         else
             return m_TransferCommandPool;
     }
+
+    std::optional<uint32_t> FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
+    VkPhysicalDeviceProperties GetDeviceProperties() const;
+    
+    static Ref<VulkanContext> GetContextFromApplication() { return Application::Get().GetGraphicsContext().As<VulkanContext>(); }
 private:
     void CreateInstance();
     void PickPhysicalDevice();
@@ -59,4 +65,4 @@ private:
 #   define SB_VK_CALL(func, ...) (func)
 #endif
 
-}
+} //namespace Saba
